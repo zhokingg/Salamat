@@ -1,0 +1,181 @@
+# Helper flow — captures the new design checkpoints in one run.
+# Two passes through onboarding so we can grab both KZT and USD paywall
+# variants with a single command.
+appId: com.example.salamat
+---
+# ============================================================
+# Pass 1 — Kazakhstan (KZT): captures name, country, dashboard, paywall_kzt
+# ============================================================
+- launchApp:
+    clearState: true
+
+# S1 Welcome → S2 Name
+- extendedWaitUntil:
+    visible: "Start"
+    timeout: 60000
+- tapOn: "Start"
+
+# S2 Name
+- extendedWaitUntil:
+    visible: "(?s).*name.*"
+    timeout: 10000
+- takeScreenshot: name
+- tapOn:
+    text: "(?s).*Your name.*"
+- inputText: "Alex"
+- tapOn: "Next"
+
+# S3 Country — select Kazakhstan
+- extendedWaitUntil:
+    visible: "(?s).*Where are you.*"
+    timeout: 10000
+- takeScreenshot: country
+- tapOn:
+    text: "(?s).*Kazakhstan.*"
+- tapOn: "Next"
+
+# Quick walk through to dashboard
+- tapOn:
+    text: "(?s).*Lose weight.*"
+- tapOn: "Next"
+- tapOn:
+    text: "(?s).*Male.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*What year.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*height.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*target weight.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*realistic goal.*"
+- tapOn: "Continue"
+- assertVisible: "(?s).*long-term.*"
+- tapOn: "Continue"
+- tapOn:
+    text: "(?s).*Beginner.*"
+- tapOn: "Next"
+- tapOn:
+    text: "(?s).*Sedentary.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*Personal plan.*"
+- tapOn: "Continue"
+- assertVisible: "(?s).*lose weight.*"
+- tapOn: "Yes"
+- assertVisible: "(?s).*clean up.*"
+- tapOn: "Yes"
+- assertVisible: "(?s).*health problems.*"
+- tapOn: "Yes"
+- assertVisible: "Without Salamat"
+- tapOn: "Continue"
+- assertVisible: "1,000,000"
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "(?s).*calorie target.*"
+    timeout: 15000
+- tapOn: "Continue"
+
+# Dashboard with name in greeting
+- extendedWaitUntil:
+    visible: "(?s).*Hi, Alex.*"
+    timeout: 10000
+- takeScreenshot: dashboard
+
+# Navigate to paywall via Profile → Salamat Pro
+- tapOn: "Profile"
+- assertVisible:
+    text: "(?s).*Profile.*"
+- scrollUntilVisible:
+    element:
+      text: "(?s).*Salamat Pro.*"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    text: "(?s).*Salamat Pro.*"
+- extendedWaitUntil:
+    visible: "(?s).*Recognized.*"
+    timeout: 10000
+- takeScreenshot: paywall_kzt
+
+# ============================================================
+# Pass 2 — Other (USD): captures paywall_usd only
+# ============================================================
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: "Start"
+    timeout: 60000
+- tapOn: "Start"
+
+- extendedWaitUntil:
+    visible: "(?s).*name.*"
+    timeout: 10000
+- tapOn:
+    text: "(?s).*Your name.*"
+- inputText: "Alex"
+- tapOn: "Next"
+
+# Country: pick Other for USD
+- extendedWaitUntil:
+    visible: "(?s).*Where are you.*"
+    timeout: 10000
+- tapOn:
+    text: "(?s).*Other.*"
+- tapOn: "Next"
+
+# Walk through to dashboard
+- tapOn:
+    text: "(?s).*Lose weight.*"
+- tapOn: "Next"
+- tapOn:
+    text: "(?s).*Male.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*What year.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*height.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*target weight.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*realistic goal.*"
+- tapOn: "Continue"
+- assertVisible: "(?s).*long-term.*"
+- tapOn: "Continue"
+- tapOn:
+    text: "(?s).*Beginner.*"
+- tapOn: "Next"
+- tapOn:
+    text: "(?s).*Sedentary.*"
+- tapOn: "Next"
+- assertVisible: "(?s).*Personal plan.*"
+- tapOn: "Continue"
+- assertVisible: "(?s).*lose weight.*"
+- tapOn: "Yes"
+- assertVisible: "(?s).*clean up.*"
+- tapOn: "Yes"
+- assertVisible: "(?s).*health problems.*"
+- tapOn: "Yes"
+- assertVisible: "Without Salamat"
+- tapOn: "Continue"
+- assertVisible: "1,000,000"
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "(?s).*calorie target.*"
+    timeout: 15000
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "(?s).*Hi, Alex.*"
+    timeout: 10000
+- tapOn: "Profile"
+- assertVisible:
+    text: "(?s).*Profile.*"
+- scrollUntilVisible:
+    element:
+      text: "(?s).*Salamat Pro.*"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    text: "(?s).*Salamat Pro.*"
+- extendedWaitUntil:
+    visible: "(?s).*Recognized.*"
+    timeout: 10000
+- takeScreenshot: paywall_usd

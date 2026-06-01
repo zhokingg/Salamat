@@ -1,0 +1,85 @@
+# Helper flow (underscore prefix to skip from default test scans).
+# Walks through onboarding without screenshots, lands on dashboard,
+# opens Profile, taps "Salamat Pro" setting, and screenshots the paywall.
+# Used for visual review only — not part of the regression suite.
+appId: com.example.salamat
+---
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: "Start"
+    timeout: 60000
+- tapOn: "Start"
+
+- tapOn:
+    text: "(?s).*Lose weight.*"
+- tapOn: "Next"
+
+- tapOn:
+    text: "(?s).*Male.*"
+- tapOn: "Next"
+
+- assertVisible: "(?s).*What year.*"
+- tapOn: "Next"
+
+- assertVisible: "(?s).*height.*"
+- tapOn: "Next"
+
+- assertVisible: "(?s).*target weight.*"
+- tapOn: "Next"
+
+- assertVisible: "(?s).*realistic goal.*"
+- tapOn: "Continue"
+
+- assertVisible: "(?s).*long-term.*"
+- tapOn: "Continue"
+
+- tapOn:
+    text: "(?s).*Beginner.*"
+- tapOn: "Next"
+
+- tapOn:
+    text: "(?s).*Sedentary.*"
+- tapOn: "Next"
+
+- assertVisible: "(?s).*Personal plan.*"
+- tapOn: "Continue"
+
+- assertVisible: "(?s).*lose weight.*"
+- tapOn: "Yes"
+- assertVisible: "(?s).*clean up.*"
+- tapOn: "Yes"
+- assertVisible: "(?s).*health problems.*"
+- tapOn: "Yes"
+
+- assertVisible: "Without Salamat"
+- tapOn: "Continue"
+
+- assertVisible: "1,000,000"
+- tapOn: "Continue"
+
+- extendedWaitUntil:
+    visible: "(?s).*calorie target.*"
+    timeout: 15000
+- tapOn: "Continue"
+
+- assertVisible: "(?s).*Hi.*"
+- tapOn: "Profile"
+- assertVisible:
+    text: "(?s).*Profile.*"
+# Salamat Pro is near the bottom of the Profile ListView — scroll it
+# into view before tapping. scrollUntilVisible probes the regex on
+# each scroll step.
+- scrollUntilVisible:
+    element:
+      text: "(?s).*Salamat Pro.*"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    text: "(?s).*Salamat Pro.*"
+
+- extendedWaitUntil:
+    visible: "(?s).*Recognized.*"
+    timeout: 10000
+- takeScreenshot: paywall

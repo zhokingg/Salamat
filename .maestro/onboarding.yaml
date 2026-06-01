@@ -1,0 +1,128 @@
+# Test 1 — end-to-end through the new localized 16-screen onboarding flow.
+#
+# Locale note: this emulator is en-US, so the app renders the English strings
+# from `app_en.arb` (LocaleNotifier falls back to en when no Russian locale
+# is detected on the device). Russian text would be asserted on a ru-RU
+# device — the i18n round-trip is what's being validated either way.
+#
+# Matching rules:
+# - Maestro `text:` / `visible:` are ALL anchored regex against the
+#   accessibility content-desc, even the shorthand string form.
+# - Flutter exposes a Text widget's full string (including `\n` newlines) as
+#   one content-desc value. Multi-line headlines need `(?s).*X.*` to match
+#   a substring across lines.
+# - Option cards (OnboardingSelectCard) merge emoji+title+subtitle into a
+#   single multi-line content-desc — taps on cards need the regex pattern.
+# - Wheel pickers (year, weight, target) accept defaults; Maestro can't land
+#   on exact values via swipe.
+# - First wait is long (60s) — emulator cold start.
+appId: com.example.salamat
+name: Salamat onboarding (16-screen flow, en-US)
+---
+- launchApp:
+    clearState: true
+
+# --- S1: Welcome ---
+- extendedWaitUntil:
+    visible: "Start"
+    timeout: 60000
+- takeScreenshot: 01_welcome
+- tapOn: "Start"
+
+# --- S2: Goal ---
+- tapOn:
+    text: "(?s).*Lose weight.*"
+- takeScreenshot: 02_goal
+- tapOn: "Next"
+
+# --- S3: Gender ---
+- tapOn:
+    text: "(?s).*Male.*"
+- takeScreenshot: 03_gender
+- tapOn: "Next"
+
+# --- S4: Year (default accepted) ---
+- assertVisible: "(?s).*What year.*"
+- takeScreenshot: 04_year
+- tapOn: "Next"
+
+# --- S5: Height + current weight (defaults) ---
+- assertVisible: "(?s).*height.*"
+- takeScreenshot: 05_weight
+- tapOn: "Next"
+
+# --- S6: Target weight (default) ---
+- assertVisible: "(?s).*target weight.*"
+- takeScreenshot: 06_target
+- tapOn: "Next"
+
+# --- S7: Celebration (confetti) ---
+- assertVisible: "(?s).*realistic goal.*"
+- takeScreenshot: 07_celebration
+- tapOn: "Continue"
+
+# --- S8: Long-term graph ---
+- assertVisible: "(?s).*long-term.*"
+- takeScreenshot: 08_long_term
+- tapOn: "Continue"
+
+# --- S9: Familiarity ---
+- tapOn:
+    text: "(?s).*Beginner.*"
+- takeScreenshot: 09_familiarity
+- tapOn: "Next"
+
+# --- S10: Activity ---
+- tapOn:
+    text: "(?s).*Sedentary.*"
+- takeScreenshot: 10_activity
+- tapOn: "Next"
+
+# --- S11: Summary checkpoint ---
+- assertVisible: "(?s).*Personal plan.*"
+- takeScreenshot: 11_summary
+- tapOn: "Continue"
+
+# --- S12a: Yes / lose ---
+- assertVisible: "(?s).*lose weight.*"
+- takeScreenshot: 12_yes_lose
+- tapOn: "Yes"
+
+# --- S12b: Yes / order ---
+- assertVisible: "(?s).*clean up.*"
+- takeScreenshot: 13_yes_order
+- tapOn: "Yes"
+
+# --- S12c: Yes / health ---
+- assertVisible: "(?s).*health problems.*"
+- takeScreenshot: 14_yes_health
+- tapOn: "Yes"
+
+# --- S13: Comparison ---
+- assertVisible: "Without Salamat"
+- takeScreenshot: 15_comparison
+- tapOn: "Continue"
+
+# --- S14: Social proof ---
+- assertVisible: "1,000,000"
+- takeScreenshot: 16_social_proof
+- tapOn: "Continue"
+
+# --- S15: Building (auto-advances in ~4s) ---
+# Can't reliably assertVisible the Building screen — by the time Maestro
+# polls accessibility, the screen has often already moved on to Plan.
+# Building still runs in the flow; we just skip the assertion and wait
+# directly for Plan content to appear.
+- extendedWaitUntil:
+    visible: "(?s).*calorie target.*"
+    timeout: 15000
+- takeScreenshot: 17_plan_arrived
+
+# --- S16: Plan ready ---
+- takeScreenshot: 18_plan
+- assertVisible: "(?s).*kcal.*"
+- tapOn: "Continue"
+
+# --- Dashboard ---
+- assertVisible: "(?s).*Hi.*"
+- takeScreenshot: 19_dashboard

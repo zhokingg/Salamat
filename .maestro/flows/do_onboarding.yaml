@@ -1,0 +1,46 @@
+# Reusable subflow: assumes app was just launched. Waits for the name
+# screen (past the splash auto-advance), then walks to the dashboard.
+#
+# Notes:
+# - Splash isn't asserted on: Flutter's accessibility tree doesn't reliably
+#   expose the splash "Salamat" text during its brief 2s window.
+# - `assertVisible: "..."` (shorthand) has a default ~5s wait, plenty for
+#   the splash auto-advance.
+# - Wheel-picker steps (age/height/weight) accept defaults (25/165/70);
+#   Maestro can't reliably swipe ListWheelScrollView to exact values.
+appId: com.example.salamat
+---
+# First step uses a long timeout because the app cold-starts in ~17s on this
+# emulator: main.dart `await`s SupabaseService.init() before runApp, and
+# Supabase.initialize takes ~8.5s against the real URL. Once UI is up,
+# subsequent assertions fire fast and the default 5s timeout is fine.
+- extendedWaitUntil:
+    visible: "ШАГ 1 ИЗ 5"
+    timeout: 60000
+# Focus + delay: autofocus races inputText, and on Android Maestro's IME
+# isn't bound to FlutterView until interaction settles. waitForAnimationToEnd
+# gives time for the keyboard to bind.
+# Note: spec asked for "Алексей" (Cyrillic) but `adb shell input text` (which
+# Maestro falls back to on Android) NPEs on non-ASCII bytes. Using
+# transliterated Latin "Alexey" so the flow can complete.
+- tapOn: "Имя"
+- waitForAnimationToEnd:
+    timeout: 3000
+- inputText: "Alexey"
+- tapOn: "Далее"
+
+- assertVisible: "ШАГ 2 ИЗ 5"
+- tapOn: "Мужчина"
+- tapOn: "Далее"
+
+- assertVisible: "ШАГ 3 ИЗ 5"
+- tapOn: "Похудеть"
+- tapOn: "Далее"
+
+- assertVisible: "ШАГ 4 ИЗ 5"
+- tapOn: "Далее"
+
+- assertVisible: "ШАГ 5 ИЗ 5"
+- tapOn: "Начать"
+
+- assertVisible: "Привет"

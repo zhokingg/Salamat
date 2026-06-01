@@ -1,0 +1,34 @@
+# Test 3: tap the camera FAB; verify we leave the dashboard for camera
+# (or its unavailable stub on an emulator) or the paywall.
+#
+# Notes:
+# - The "camera button" is the FAB on the dashboard shell (Icons.camera_alt).
+#   It only exists once onboarding is complete, so we onboard first.
+# - The FAB has no text label; tap by coordinate (centerDocked above the
+#   bottom tab bar ≈ 50%, 90%).
+# - Routing logic from dashboard_shell._onFabPressed:
+#     canTakePhoto → /camera, else → /paywall
+#   The camera screen itself may render the live preview ("НАВЕДИ"),
+#   the simulator stub ("Камера недоступна"), or the out-of-photos stub
+#   ("использовали"). On an AVD, availableCameras() returns empty → stub.
+# - Verification has two parts: we definitely left the dashboard (no
+#   greeting), and one of the expected destinations is visible.
+appId: com.example.salamat
+name: Camera FAB lands on camera or paywall
+---
+- launchApp:
+    clearState: true
+- runFlow: flows/do_onboarding.yaml
+
+# --- Tap camera FAB ---
+- tapOn:
+    point: "50%,90%"
+
+# --- Verify we navigated off the dashboard ---
+- assertNotVisible: "Привет"
+
+# --- Expected destination on this emulator is the camera-unavailable stub.
+# If running on a real device, replace with "НАВЕДИ"; if user already used
+# their lifetime photo, replace with "использовали" (out-of-photos stub) or
+# "Питайся умнее" (paywall hero).
+- assertVisible: "Камера"

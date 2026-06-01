@@ -1,0 +1,16 @@
+# Template for release-signing credentials. Copy to `android/key.properties`
+# and fill in real values. `key.properties` itself is gitignored — never
+# commit real credentials.
+#
+# Generate the keystore once with:
+#   keytool -genkey -v -keystore android/app/salamat-release.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias salamat
+#
+# `storeFile` is resolved by Gradle's file() inside the :app module, so the
+# path is relative to android/app — use just the filename when the keystore
+# lives in android/app (an absolute path also works).
+
+storeFile=salamat-release.jks
+storePassword=CHANGE_ME
+keyAlias=salamat
+keyPassword=CHANGE_ME

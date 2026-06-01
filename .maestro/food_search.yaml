@@ -1,0 +1,45 @@
+# Test 2: search for "плов", add a 200g portion, verify calories on dashboard.
+#
+# Notes:
+# - Onboards via shared subflow so this can run from a clean install.
+# - Portion sheet has presets С=150 / М=250 / Б=350 / Своя=custom — no 200g
+#   preset, so we use "Своя" + inputText "200".
+# - "Плов узбекский" = 245 kcal/100g, so 200g portion = 490 kcal. Dashboard
+#   ring should show "490" after the add.
+# - The "+" button on a food card is an unlabeled icon at the right edge,
+#   not addressable by text. We tap by relative coordinate; this is the
+#   brittlest step in this file.
+appId: com.example.salamat
+name: Food search and add to diary
+---
+- launchApp:
+    clearState: true
+- runFlow: flows/do_onboarding.yaml
+
+# --- Open Search tab ---
+- tapOn: "Search"
+- assertVisible: "Добавить еду"
+
+# --- Filter list to plov ---
+- tapOn: "Поиск блюда"
+- inputText: "плов"
+- assertVisible: "Плов узбекский"
+
+# --- Tap "+" on the first result.
+# First card sits below the search field and meal-chip row.
+# Right edge of card; y is approximate for a typical phone screen.
+- tapOn:
+    point: "92%,25%"
+
+# --- Portion sheet: use Своя + 200 ---
+- assertVisible: "Плов узбекский"
+- tapOn: "Своя"
+- inputText: "200"
+
+# --- Add. Button text varies by meal type ("Добавить в Завтрак" etc.);
+# the constant prefix "Добавить в" matches them all. ---
+- tapOn: "Добавить в"
+
+# --- Back on dashboard; ring should show 490 kcal ---
+- assertVisible: "Привет"
+- assertVisible: "490"

@@ -1,0 +1,145 @@
+# End-to-end Russian capture. The app is force-locked to ru via a temporary
+# edit in LocaleNotifier.build() — the matcher patterns below are all
+# anchored on the Russian content-desc strings from app_ru.arb.
+#
+# Notes:
+# - Name field gets "Aleksey" (Latin transliteration). `adb shell input
+#   text` NPEs on non-ASCII bytes; Maestro's IME path doesn't bind to
+#   FlutterView. Real users typing with a Cyrillic keyboard are unaffected.
+# - The bottom nav labels ("Profile", etc.) are hardcoded English in
+#   dashboard_shell.dart — that's a real bug we'll surface.
+appId: com.example.salamat
+name: Russian end-to-end capture
+---
+- launchApp:
+    clearState: true
+
+# --- S1 Welcome ---
+- extendedWaitUntil:
+    visible: "Начать"
+    timeout: 60000
+- takeScreenshot: welcome_ru
+- tapOn: "Начать"
+
+# --- S2 Name ---
+- extendedWaitUntil:
+    visible: "(?s).*Как вас.*"
+    timeout: 10000
+- takeScreenshot: name_ru
+- tapOn:
+    text: "(?s).*Ваше имя.*"
+- inputText: "Aleksey"
+- tapOn: "Далее"
+
+# --- S3 Country — pick Kazakhstan for KZT paywall ---
+- extendedWaitUntil:
+    visible: "(?s).*Откуда.*"
+    timeout: 10000
+- takeScreenshot: country_ru
+- tapOn:
+    text: "(?s).*Казахстан.*"
+- tapOn: "Далее"
+
+# --- S4 Goal ---
+- extendedWaitUntil:
+    visible: "(?s).*главная цель.*"
+    timeout: 10000
+- takeScreenshot: goal_ru
+- tapOn:
+    text: "(?s).*Похудеть.*"
+- tapOn: "Далее"
+
+# --- S5 Gender ---
+- assertVisible: "(?s).*Ваш пол.*"
+- takeScreenshot: gender_ru
+- tapOn:
+    text: "(?s).*Мужчина.*"
+- tapOn: "Далее"
+
+# --- S6 Year ---
+- assertVisible: "(?s).*каком году.*"
+- takeScreenshot: year_ru
+- tapOn: "Далее"
+
+# --- S7 Weight ---
+- assertVisible: "(?s).*рост и.*"
+- takeScreenshot: weight_ru
+- tapOn: "Далее"
+
+# --- S8 Target ---
+- assertVisible: "(?s).*целевой вес.*"
+- takeScreenshot: target_ru
+- tapOn: "Далее"
+
+# --- S9 Celebration ---
+- assertVisible: "(?s).*реальная цель.*"
+- takeScreenshot: celebration_ru
+- tapOn: "Продолжить"
+
+# --- S10 Long-term ---
+- assertVisible: "(?s).*долгосрочный.*"
+- takeScreenshot: long_term_ru
+- tapOn: "Продолжить"
+
+# --- S11 Familiarity ---
+- tapOn:
+    text: "(?s).*Новичок.*"
+- takeScreenshot: familiarity_ru
+- tapOn: "Далее"
+
+# --- S12 Activity ---
+- tapOn:
+    text: "(?s).*Малоподвижный.*"
+- takeScreenshot: activity_ru
+- tapOn: "Далее"
+
+# --- S13 Summary ---
+- assertVisible: "(?s).*Персональный план.*"
+- takeScreenshot: summary_ru
+- tapOn: "Продолжить"
+
+# --- S14 Yes / lose ---
+- assertVisible: "(?s).*Хотите похудеть.*"
+- takeScreenshot: yes_lose_ru
+- tapOn: "Да"
+- assertVisible: "(?s).*порядок в питании.*"
+- tapOn: "Да"
+- assertVisible: "(?s).*проблемами здоровья.*"
+- tapOn: "Да"
+
+# --- S15 Comparison ---
+- assertVisible: "Без Salamat"
+- takeScreenshot: comparison_ru
+- tapOn: "Продолжить"
+
+# --- S16 Social proof ---
+- assertVisible: "1 000 000"
+- takeScreenshot: social_proof_ru
+- tapOn: "Продолжить"
+
+# --- S17 Building → S18 Plan ---
+- extendedWaitUntil:
+    visible: "(?s).*норма калорий.*"
+    timeout: 15000
+- takeScreenshot: plan_ready_ru
+- tapOn: "Продолжить"
+
+# --- Dashboard ---
+- extendedWaitUntil:
+    visible: "(?s).*Привет.*"
+    timeout: 10000
+- takeScreenshot: dashboard_ru
+
+# --- Paywall (KZT, Russian) ---
+- tapOn: "Profile"
+- scrollUntilVisible:
+    element:
+      text: "(?s).*Salamat Pro.*"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    text: "(?s).*Salamat Pro.*"
+- extendedWaitUntil:
+    visible: "(?s).*12 МЕСЯЦЕВ.*"
+    timeout: 10000
+- takeScreenshot: paywall_kzt_ru
