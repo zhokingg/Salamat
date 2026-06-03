@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -144,12 +144,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         return;
       }
 
-      final status = await Permission.camera.request();
-      if (!mounted) return;
-      if (status.isDenied || status.isPermanentlyDenied) {
-        await _showPermissionDialog();
-        return;
-      }
+      if (!await _ensureCameraPermission()) return;
       final cams = await availableCameras();
       if (cams.isEmpty) {
         if (mounted) setState(() => _unavailable = true);
@@ -157,7 +152,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       }
       final controller = CameraController(
         cams.first,
-        ResolutionPreset.medium,
+        ResolutionPreset.ultraHigh,
         enableAudio: false,
       );
       await controller.initialize();
@@ -172,6 +167,28 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     } catch (_) {
       if (mounted) setState(() => _unavailable = true);
     }
+  }
+
+  Future<bool> _ensureCameraPermission() async {
+    var status = await Permission.camera.status;
+    if (status.isGranted) return true;
+
+    if (status.isPermanentlyDenied || status.isRestricted) {
+      if (!mounted) return false;
+      await _showPermissionDialog();
+      return false;
+    }
+
+    status = await Permission.camera.request();
+    if (!mounted) return false;
+    if (status.isGranted) return true;
+
+    if (status.isPermanentlyDenied || status.isRestricted) {
+      await _showPermissionDialog();
+    } else if (mounted) {
+      context.pop();
+    }
+    return false;
   }
 
   Future<void> _showPermissionDialog() async {
