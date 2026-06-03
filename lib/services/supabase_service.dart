@@ -33,6 +33,20 @@ class SupabaseService {
       ),
       debug: kDebugMode,
     );
+
+    // Guarantee every user has a session. Anonymous sign-in gives a stable
+    // auth.uid() so RLS-scoped rows (meals, weight, photo usage) and the
+    // recognize-food Edge Function all work without forcing account creation.
+    // A persisted session is restored by Supabase.initialize, so we only sign
+    // in when there is genuinely no user yet.
+    if (Supabase.instance.client.auth.currentUser == null) {
+      try {
+        await Supabase.instance.client.auth.signInAnonymously();
+      } catch (e) {
+        if (kDebugMode) debugPrint('[SupabaseService] signInAnonymously: $e');
+      }
+    }
+
     _initialized = true;
   }
 

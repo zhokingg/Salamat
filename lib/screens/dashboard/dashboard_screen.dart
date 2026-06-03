@@ -61,7 +61,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
-    final meals = ref.watch(mealsProvider);
+    final meals = ref.watch(mealsProvider).valueOrNull ?? const MealsState();
 
     final norm = user.calorieNorm ?? 2000;
     final name = user.name.isNotEmpty ? user.name : loc.dashboardGuestName;

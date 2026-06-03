@@ -22,7 +22,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
-    final meals = ref.watch(mealsProvider);
+    final meals = ref.watch(mealsProvider).valueOrNull ?? const MealsState();
     final sub = ref.watch(subscriptionProvider);
 
     final fullName = '${user.name} ${user.lastName}'.trim().isEmpty

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -7,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'providers/locale_provider.dart';
 import 'router.dart';
-import 'services/supabase_service.dart';
 import 'theme/colors.dart';
 import 'theme/text_styles.dart';
 
@@ -19,8 +16,8 @@ void main() {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
-  // Fire-and-forget so we don't block first frame on a network init.
-  unawaited(SupabaseService.init());
+  // Supabase init + anonymous sign-in are driven by `bootstrapProvider`, which
+  // the splash screen awaits before routing into the app. See splash_screen.dart.
   runApp(const ProviderScope(child: SalamatApp()));
 }
 

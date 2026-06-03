@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../models/food.dart';
 import '../../providers/meals_provider.dart';
+import '../../services/food_repository.dart';
 import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
 import '../../theme/text_styles.dart';
@@ -22,25 +25,108 @@ class SearchScreen extends ConsumerStatefulWidget {
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _queryCtrl = TextEditingController();
+  final ScrollController _scrollCtrl = ScrollController();
   late MealType _mealType;
+
+  static const _debounceDuration = Duration(milliseconds: 300);
+  Timer? _debounce;
+
+  final List<Food> _items = [];
+  int _offset = 0;
+  bool _loading = false; // first page loading
+  bool _loadingMore = false; // appending next page
+  bool _hasMore = true;
+  bool _offline = false; // true once we fell back to kFoods
 
   @override
   void initState() {
     super.initState();
     _mealType = widget.initialMealType ?? MealType.breakfast;
-    _queryCtrl.addListener(() => setState(() {}));
+    _queryCtrl.addListener(_onQueryChanged);
+    _scrollCtrl.addListener(_onScroll);
+    _resetAndLoad();
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _queryCtrl.removeListener(_onQueryChanged);
     _queryCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
-  List<Food> get _filtered {
-    final q = _queryCtrl.text.trim().toLowerCase();
+  void _onQueryChanged() {
+    _debounce?.cancel();
+    _debounce = Timer(_debounceDuration, _resetAndLoad);
+  }
+
+  void _onScroll() {
+    if (!_scrollCtrl.hasClients) return;
+    final pos = _scrollCtrl.position;
+    if (pos.pixels >= pos.maxScrollExtent - 320) _loadMore();
+  }
+
+  /// Local fallback used when Supabase is unreachable.
+  List<Food> _localFallback(String query) {
+    final q = query.trim().toLowerCase();
     if (q.isEmpty) return kFoods;
     return kFoods.where((f) => f.name.toLowerCase().contains(q)).toList();
+  }
+
+  Future<void> _resetAndLoad() async {
+    final query = _queryCtrl.text;
+    setState(() {
+      _loading = true;
+      _offline = false;
+      _offset = 0;
+      _hasMore = true;
+      _items.clear();
+    });
+    try {
+      final repo = ref.read(foodRepositoryProvider);
+      final page = await repo.search(query: query, offset: 0);
+      if (!mounted || query != _queryCtrl.text) return;
+      setState(() {
+        _items.addAll(page);
+        _offset = page.length;
+        _hasMore = page.length == FoodRepository.pageSize;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted || query != _queryCtrl.text) return;
+      setState(() {
+        _items
+          ..clear()
+          ..addAll(_localFallback(query));
+        _offline = true;
+        _hasMore = false;
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loading || _loadingMore || !_hasMore || _offline) return;
+    final query = _queryCtrl.text;
+    setState(() => _loadingMore = true);
+    try {
+      final repo = ref.read(foodRepositoryProvider);
+      final page = await repo.search(query: query, offset: _offset);
+      if (!mounted || query != _queryCtrl.text) return;
+      setState(() {
+        _items.addAll(page);
+        _offset += page.length;
+        _hasMore = page.length == FoodRepository.pageSize;
+        _loadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _hasMore = false;
+        _loadingMore = false;
+      });
+    }
   }
 
   @override
@@ -86,46 +172,117 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               padding: const EdgeInsets.symmetric(
                 horizontal: SalamatDims.screenPadding,
               ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (final t in MealType.values) ...[
-                      _MealChip(
-                        type: t,
-                        selected: _mealType == t,
-                        onTap: () => setState(() => _mealType = t),
-                      ),
-                      if (t != MealType.values.last) const SizedBox(width: 8),
-                    ],
-                  ],
+              // These chips pick the meal slot a tapped dish gets added to
+              // (breakfast/lunch/dinner/snack) — they are NOT a dish filter.
+              // The label makes that intent explicit.
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.searchAddTo,
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: SalamatColors.i3,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final t in MealType.values) ...[
+                          _MealChip(
+                            type: t,
+                            selected: _mealType == t,
+                            onTap: () => setState(() => _mealType = t),
+                          ),
+                          if (t != MealType.values.last)
+                            const SizedBox(width: 8),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_offline)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  SalamatDims.screenPadding,
+                  4,
+                  SalamatDims.screenPadding,
+                  0,
+                ),
+                child: Text(
+                  loc.searchOffline,
+                  style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: SalamatColors.i3,
+                  ),
                 ),
               ),
-            ),
             const SizedBox(height: 12),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-                itemCount: _filtered.length,
-                itemBuilder: (context, i) {
-                  final food = _filtered[i];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: _FoodCard(
-                      food: food,
-                      onAdd: () => showPortionSheet(
-                        context,
-                        food: food,
-                        mealType: _mealType,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            Expanded(child: _buildResults(loc)),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildResults(AppLocalizations loc) {
+    if (_loading) {
+      return const Center(
+        child: CircularProgressIndicator(color: SalamatColors.g1),
+      );
+    }
+    if (_items.isEmpty) {
+      return Center(
+        child: Text(
+          loc.searchEmpty,
+          style: GoogleFonts.manrope(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: SalamatColors.i3,
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      controller: _scrollCtrl,
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+      itemCount: _items.length + (_loadingMore ? 1 : 0),
+      itemBuilder: (context, i) {
+        if (i >= _items.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  color: SalamatColors.g1,
+                ),
+              ),
+            ),
+          );
+        }
+        final food = _items[i];
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: _FoodCard(
+            food: food,
+            onAdd: () => showPortionSheet(
+              context,
+              food: food,
+              mealType: _mealType,
+            ),
+          ),
+        );
+      },
     );
   }
 }

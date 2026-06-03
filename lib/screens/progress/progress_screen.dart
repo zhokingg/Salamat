@@ -30,8 +30,6 @@ class _HistoryDay {
 
 class _ProgressScreenState extends ConsumerState<ProgressScreen>
     with SingleTickerProviderStateMixin {
-  static const int _streak = 3;
-
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulse;
 
@@ -57,7 +55,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen>
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
-    final meals = ref.watch(mealsProvider);
+    final meals = ref.watch(mealsProvider).valueOrNull ?? const MealsState();
 
     final norm = user.calorieNorm ?? 2000;
     final consumed = meals.totalKcalAll;
@@ -69,15 +67,20 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen>
     final fatNorm = norm * 0.3 / 9;
     final carbsNorm = norm * 0.4 / 4;
 
-    // Dummy historical data — labels localized, dates kept as literals.
+    // Real history. Meals are tracked for the current session only (no
+    // multi-day persistence yet), so the only day we can show truthfully is
+    // today — and only once the user has actually logged something. A new
+    // user sees an empty state and a streak of 0. Past days will populate
+    // here once a persisted history feed exists.
+    final loggedToday = consumed > 0;
+    final streak = loggedToday ? 1 : 0;
     final history = <_HistoryDay>[
-      _HistoryDay(loc.progressDayMon, '14 апр', 850),
-      _HistoryDay(loc.progressDayTue, '15 апр', 1240),
-      _HistoryDay(loc.progressDayWed, '16 апр', 1680),
-      _HistoryDay(loc.progressDayThu, '17 апр', 920),
-      _HistoryDay(loc.progressDayFri, '18 апр', 1450),
-      _HistoryDay(loc.progressDaySat, '19 апр', 1890),
-      _HistoryDay(loc.progressDayToday, '20 апр', consumed),
+      if (loggedToday)
+        _HistoryDay(
+          loc.progressDayToday,
+          MaterialLocalizations.of(context).formatShortMonthDay(DateTime.now()),
+          consumed,
+        ),
     ];
     final maxKcal = history.map((d) => d.kcal).fold<int>(
           1,
@@ -107,7 +110,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen>
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _StreakCard(streak: _streak, pulse: _pulse),
+          child: _StreakCard(streak: streak, pulse: _pulse),
         ),
         const SizedBox(height: 24),
         Padding(
@@ -162,19 +165,35 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen>
               borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
               border: Border.all(color: SalamatColors.line),
             ),
-            child: Column(
-              children: [
-                for (var i = 0; i < history.length; i++) ...[
-                  _HistoryRow(day: history[i], maxKcal: maxKcal),
-                  if (i != history.length - 1)
-                    Container(
-                      height: 1,
-                      color: SalamatColors.line,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
+            child: history.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 20,
                     ),
-                ],
-              ],
-            ),
+                    child: Text(
+                      loc.progressHistoryEmpty,
+                      style: GoogleFonts.manrope(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: SalamatColors.i3,
+                        height: 1.4,
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: [
+                      for (var i = 0; i < history.length; i++) ...[
+                        _HistoryRow(day: history[i], maxKcal: maxKcal),
+                        if (i != history.length - 1)
+                          Container(
+                            height: 1,
+                            color: SalamatColors.line,
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                      ],
+                    ],
+                  ),
           ),
         ),
       ],
@@ -208,10 +227,15 @@ class _StreakCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('🔥', style: TextStyle(fontSize: 28)),
+              Text(
+                streak > 0 ? '🔥' : '🌱',
+                style: const TextStyle(fontSize: 28),
+              ),
               const SizedBox(width: 10),
               Text(
-                loc.progressStreak(streak),
+                streak > 0
+                    ? loc.progressStreak(streak)
+                    : loc.progressStreakStart,
                 style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -223,7 +247,7 @@ class _StreakCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            loc.progressNextGoal,
+            streak > 0 ? loc.progressNextGoal : loc.progressStreakStartHint,
             style: GoogleFonts.manrope(
               fontSize: 14,
               fontWeight: FontWeight.w400,

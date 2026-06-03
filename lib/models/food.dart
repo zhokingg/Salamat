@@ -10,6 +10,22 @@ class Food {
     required this.category,
   });
 
+  /// Builds a [Food] from a Supabase `foods` row.
+  factory Food.fromMap(Map<String, dynamic> map) {
+    double toD(Object? v) =>
+        v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '') ?? 0;
+    int toI(Object? v) =>
+        v is num ? v.toInt() : int.tryParse(v?.toString() ?? '') ?? 0;
+    return Food(
+      name: map['name']?.toString() ?? '',
+      kcalPer100: toI(map['kcal_per_100g']),
+      proteinPer100: toD(map['protein_per_100g']),
+      fatPer100: toD(map['fat_per_100g']),
+      carbsPer100: toD(map['carbs_per_100g']),
+      category: map['category']?.toString() ?? '',
+    );
+  }
+
   final String name;
   final int kcalPer100;
   final double proteinPer100;
@@ -25,15 +41,27 @@ class Food {
 }
 
 const Map<String, Color> _categoryColors = {
+  // Legacy curated categories (kFoods fallback)
   'Основные блюда': Color(0xFFBF7030),
+  'Крупы': Color(0xFFB5935A),
+  // CSV core dataset categories
+  'Блюда ЦА': Color(0xFFBF7030),
+  'Гарниры': Color(0xFFB5935A),
   'Супы': Color(0xFFE67E22),
   'Выпечка': Color(0xFFD4A574),
   'Хлеб': Color(0xFFA88354),
   'Салаты': Color(0xFF49AA72),
+  'Овощи': Color(0xFF4CAF50),
+  'Фрукты': Color(0xFFEF6C9A),
   'Сладкое': Color(0xFFE85A8C),
   'Молочное': Color(0xFF7BB3E8),
-  'Крупы': Color(0xFFB5935A),
+  'Мясо': Color(0xFFC0392B),
+  'Рыба': Color(0xFF1FA9C7),
   'Яйца': Color(0xFFF1C40F),
+  'Напитки': Color(0xFF5B8DEF),
+  'Орехи': Color(0xFF8D6E63),
+  'Фастфуд': Color(0xFFE07A2F),
+  'Завтрак': Color(0xFFF0A500),
 };
 
 const List<Food> kFoods = [

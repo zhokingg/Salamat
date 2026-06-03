@@ -1,6 +1,9 @@
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/supabase_service.dart';
+import 'bootstrap_provider.dart';
+
 /// Meal slot. Display labels come from AppLocalizations via the extension
 /// below — the enum itself only carries the emoji (purely visual, locale-agnostic).
 enum MealType {
@@ -80,14 +83,83 @@ class MealsState {
   }
 }
 
-class MealsNotifier extends Notifier<MealsState> {
+/// Today's meals, persisted in Supabase.
+///
+/// `build` waits for [bootstrapProvider] (Supabase init + anonymous sign-in)
+/// before loading, so reads/writes always run against a real `auth.uid()`.
+class MealsNotifier extends AsyncNotifier<MealsState> {
   @override
-  MealsState build() => const MealsState();
+  Future<MealsState> build() async {
+    // Gate on bootstrap: never touch the network before the session exists.
+    await ref.watch(bootstrapProvider.future);
+    final rows = await SupabaseService.getTodayFoodLogs();
+    return _fromRows(rows);
+  }
 
-  void add(MealType type, MealEntry entry) {
-    state = state.copyWithAdded(type, entry);
+  /// Adds a meal. The UI updates optimistically, then the row is persisted.
+  /// Signature is unchanged so existing call sites (camera, portion sheet)
+  /// keep working — they fire-and-forget this future.
+  Future<void> add(MealType type, MealEntry entry) async {
+    final current = state.valueOrNull ?? const MealsState();
+    state = AsyncData(current.copyWithAdded(type, entry));
+    await SupabaseService.logFood(
+      foodName: entry.name,
+      calories: entry.kcal,
+      proteinG: entry.protein,
+      carbsG: entry.carbs,
+      fatG: entry.fat,
+      portionG: entry.grams,
+      mealType: type.name,
+    );
+  }
+
+  /// Re-reads today's meals from Supabase (e.g. after returning to a screen).
+  Future<void> reload() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final rows = await SupabaseService.getTodayFoodLogs();
+      return _fromRows(rows);
+    });
+  }
+
+  static MealsState _fromRows(List<Map<String, dynamic>> rows) {
+    final entries = <MealType, List<MealEntry>>{};
+    for (final row in rows) {
+      final type = _typeFromDb(row['meal_type']);
+      if (type == null) continue;
+      (entries[type] ??= <MealEntry>[]).add(
+        MealEntry(
+          id: row['id']?.toString() ?? '',
+          name: row['name']?.toString() ?? '',
+          grams: _toDouble(row['grams']),
+          kcal: _toInt(row['kcal']),
+          protein: _toDouble(row['protein']),
+          fat: _toDouble(row['fat']),
+          carbs: _toDouble(row['carbs']),
+        ),
+      );
+    }
+    return MealsState(entries: entries);
+  }
+
+  static MealType? _typeFromDb(Object? raw) => switch (raw?.toString()) {
+        'breakfast' => MealType.breakfast,
+        'lunch' => MealType.lunch,
+        'dinner' => MealType.dinner,
+        'snack' => MealType.snack,
+        _ => null,
+      };
+
+  static double _toDouble(Object? v) {
+    if (v is num) return v.toDouble();
+    return double.tryParse(v?.toString() ?? '') ?? 0;
+  }
+
+  static int _toInt(Object? v) {
+    if (v is num) return v.toInt();
+    return int.tryParse(v?.toString() ?? '') ?? 0;
   }
 }
 
 final mealsProvider =
-    NotifierProvider<MealsNotifier, MealsState>(MealsNotifier.new);
+    AsyncNotifierProvider<MealsNotifier, MealsState>(MealsNotifier.new);

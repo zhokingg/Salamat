@@ -1,23 +1,28 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../providers/bootstrap_provider.dart';
 import '../../theme/colors.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fade;
-  Timer? _timer;
+  Timer? _minTimer;
+  Timer? _maxTimer;
+  bool _minElapsed = false;
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -29,20 +34,42 @@ class _SplashScreenState extends State<SplashScreen>
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _controller.forward();
 
-    _timer = Timer(const Duration(seconds: 2), () {
-      if (mounted) context.go('/onboarding/welcome');
+    // Hold the brand for a minimum, then proceed as soon as bootstrap settles.
+    _minTimer = Timer(const Duration(seconds: 2), () {
+      _minElapsed = true;
+      _tryNavigate();
     });
+    // Safety net: never trap the user on splash if the network hangs.
+    _maxTimer = Timer(const Duration(seconds: 8), _goNext);
+  }
+
+  /// Navigate once the minimum splash time has elapsed AND bootstrap has
+  /// finished (resolved or errored — we don't block the UI on a failed init).
+  void _tryNavigate() {
+    if (!_minElapsed) return;
+    final boot = ref.read(bootstrapProvider);
+    if (boot.hasValue || boot.hasError) _goNext();
+  }
+
+  void _goNext() {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    context.go('/onboarding/welcome');
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _minTimer?.cancel();
+    _maxTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Kick off bootstrap (init + anonymous sign-in) and react when it settles.
+    ref.listen(bootstrapProvider, (_, __) => _tryNavigate());
+    ref.watch(bootstrapProvider);
     return Scaffold(
       backgroundColor: SalamatColors.g1,
       body: Center(

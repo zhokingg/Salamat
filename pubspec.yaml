@@ -38,7 +38,20 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1
 
 flutter:
   uses-material-design: true
   generate: true
+
+# App launcher icon — Salamat brand sprout (green #26593C). Regenerate with:
+#   /Users/user/flutter/bin/dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon_full.png"
+  remove_alpha_ios: true
+  background_color_ios: "#26593C"
+  adaptive_icon_background: "#26593C"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  min_sdk_android: 21

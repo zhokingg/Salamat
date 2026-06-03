@@ -511,10 +511,10 @@ class _TierRow extends StatelessWidget {
           discount: 58,
         );
       case _Tier.month3:
-        // 3-month: per-month big, total small.
+        // 3-month: total big, per-month equivalent small (matches annual).
         return (
-          main: prices.threeMonthsPerMo,
-          sub: prices.threeMonths,
+          main: prices.threeMonths,
+          sub: prices.threeMonthsPerMo,
           popular: false,
           discount: 38,
         );
@@ -704,9 +704,9 @@ class _TierCardState extends State<_TierCard> {
                     : FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          widget.tier == _Tier.year
-                              ? loc.paywallPerMonthValue(spec.sub)
-                              : loc.paywallTotal(spec.sub),
+                          // Every multi-month card: big = period total,
+                          // small = per-month equivalent for comparison.
+                          loc.paywallPerMonthValue(spec.sub),
                           style: GoogleFonts.manrope(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
