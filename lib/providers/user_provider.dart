@@ -256,6 +256,48 @@ class UserNotifier extends Notifier<UserState> {
   void setCountry(Country country) {
     state = state.copyWith(country: country);
   }
+
+  /// Populates state from a persisted Supabase `profiles` row so a returning
+  /// user sees their data without re-onboarding. Missing or unparseable fields
+  /// keep their current value (copyWith ignores nulls).
+  void hydrateFromProfile(Map<String, dynamic> row) {
+    state = state.copyWith(
+      name: (row['name'] as String?)?.trim(),
+      lastName: (row['last_name'] as String?)?.trim(),
+      gender: _genderFromDb(row['gender']),
+      goal: _goalFromDb(row['goal']),
+      age: _intOrNull(row['age']),
+      height: _doubleOrNull(row['height']),
+      weight: _doubleOrNull(row['weight']),
+      calorieNorm: _intOrNull(row['calorie_norm']),
+    );
+  }
+
+  static Gender? _genderFromDb(Object? v) => switch (v?.toString()) {
+        'male' => Gender.male,
+        'female' => Gender.female,
+        _ => null,
+      };
+
+  static Goal? _goalFromDb(Object? v) => switch (v?.toString()) {
+        'lose' => Goal.lose,
+        'gain' => Goal.gain,
+        'maintain' => Goal.maintain,
+        'healthy' => Goal.healthy,
+        _ => null,
+      };
+
+  static int? _intOrNull(Object? v) {
+    if (v == null) return null;
+    if (v is num) return v.toInt();
+    return int.tryParse(v.toString());
+  }
+
+  static double? _doubleOrNull(Object? v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString());
+  }
 }
 
 final userProvider = NotifierProvider<UserNotifier, UserState>(UserNotifier.new);

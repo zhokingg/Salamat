@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/bootstrap_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../theme/colors.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -43,18 +44,40 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _maxTimer = Timer(const Duration(seconds: 8), _goNext);
   }
 
-  /// Navigate once the minimum splash time has elapsed AND bootstrap has
-  /// finished (resolved or errored — we don't block the UI on a failed init).
+  /// Navigate once the minimum splash time has elapsed AND the profile load
+  /// has finished (resolved or errored — we don't block the UI on a failed
+  /// init). [profileProvider] awaits bootstrap internally, so this still
+  /// honours the startup gate (init + anonymous session) before deciding.
   void _tryNavigate() {
     if (!_minElapsed) return;
-    final boot = ref.read(bootstrapProvider);
-    if (boot.hasValue || boot.hasError) _goNext();
+    final profile = ref.read(profileProvider);
+    if (profile.hasValue || profile.hasError) _goNext();
   }
 
   void _goNext() {
     if (_navigated || !mounted) return;
     _navigated = true;
-    context.go('/onboarding/welcome');
+    final row = ref.read(profileProvider).valueOrNull;
+    if (_isOnboarded(row)) {
+      // Returning user: restore their data and skip straight to the dashboard.
+      ref.read(userProvider.notifier).hydrateFromProfile(row!);
+      context.go('/dashboard');
+    } else {
+      context.go('/onboarding/welcome');
+    }
+  }
+
+  /// A profile counts as "onboarded" only when both name and calorie norm are
+  /// set. The `handle_new_user` trigger inserts an empty row at anonymous
+  /// sign-in, so a row merely existing does not mean onboarding is done.
+  static bool _isOnboarded(Map<String, dynamic>? row) {
+    if (row == null) return false;
+    final name = (row['name'] as String?)?.trim() ?? '';
+    final kcalRaw = row['calorie_norm'];
+    final kcal = kcalRaw is num
+        ? kcalRaw.toInt()
+        : int.tryParse(kcalRaw?.toString() ?? '') ?? 0;
+    return name.isNotEmpty && kcal > 0;
   }
 
   @override
@@ -67,9 +90,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Kick off bootstrap (init + anonymous sign-in) and react when it settles.
-    ref.listen(bootstrapProvider, (_, __) => _tryNavigate());
-    ref.watch(bootstrapProvider);
+    // Kick off bootstrap (init + anonymous sign-in) then the profile load, and
+    // react when it settles. profileProvider transitively starts bootstrap.
+    ref.listen(profileProvider, (_, __) => _tryNavigate());
+    ref.watch(profileProvider);
     return Scaffold(
       backgroundColor: SalamatColors.g1,
       body: Center(

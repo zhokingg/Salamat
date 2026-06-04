@@ -11,3 +11,14 @@ import '../services/supabase_service.dart';
 final bootstrapProvider = FutureProvider<void>((ref) async {
   await SupabaseService.init();
 });
+
+/// Loads the persisted profile once, after [bootstrapProvider] settles so a
+/// real `auth.uid()` exists. Returns the raw `profiles` row, or null when
+/// there's no user, no row, or the read failed.
+///
+/// The splash screen awaits this to decide between onboarding and the
+/// dashboard, and to hydrate `userProvider` for a returning user.
+final profileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  await ref.watch(bootstrapProvider.future);
+  return SupabaseService.getProfile();
+});

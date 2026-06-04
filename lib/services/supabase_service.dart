@@ -91,6 +91,25 @@ class SupabaseService {
     }
   }
 
+  /// Reads the current user's profile row, or null if there's no user, no row,
+  /// or the read failed. The `handle_new_user` trigger inserts an empty row at
+  /// anonymous sign-in, so callers must verify `name`/`calorie_norm` are
+  /// populated before treating the profile as "onboarded".
+  static Future<Map<String, dynamic>?> getProfile() async {
+    final uid = currentUser?.id;
+    if (uid == null) return null;
+    try {
+      return await client
+          .from('profiles')
+          .select()
+          .eq('id', uid)
+          .maybeSingle();
+    } catch (e) {
+      if (kDebugMode) debugPrint('getProfile error: $e');
+      return null;
+    }
+  }
+
   // -------- meals (food logs) --------
 
   static Future<void> logFood({

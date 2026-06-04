@@ -22,6 +22,11 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
   int _weeksToTarget = 0;
   DateTime _targetDate = DateTime.now();
 
+  /// The in-flight profile write started by [_commit]. The Continue button
+  /// awaits this so the row is guaranteed persisted before the user can leave
+  /// (and potentially close the app).
+  Future<void>? _saveFuture;
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +59,7 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
       _targetDate = target;
     });
 
-    SupabaseService.upsertUser(
+    _saveFuture = SupabaseService.upsertUser(
       name: u.name.isEmpty ? 'Friend' : u.name,
       gender: u.gender == Gender.female ? 'female' : 'male',
       age: age,
@@ -223,7 +228,12 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
         ],
       ),
       buttonLabel: loc.buttonContinue,
-      onContinue: () => context.go('/dashboard'),
+      onContinue: () async {
+        // Ensure the profile write finished before leaving onboarding, so a
+        // returning user is always recognised on the next launch.
+        await _saveFuture;
+        if (context.mounted) context.go('/dashboard');
+      },
     );
   }
 }
