@@ -12,5 +12,6 @@ class SalamatColors {
   static const g4 = Color(0xFFEAF4EB);
   static const line = Color(0xFFDDE8D8);
   static const warn = Color(0xFFBF7030);
+  static const danger = Color(0xFFC0392B);
   static const cam = Color(0xFF111810);
 }

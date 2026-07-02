@@ -39,8 +39,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeHeadline => 'Your weight WILL be reached\nin our app';
 
   @override
-  String get welcomeSubtitle =>
-      'Let\'s start with a few questions\nfor your personal plan';
+  String get welcomeSubtitle => 'Let\'s start with a few questions\nfor your personal plan';
 
   @override
   String get nameTitle => 'What\'s your name?';
@@ -196,8 +195,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get underweightWarningTitle => 'Weight loss may be unsafe';
 
   @override
-  String get underweightWarningBody =>
-      'Your body mass index is below normal. Losing weight at this level can harm your health. We recommend consulting a doctor before starting.';
+  String get underweightWarningBody => 'Your body mass index is below normal. Losing weight at this level can harm your health. We recommend consulting a doctor before starting.';
 
   @override
   String get underweightWarningChangeGoal => 'Choose another goal';
@@ -219,8 +217,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get celebrationMaintain => 'Great choice —\nholding a healthy weight';
 
   @override
-  String get celebrationStat =>
-      'Losing just 5% of your weight\nalready improves health';
+  String get celebrationStat => 'Losing just 5% of your weight\nalready improves health';
 
   @override
   String get longTermTitle => 'Salamat builds\nlong-term results';
@@ -232,15 +229,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get longTermLegendOthers => 'Typical diets';
 
   @override
-  String get longTermStat =>
-      '76% of Salamat users keep their weight\noff for 6+ months';
+  String get longTermStat => '76% of Salamat users keep their weight\noff for 6+ months';
 
   @override
   String get familiarityTitle => 'How familiar are you\nwith weight loss?';
 
   @override
-  String get familiarityHint =>
-      '75% answered the same way.\nSalamat will guide you through it.';
+  String get familiarityHint => '75% answered the same way.\nSalamat will guide you through it.';
 
   @override
   String get familiarityNovice => 'Beginner';
@@ -321,8 +316,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yesCaptionAfter => 'With Salamat';
 
   @override
-  String get comparisonTitle =>
-      'Lose weight 2× faster\nwith Salamat than\non your own';
+  String get comparisonTitle => 'Lose weight 2× faster\nwith Salamat than\non your own';
 
   @override
   String get comparisonWithout => 'Without Salamat';
@@ -331,8 +325,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get comparisonWith => 'With Salamat';
 
   @override
-  String get comparisonStat =>
-      '78% of users reach lasting results\nwith Salamat';
+  String get comparisonStat => '78% of users reach lasting results\nwith Salamat';
 
   @override
   String get socialTitle => 'Salamat is built\nfor people\nlike you!';
@@ -560,8 +553,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraPermissionTitle => 'Camera access needed';
 
   @override
-  String get cameraPermissionBody =>
-      'Allow camera access in Settings to recognise dishes from photos.';
+  String get cameraPermissionBody => 'Allow camera access in Settings to recognise dishes from photos.';
 
   @override
   String get cameraOpenSettings => 'Open Settings';
@@ -570,8 +562,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraUnavailable => 'Camera not available on the simulator';
 
   @override
-  String get cameraUnavailableDevice =>
-      'Camera is not available on this device';
+  String get cameraUnavailableDevice => 'Camera is not available on this device';
 
   @override
   String get cameraSimulate => 'Simulate recognition';
@@ -617,8 +608,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraRetake => '↺ Retake';
 
   @override
-  String get cameraOutOfPhotos =>
-      'You\'ve used all 3 free photos.\nUpgrade to Pro — 10 photos a day. 📸';
+  String get cameraOutOfPhotos => 'You\'ve used all 3 free photos.\nUpgrade to Pro — 10 photos a day. 📸';
 
   @override
   String get cameraTryPro => 'Try Pro';
@@ -641,8 +631,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTitleLine2 => 'with Salamat Pro';
 
   @override
-  String get paywallSubtitle =>
-      '3 free photos.\nWith Pro — 10 photos a day + forecast + analysis.';
+  String get paywallSubtitle => '3 free photos.\nWith Pro — 10 photos a day + forecast + analysis.';
 
   @override
   String get paywallLimitBadge => 'Photo limit reached';
@@ -742,8 +731,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTrustLine => '1,000,000 users · 83% reach their goal';
 
   @override
-  String get paywallFinePrint =>
-      'Subscription renews automatically at the end of each period. Cancel anytime in your store account. Terms and Privacy apply.';
+  String get paywallFinePrint => 'Subscription renews automatically at the end of each period. Cancel anytime in your store account. Terms and Privacy apply.';
 
   @override
   String get profileTitle => 'Profile';
@@ -832,6 +820,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSettingTerms => 'Terms of Service';
 
   @override
+  String get profileDeleteAccount => 'Delete account';
+
+  @override
+  String get profileDeleteDialogTitle => 'Delete account?';
+
+  @override
+  String get profileDeleteDialogBody => 'All your data — profile, food history and weight — will be permanently deleted. This cannot be undone.';
+
+  @override
+  String get profileDeleteConfirm => 'Delete';
+
+  @override
+  String get profileDeleteError => 'Couldn\'t delete account. Please try again later.';
+
+  @override
   String get paywallFinePrintPrivacy => 'Privacy Policy';
 
   @override
@@ -883,8 +886,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get progressStreakStartHint => 'Log your first meal to start a streak';
 
   @override
-  String get progressHistoryEmpty =>
-      'No data yet. Add meals and your history will appear here.';
+  String get progressHistoryEmpty => 'No data yet. Add meals and your history will appear here.';
 
   @override
   String get progressToday => 'Today';

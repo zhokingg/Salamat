@@ -110,6 +110,32 @@ class SupabaseService {
     }
   }
 
+  /// Permanently deletes the current user's account and all their data via the
+  /// `delete-account` Edge Function (cascade removes profile, meals, weight,
+  /// photo usage). On success the old session is cleared and a fresh anonymous
+  /// session is created so the app stays usable as a brand-new user.
+  ///
+  /// Returns true if the account was deleted.
+  static Future<bool> deleteAccount() async {
+    if (!isReady || !isSignedIn) return false;
+    try {
+      final res = await client.functions.invoke('delete-account');
+      if (res.status != 200) {
+        if (kDebugMode) {
+          debugPrint('deleteAccount status ${res.status}: ${res.data}');
+        }
+        return false;
+      }
+      // Clear the now-deleted user's session, then start clean.
+      await client.auth.signOut();
+      await client.auth.signInAnonymously();
+      return true;
+    } catch (e) {
+      if (kDebugMode) debugPrint('deleteAccount error: $e');
+      return false;
+    }
+  }
+
   // -------- meals (food logs) --------
 
   static Future<void> logFood({

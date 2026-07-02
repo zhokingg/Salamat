@@ -39,8 +39,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get welcomeHeadline => 'Ваш вес БУДЕТ\nдостигнут в нашем\nприложении';
 
   @override
-  String get welcomeSubtitle =>
-      'Начнём с нескольких вопросов\nдля вашего персонального плана';
+  String get welcomeSubtitle => 'Начнём с нескольких вопросов\nдля вашего персонального плана';
 
   @override
   String get nameTitle => 'Как вас зовут?';
@@ -196,8 +195,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get underweightWarningTitle => 'Снижение веса может быть небезопасно';
 
   @override
-  String get underweightWarningBody =>
-      'Ваш индекс массы тела ниже нормы. Снижение веса при таком показателе может навредить здоровью. Рекомендуем проконсультироваться с врачом перед началом.';
+  String get underweightWarningBody => 'Ваш индекс массы тела ниже нормы. Снижение веса при таком показателе может навредить здоровью. Рекомендуем проконсультироваться с врачом перед началом.';
 
   @override
   String get underweightWarningChangeGoal => 'Выбрать другую цель';
@@ -231,15 +229,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get longTermLegendOthers => 'Обычные диеты';
 
   @override
-  String get longTermStat =>
-      '76% пользователей Salamat удерживают вес\nболее 6 месяцев';
+  String get longTermStat => '76% пользователей Salamat удерживают вес\nболее 6 месяцев';
 
   @override
   String get familiarityTitle => 'Насколько вы знакомы\nс темой похудения?';
 
   @override
-  String get familiarityHint =>
-      '75% ответили так же.\nSalamat проведёт вас по пути похудения.';
+  String get familiarityHint => '75% ответили так же.\nSalamat проведёт вас по пути похудения.';
 
   @override
   String get familiarityNovice => 'Новичок';
@@ -329,8 +325,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get comparisonWith => 'С Salamat';
 
   @override
-  String get comparisonStat =>
-      '78% пользователей достигают долгосрочного\nрезультата с Salamat';
+  String get comparisonStat => '78% пользователей достигают долгосрочного\nрезультата с Salamat';
 
   @override
   String get socialTitle => 'Salamat создан\nдля таких людей,\nкак вы!';
@@ -345,8 +340,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get socialStatPercent => '83%';
 
   @override
-  String get socialStatText =>
-      'пользователей говорят, что наш план\nлегко соблюдать';
+  String get socialStatText => 'пользователей говорят, что наш план\nлегко соблюдать';
 
   @override
   String get buildingTitle => 'Создаём вашу\nпрограмму...';
@@ -561,8 +555,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cameraPermissionTitle => 'Нужен доступ к камере';
 
   @override
-  String get cameraPermissionBody =>
-      'Разреши доступ к камере в настройках, чтобы распознавать блюда на фото.';
+  String get cameraPermissionBody => 'Разреши доступ к камере в настройках, чтобы распознавать блюда на фото.';
 
   @override
   String get cameraOpenSettings => 'Открыть настройки';
@@ -617,8 +610,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cameraRetake => '↺ Переснять';
 
   @override
-  String get cameraOutOfPhotos =>
-      'Вы использовали все 3 бесплатных фото.\nПерейдите на Pro — 10 фото в день. 📸';
+  String get cameraOutOfPhotos => 'Вы использовали все 3 бесплатных фото.\nПерейдите на Pro — 10 фото в день. 📸';
 
   @override
   String get cameraTryPro => 'Попробовать Pro';
@@ -641,8 +633,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallTitleLine2 => 'с Salamat Pro';
 
   @override
-  String get paywallSubtitle =>
-      '3 фото бесплатно.\nС Pro — 10 фото в день + прогноз + анализ.';
+  String get paywallSubtitle => '3 фото бесплатно.\nС Pro — 10 фото в день + прогноз + анализ.';
 
   @override
   String get paywallLimitBadge => 'Лимит фото исчерпан';
@@ -742,8 +733,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallTrustLine => '1 000 000 пользователей · 83% достигают цели';
 
   @override
-  String get paywallFinePrint =>
-      'Подписка продлевается автоматически в конце каждого периода. Отмените в любой момент в аккаунте магазина. Действуют Условия и Политика конфиденциальности.';
+  String get paywallFinePrint => 'Подписка продлевается автоматически в конце каждого периода. Отмените в любой момент в аккаунте магазина. Действуют Условия и Политика конфиденциальности.';
 
   @override
   String get profileTitle => 'Профиль';
@@ -832,6 +822,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileSettingTerms => 'Условия использования';
 
   @override
+  String get profileDeleteAccount => 'Удалить аккаунт';
+
+  @override
+  String get profileDeleteDialogTitle => 'Удалить аккаунт?';
+
+  @override
+  String get profileDeleteDialogBody => 'Все ваши данные — профиль, история питания и вес — будут удалены безвозвратно. Это действие нельзя отменить.';
+
+  @override
+  String get profileDeleteConfirm => 'Удалить';
+
+  @override
+  String get profileDeleteError => 'Не удалось удалить аккаунт. Попробуйте позже.';
+
+  @override
   String get paywallFinePrintPrivacy => 'Политика конфиденциальности';
 
   @override
@@ -882,12 +887,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get progressStreakStart => 'Начни сегодня';
 
   @override
-  String get progressStreakStartHint =>
-      'Отметь первый приём пищи — серия начнётся';
+  String get progressStreakStartHint => 'Отметь первый приём пищи — серия начнётся';
 
   @override
-  String get progressHistoryEmpty =>
-      'Пока нет данных. Добавляй блюда — история появится здесь.';
+  String get progressHistoryEmpty => 'Пока нет данных. Добавляй блюда — история появится здесь.';
 
   @override
   String get progressToday => 'Сегодня';
