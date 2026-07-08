@@ -498,6 +498,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardSnapFirstMeal => 'Snap your first meal';
 
   @override
+  String get mealsNothingYet => 'Nothing yet';
+
+  @override
   String get dashboardOffline => 'Offline — showing local data';
 
   @override
@@ -542,6 +545,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navHome => 'Home';
+
+  @override
+  String get navMeals => 'Meals';
+
+  @override
+  String get navCameraAction => 'Scan a meal';
 
   @override
   String get navProgress => 'Progress';

@@ -41,6 +41,7 @@ class MealEntry {
     required this.fat,
     required this.carbs,
     this.source = '',
+    this.eatenAt,
   });
 
   final String id;
@@ -55,6 +56,10 @@ class MealEntry {
   /// now — persisting it needs a `source` column migration in `meals`
   /// (Supabase intentionally untouched); rows loaded from the DB carry ''.
   final String source;
+
+  /// When the entry was eaten — display only, populated from the DB row;
+  /// entries created this session carry null until reloaded.
+  final DateTime? eatenAt;
 }
 
 class MealsState {
@@ -140,6 +145,8 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
           protein: _toDouble(row['protein']),
           fat: _toDouble(row['fat']),
           carbs: _toDouble(row['carbs']),
+          eatenAt:
+              DateTime.tryParse(row['eaten_at']?.toString() ?? '')?.toLocal(),
         ),
       );
     }

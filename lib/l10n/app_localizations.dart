@@ -1001,6 +1001,12 @@ abstract class AppLocalizations {
   /// **'Snap your first meal'**
   String get dashboardSnapFirstMeal;
 
+  /// No description provided for @mealsNothingYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet'**
+  String get mealsNothingYet;
+
   /// No description provided for @dashboardOffline.
   ///
   /// In en, this message translates to:
@@ -1072,6 +1078,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home'**
   String get navHome;
+
+  /// No description provided for @navMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals'**
+  String get navMeals;
+
+  /// No description provided for @navCameraAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a meal'**
+  String get navCameraAction;
 
   /// No description provided for @navProgress.
   ///

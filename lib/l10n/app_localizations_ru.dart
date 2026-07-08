@@ -498,6 +498,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dashboardSnapFirstMeal => 'Сфотографируй первое блюдо';
 
   @override
+  String get mealsNothingYet => 'Пока пусто';
+
+  @override
   String get dashboardOffline => 'Офлайн — показаны локальные данные';
 
   @override
@@ -544,6 +547,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navHome => 'Главная';
+
+  @override
+  String get navMeals => 'Приёмы';
+
+  @override
+  String get navCameraAction => 'Сканировать блюдо';
 
   @override
   String get navProgress => 'Прогресс';

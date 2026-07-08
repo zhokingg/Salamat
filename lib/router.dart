@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'screens/camera/camera_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/goal_edit/goal_edit_screen.dart';
+import 'screens/meals/meals_screen.dart';
 import 'screens/onboarding/activity_screen.dart';
 import 'screens/onboarding/building_screen.dart';
 import 'screens/onboarding/celebration_screen.dart';
@@ -121,6 +122,10 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/dashboard',
           builder: (context, state) => const DashboardScreen(),
+        ),
+        GoRoute(
+          path: '/meals',
+          builder: (context, state) => const MealsScreen(),
         ),
         GoRoute(
           path: '/progress',

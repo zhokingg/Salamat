@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/meals_provider.dart';
@@ -13,17 +14,6 @@ import '../../screens/onboarding/widgets.dart' show CountUp;
 import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
 import '../../theme/salamat_theme.dart';
-
-const List<_MealView> _kMealViews = [
-  _MealView(type: MealType.breakfast),
-  _MealView(type: MealType.lunch),
-  _MealView(type: MealType.dinner),
-];
-
-class _MealView {
-  const _MealView({required this.type});
-  final MealType type;
-}
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -203,58 +193,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               ),
             ),
           ),
-        ],
-        const SizedBox(height: 28),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  loc.dashboardMeals,
-                  style: GoogleFonts.manrope(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: SalamatTokens.textPrimary,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () => showManualEntrySheet(context),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: const Size(0, 36),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  loc.manualAddButton,
-                  style: GoogleFonts.manrope(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: SalamatTokens.accentDeep,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        for (var i = 0; i < _kMealViews.length; i++) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _MealCard(
-              type: _kMealViews[i].type,
-              entries: meals.forType(_kMealViews[i].type),
-              totalKcal: meals.totalKcal(_kMealViews[i].type),
-              onTap: () => showManualEntrySheet(
-                context,
-                initialMealType: _kMealViews[i].type,
-              ),
-            ),
-          ),
-          if (i != _kMealViews.length - 1) const SizedBox(height: 12),
         ],
       ],
     );
@@ -777,6 +715,15 @@ class _LastMealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    // The card is a doorway into the Meals tab — full diary lives there now.
+    return GestureDetector(
+      onTap: () => context.go('/meals'),
+      behavior: HitTestBehavior.opaque,
+      child: _body(loc),
+    );
+  }
+
+  Widget _body(AppLocalizations loc) {
     if (entry == null) {
       return Container(
         padding: const EdgeInsets.all(16),
@@ -860,163 +807,4 @@ class _LastMealCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _MealCard extends StatelessWidget {
-  const _MealCard({
-    required this.type,
-    required this.entries,
-    required this.totalKcal,
-    required this.onTap,
-  });
-
-  final MealType type;
-  final List<MealEntry> entries;
-  final int totalKcal;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    final empty = entries.isEmpty;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: SalamatTokens.card(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SalamatIcon(
-                  type.icon,
-                  size: 20,
-                  color: SalamatTokens.accentDeep,
-                  bubbleColor: SalamatTokens.bubbleMint,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    type.label(loc),
-                    style: GoogleFonts.manrope(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: SalamatTokens.textPrimary,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: SalamatTokens.pill(),
-                  child: Text(
-                    loc.dashboardKcalWithValue(totalKcal),
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: totalKcal == 0
-                          ? SalamatTokens.textMuted
-                          : SalamatTokens.pillText,
-                      height: 1.0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (empty) ...[
-              const SizedBox(height: 10),
-              Text(
-                loc.dashboardEmptyMeal,
-                style: GoogleFonts.manrope(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: SalamatTokens.textMuted,
-                ),
-              ),
-            ] else ...[
-              const SizedBox(height: 10),
-              Container(height: 1, color: SalamatTokens.ringTrack),
-              const SizedBox(height: 10),
-              for (var i = 0; i < entries.length; i++) ...[
-                _EntryRow(entry: entries[i]),
-                if (i != entries.length - 1) const SizedBox(height: 8),
-              ],
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EntryRow extends StatelessWidget {
-  const _EntryRow({required this.entry});
-
-  final MealEntry entry;
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FoodIllustration.forDish(entry.name, size: 32),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                entry.name,
-                style: GoogleFonts.manrope(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: SalamatTokens.textPrimary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                loc.gramsSuffix(entry.grams.round()),
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: SalamatTokens.textMuted,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        Padding(
-          padding: const EdgeInsets.only(top: 1),
-          child: Text(
-            '${entry.kcal}',
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: SalamatTokens.textPrimary,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-
-/// Meal-slot icons (Duotone) — replaces the old emoji markers.
-extension _MealTypeIcon on MealType {
-  PhosphorIconData get icon => switch (this) {
-        MealType.breakfast =>
-          PhosphorIcons.sunHorizon(PhosphorIconsStyle.duotone),
-        MealType.lunch => PhosphorIcons.sun(PhosphorIconsStyle.duotone),
-        MealType.dinner =>
-          PhosphorIcons.moonStars(PhosphorIconsStyle.duotone),
-        MealType.snack => PhosphorIcons.cookie(PhosphorIconsStyle.duotone),
-      };
 }

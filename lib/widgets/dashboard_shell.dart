@@ -25,6 +25,11 @@ class DashboardShell extends ConsumerWidget {
       labelKey: _NavLabel.home,
     ),
     _TabItem(
+      icon: PhosphorIcons.forkKnife(),
+      path: '/meals',
+      labelKey: _NavLabel.meals,
+    ),
+    _TabItem(
       icon: PhosphorIcons.chartBar(),
       path: '/progress',
       labelKey: _NavLabel.progress,
@@ -70,7 +75,7 @@ class DashboardShell extends ConsumerWidget {
   }
 }
 
-enum _NavLabel { home, progress, profile }
+enum _NavLabel { home, meals, progress, profile }
 
 class _TabItem {
   const _TabItem({
@@ -84,6 +89,7 @@ class _TabItem {
 
   String label(AppLocalizations loc) => switch (labelKey) {
         _NavLabel.home => loc.navHome,
+        _NavLabel.meals => loc.navMeals,
         _NavLabel.progress => loc.navProgress,
         _NavLabel.profile => loc.navProfile,
       };
@@ -118,11 +124,13 @@ class _TabBar extends StatelessWidget {
           child: Row(
             children: [
               _tabButton(context, 0),
-              // Camera is an ACTION slot, not a tab: it opens the camera on
-              // top of the current tab and never becomes "selected".
-              Expanded(child: _CameraButton(onTap: onCamera)),
               _tabButton(context, 1),
+              // Camera is an ACTION slot, not a tab: geometrically centered
+              // (2 + 2), opens the camera on top of the current tab and
+              // never becomes "selected".
+              Expanded(child: _CameraButton(onTap: onCamera)),
               _tabButton(context, 2),
+              _tabButton(context, 3),
             ],
           ),
         ),
