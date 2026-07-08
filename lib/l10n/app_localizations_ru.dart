@@ -703,10 +703,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallCancelAnytime => 'Отменить в любой момент';
 
   @override
-  String get paywallStub => 'Оплата в разработке — скоро!';
+  String get paywallRestore => 'Восстановить';
 
   @override
-  String get paywallRestore => 'Восстановить';
+  String get paywallWelcomePro => 'Добро пожаловать в Pro';
+
+  @override
+  String get paywallPurchaseError => 'Оплата не прошла — попробуйте ещё раз';
+
+  @override
+  String get paywallRestoreFound => 'Pro восстановлен';
+
+  @override
+  String get paywallRestoreNotFound => 'Покупки не найдены';
+
+  @override
+  String get paywallOfferingsError => 'Не удалось загрузить цены из Google Play.\nПроверьте связь и повторите.';
 
   @override
   String get paywallHeroHeadlineLose => 'Полный доступ к вашему\nплану похудения';

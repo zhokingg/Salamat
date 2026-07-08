@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../config/legal.dart';
 import '../../providers/user_provider.dart';
-import '../../services/currency.dart';
+import '../../services/purchases_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
 import '../../theme/elevation.dart';
 import '../../theme/text_styles.dart';
 
 enum _Tier { month1, year }
+
+/// Card content resolved from a store package — prices and currency come
+/// from Google Play via RevenueCat, never from hardcoded tables.
+class _TierData {
+  const _TierData({
+    required this.main,
+    required this.sub,
+    required this.discount,
+    required this.package,
+  });
+
+  final String main;
+  final String sub;
+  final int? discount;
+  final Package package;
+}
 
 String _tierLabel(AppLocalizations loc, _Tier t) => switch (t) {
       _Tier.month1 => loc.paywallTier1mo,
@@ -32,6 +51,94 @@ class PaywallScreen extends ConsumerStatefulWidget {
 class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   _Tier _selected = _Tier.year;
 
+  bool _loading = true;
+  bool _loadError = false;
+  bool _purchasing = false;
+  Map<_Tier, _TierData> _tiers = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOfferings();
+  }
+
+  Future<void> _loadOfferings() async {
+    setState(() {
+      _loading = true;
+      _loadError = false;
+    });
+    if (!PurchasesService.isReady) {
+      // No key configured or SDK failed to start (e.g. offline at boot).
+      setState(() {
+        _loading = false;
+        _loadError = true;
+      });
+      return;
+    }
+    try {
+      final offerings = await Purchases.getOfferings();
+      final offering = offerings.current;
+      final annual = offering?.annual;
+      final monthly = offering?.monthly;
+      if (annual == null || monthly == null) {
+        throw StateError('current offering is missing annual/monthly');
+      }
+      final annualPrice = annual.storeProduct.price;
+      final monthlyPrice = monthly.storeProduct.price;
+      final currency = annual.storeProduct.currencyCode;
+      final perMonth = NumberFormat.simpleCurrency(name: currency)
+          .format(annualPrice / 12);
+      final discount = monthlyPrice > 0
+          ? (100 - annualPrice / (monthlyPrice * 12) * 100).round()
+          : null;
+      setState(() {
+        _tiers = {
+          _Tier.year: _TierData(
+            main: annual.storeProduct.priceString,
+            sub: perMonth,
+            discount: (discount != null && discount > 0) ? discount : null,
+            package: annual,
+          ),
+          _Tier.month1: _TierData(
+            main: monthly.storeProduct.priceString,
+            sub: '',
+            discount: null,
+            package: monthly,
+          ),
+        };
+        _loading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = true;
+        });
+      }
+    }
+  }
+
+  void _snack(String text, {Color? bg, SnackBarAction? action}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: bg ?? SalamatColors.g1,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        action: action,
+        content: Text(
+          text,
+          style: GoogleFonts.manrope(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: SalamatColors.surf,
+          ),
+        ),
+      ),
+    );
+  }
+
   void _close() {
     if (context.canPop()) {
       context.pop();
@@ -40,49 +147,65 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
   }
 
-  void _purchase() {
-    // TODO(iap): wire real purchase flow once StoreKit/Play Billing is integrated.
-    // For now the same stub snackbar the previous paywall used.
+  Future<void> _purchase() async {
     final loc = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: SalamatColors.g1,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        content: Text(
-          loc.paywallStub,
-          style: GoogleFonts.manrope(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: SalamatColors.surf,
+    final tier = _tiers[_selected];
+    if (tier == null || _purchasing) return;
+    setState(() => _purchasing = true);
+    try {
+      // purchases_flutter 8.x returns CustomerInfo directly.
+      final info = await Purchases.purchasePackage(tier.package);
+      if (!mounted) return;
+      if (PurchasesService.hasPro(info)) {
+        _snack(loc.paywallWelcomePro);
+        _close();
+      }
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      final code = PurchasesErrorHelper.getErrorCode(e);
+      if (code != PurchasesErrorCode.purchaseCancelledError) {
+        _snack(
+          loc.paywallPurchaseError,
+          bg: SalamatColors.danger,
+          action: SnackBarAction(
+            label: loc.retryButton,
+            textColor: SalamatColors.surf,
+            onPressed: _purchase,
           ),
-        ),
-      ),
-    );
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _purchasing = false);
+    }
   }
 
-  void _restore() {
-    // TODO(iap): call store restore-purchases API.
+  Future<void> _restore() async {
     final loc = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: SalamatColors.i2,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    if (!PurchasesService.isReady) {
+      _snack(loc.paywallRestoreNotFound, bg: SalamatColors.i2);
+      return;
+    }
+    try {
+      final info = await Purchases.restorePurchases();
+      if (!mounted) return;
+      if (PurchasesService.hasPro(info)) {
+        _snack(loc.paywallRestoreFound);
+        _close();
+      } else {
+        _snack(loc.paywallRestoreNotFound, bg: SalamatColors.i2);
+      }
+    } on PlatformException catch (_) {
+      if (!mounted) return;
+      _snack(
+        loc.paywallPurchaseError,
+        bg: SalamatColors.danger,
+        action: SnackBarAction(
+          label: loc.retryButton,
+          textColor: SalamatColors.surf,
+          onPressed: _restore,
         ),
-        content: Text(
-          loc.paywallStub,
-          style: GoogleFonts.manrope(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: SalamatColors.surf,
-          ),
-        ),
-      ),
-    );
+      );
+    }
   }
 
   // Mirrors the date math in plan_ready_screen so the urgency line and the
@@ -113,8 +236,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final loc = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
     final t = _targetSnapshot(user);
-    // Prices are always USD — country selection was removed from onboarding.
-    final prices = kPaywallPrices[Currency.usd]!;
 
     return Scaffold(
       backgroundColor: SalamatColors.bg,
@@ -149,17 +270,30 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    _TierRow(
-                      selected: _selected,
-                      prices: prices,
-                      onSelect: (t) => setState(() => _selected = t),
-                    ),
+                    if (_loading)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 48),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: SalamatColors.g1,
+                          ),
+                        ),
+                      )
+                    else if (_loadError)
+                      _OfferingsError(onRetry: _loadOfferings)
+                    else
+                      _TierRow(
+                        selected: _selected,
+                        tiers: _tiers,
+                        onSelect: (t) => setState(() => _selected = t),
+                      ),
                     const SizedBox(height: 24),
                   ],
                 ),
               ),
               _BottomBar(
-                onContinue: _purchase,
+                onContinue:
+                    (_loading || _loadError || _purchasing) ? null : _purchase,
                 finePrint: loc.paywallFinePrint,
               ),
             ],
@@ -483,41 +617,31 @@ class _UrgencyLine extends StatelessWidget {
 class _TierRow extends StatelessWidget {
   const _TierRow({
     required this.selected,
-    required this.prices,
+    required this.tiers,
     required this.onSelect,
   });
 
   final _Tier selected;
-  final PaywallPrices prices;
+  final Map<_Tier, _TierData> tiers;
   final ValueChanged<_Tier> onSelect;
 
   // Two tiers, stacked: Annual (best value, default) on top, Monthly below.
   static const _order = [_Tier.year, _Tier.month1];
 
-  /// Build one card's content for the given tier from the active price set.
+  /// Card content for the given tier, straight from the store package.
   ({
     String main,
     String sub,
     bool popular,
     int? discount,
   }) _spec(_Tier t) {
-    switch (t) {
-      case _Tier.month1:
-        return (
-          main: prices.oneMonth,
-          sub: '',
-          popular: false,
-          discount: null,
-        );
-      case _Tier.year:
-        // Annual: total big, per-month equivalent small (per spec).
-        return (
-          main: prices.twelveMonths,
-          sub: prices.twelveMonthsPerMo,
-          popular: true,
-          discount: 58,
-        );
-    }
+    final d = tiers[t]!;
+    return (
+      main: d.main,
+      sub: d.sub,
+      popular: t == _Tier.year,
+      discount: d.discount,
+    );
   }
 
   @override
@@ -806,7 +930,7 @@ class _BottomBar extends StatelessWidget {
     required this.finePrint,
   });
 
-  final VoidCallback onContinue;
+  final VoidCallback? onContinue;
   final String finePrint;
 
   @override
@@ -914,7 +1038,7 @@ class _PrimaryCta extends StatefulWidget {
   const _PrimaryCta({required this.label, required this.onTap});
 
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   State<_PrimaryCta> createState() => _PrimaryCtaState();
@@ -925,31 +1049,95 @@ class _PrimaryCtaState extends State<_PrimaryCta> {
 
   @override
   Widget build(BuildContext context) {
+    final enabled = widget.onTap != null;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
+      onTapDown: enabled ? (_) => setState(() => _pressed = true) : null,
+      onTapCancel: enabled ? () => setState(() => _pressed = false) : null,
+      onTapUp: enabled
+          ? (_) {
+              setState(() => _pressed = false);
+              widget.onTap!();
+            }
+          : null,
       child: AnimatedScale(
         scale: _pressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
-        child: Container(
-          width: double.infinity,
-          height: SalamatDims.buttonHeight,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            gradient: SalamatElevation.primaryGradient,
-            borderRadius: BorderRadius.circular(SalamatDims.buttonRadius),
-            boxShadow: SalamatElevation.primaryButton,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 150),
+          opacity: enabled ? 1.0 : 0.5,
+          child: Container(
+            width: double.infinity,
+            height: SalamatDims.buttonHeight,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              gradient: SalamatElevation.primaryGradient,
+              borderRadius: BorderRadius.circular(SalamatDims.buttonRadius),
+              boxShadow: SalamatElevation.primaryButton,
+            ),
+            child: Text(widget.label, style: SalamatText.btn),
           ),
-          child: Text(widget.label, style: SalamatText.btn),
         ),
       ),
     );
   }
 }
 
+
+
+/// Store prices could not be loaded (offline / SDK not configured). No
+/// hardcoded fallback prices — retry is the only way forward.
+class _OfferingsError extends StatelessWidget {
+  const _OfferingsError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        SalamatDims.screenPadding,
+        16,
+        SalamatDims.screenPadding,
+        0,
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: SalamatColors.surf,
+          borderRadius: BorderRadius.circular(SalamatElevation.cardRadius),
+          border: Border.all(color: SalamatElevation.hairline),
+        ),
+        child: Column(
+          children: [
+            Text(
+              loc.paywallOfferingsError,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: SalamatColors.i2,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: onRetry,
+              child: Text(
+                loc.retryButton,
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: SalamatColors.g1,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

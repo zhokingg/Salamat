@@ -701,10 +701,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallCancelAnytime => 'Cancel anytime';
 
   @override
-  String get paywallStub => 'Payments coming soon!';
+  String get paywallRestore => 'Restore';
 
   @override
-  String get paywallRestore => 'Restore';
+  String get paywallWelcomePro => 'Welcome to Pro';
+
+  @override
+  String get paywallPurchaseError => 'Purchase failed — please try again';
+
+  @override
+  String get paywallRestoreFound => 'Pro restored';
+
+  @override
+  String get paywallRestoreNotFound => 'No purchases found';
+
+  @override
+  String get paywallOfferingsError => 'Couldn’t load prices from Google Play.\nCheck your connection and retry.';
 
   @override
   String get paywallHeroHeadlineLose => 'Get full access to\nyour weight-loss plan';

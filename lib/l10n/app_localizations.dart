@@ -1367,17 +1367,41 @@ abstract class AppLocalizations {
   /// **'Cancel anytime'**
   String get paywallCancelAnytime;
 
-  /// No description provided for @paywallStub.
-  ///
-  /// In en, this message translates to:
-  /// **'Payments coming soon!'**
-  String get paywallStub;
-
   /// No description provided for @paywallRestore.
   ///
   /// In en, this message translates to:
   /// **'Restore'**
   String get paywallRestore;
+
+  /// No description provided for @paywallWelcomePro.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Pro'**
+  String get paywallWelcomePro;
+
+  /// No description provided for @paywallPurchaseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase failed — please try again'**
+  String get paywallPurchaseError;
+
+  /// No description provided for @paywallRestoreFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro restored'**
+  String get paywallRestoreFound;
+
+  /// No description provided for @paywallRestoreNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchases found'**
+  String get paywallRestoreNotFound;
+
+  /// No description provided for @paywallOfferingsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load prices from Google Play.\nCheck your connection and retry.'**
+  String get paywallOfferingsError;
 
   /// No description provided for @paywallHeroHeadlineLose.
   ///

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/onboarding_flag.dart';
+import '../services/purchases_service.dart';
 import '../services/supabase_service.dart';
 import 'user_provider.dart';
 
@@ -12,6 +13,9 @@ import 'user_provider.dart';
 /// closing the old `unawaited(init())` race.
 final bootstrapProvider = FutureProvider<void>((ref) async {
   await SupabaseService.init();
+  // RevenueCat is keyed to the Supabase (anonymous) uid so a purchase
+  // survives reinstalls and stays linked to this account's data.
+  await PurchasesService.init();
 });
 
 /// A profile row counts as "onboarded" only when both name and calorie norm
