@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
+import '../../theme/salamat_icons.dart';
+import '../../theme/salamat_theme.dart';
 
 class BuildingScreen extends StatefulWidget {
   const BuildingScreen({super.key});
@@ -54,7 +56,13 @@ class _BuildingScreenState extends State<BuildingScreen>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 80),
-              const Center(child: Text('⚙️', style: TextStyle(fontSize: 64))),
+              Center(
+                child: SalamatIcon(
+                  PhosphorIcons.gear(),
+                  size: 64,
+                  color: SalamatTokens.iconQuiet,
+                ),
+              ),
               const SizedBox(height: 24),
               Text(
                 loc.buildingTitle,

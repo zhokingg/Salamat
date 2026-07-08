@@ -75,7 +75,7 @@ class _YearScreenState extends ConsumerState<YearScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 6,
+      step: 5,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

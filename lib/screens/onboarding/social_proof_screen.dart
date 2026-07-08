@@ -14,7 +14,7 @@ class SocialProofScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 16,
+      step: 15,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

@@ -40,7 +40,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 12,
+      step: 11,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

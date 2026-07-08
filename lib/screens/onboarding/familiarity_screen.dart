@@ -42,7 +42,7 @@ class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 11,
+      step: 10,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -32,7 +32,7 @@ class _GenderScreenState extends ConsumerState<GenderScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 5,
+      step: 4,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

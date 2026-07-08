@@ -46,7 +46,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     final name = _ctl.text.trim();
     if (name.isEmpty) return;
     ref.read(userProvider.notifier).setName(name: name, lastName: '');
-    context.go('/onboarding/country');
+    context.go('/onboarding/goal');
   }
 
   @override

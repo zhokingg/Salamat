@@ -41,7 +41,7 @@ class _GoalScreenState extends ConsumerState<GoalScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 4,
+      step: 3,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

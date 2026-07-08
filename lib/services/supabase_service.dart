@@ -165,6 +165,8 @@ class SupabaseService {
     }
   }
 
+  /// Throws on network/backend failure so callers (mealsProvider) can surface
+  /// a real error state instead of silently rendering an empty diary.
   static Future<List<Map<String, dynamic>>> getTodayFoodLogs() async {
     if (!isSignedIn) return [];
     try {
@@ -178,7 +180,7 @@ class SupabaseService {
       return List<Map<String, dynamic>>.from(rows);
     } catch (e) {
       if (kDebugMode) debugPrint('getTodayFoodLogs error: $e');
-      return [];
+      rethrow;
     }
   }
 

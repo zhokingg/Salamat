@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/bootstrap_provider.dart';
-import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
+import '../../services/onboarding_flag.dart';
+import '../../theme/salamat_theme.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -25,6 +25,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   bool _minElapsed = false;
   bool _navigated = false;
 
+  /// Local onboarding flag, loaded at startup. Null until the prefs read
+  /// completes (it's local storage — effectively instant).
+  bool? _onboardedLocally;
+
   @override
   void initState() {
     super.initState();
@@ -35,21 +39,42 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _controller.forward();
 
-    // Hold the brand for a minimum, then proceed as soon as bootstrap settles.
+    // The local flag decides the route for returning users — a dead network
+    // must never bounce them back into onboarding.
+    OnboardingFlag.isCompleted().then((v) {
+      if (!mounted) return;
+      _onboardedLocally = v;
+      _tryNavigate();
+    });
+
+    // Hold the brand for a minimum, then proceed as soon as we can decide.
     _minTimer = Timer(const Duration(seconds: 2), () {
       _minElapsed = true;
       _tryNavigate();
     });
     // Safety net: never trap the user on splash if the network hangs.
-    _maxTimer = Timer(const Duration(seconds: 8), _goNext);
+    // The net itself must be flag-aware: on a slow cold start it can fire
+    // before the prefs read resolves, and deciding with a null flag would
+    // bounce a returning user into onboarding.
+    _maxTimer = Timer(const Duration(seconds: 8), () async {
+      _onboardedLocally ??= await OnboardingFlag.isCompleted()
+          .timeout(const Duration(seconds: 2), onTimeout: () => false);
+      _goNext();
+    });
   }
 
-  /// Navigate once the minimum splash time has elapsed AND the profile load
-  /// has finished (resolved or errored — we don't block the UI on a failed
-  /// init). [profileProvider] awaits bootstrap internally, so this still
-  /// honours the startup gate (init + anonymous session) before deciding.
+  /// Navigate once the minimum splash time has elapsed AND we can decide:
+  ///  - local flag says onboarded → dashboard immediately, no network wait
+  ///    (profileProvider keeps syncing in the background and hydrates
+  ///    [userProvider] whenever it lands);
+  ///  - local flag says not onboarded → wait for the profile load to settle,
+  ///    because a reinstall may still have a server-side profile.
   void _tryNavigate() {
-    if (!_minElapsed) return;
+    if (!_minElapsed || _onboardedLocally == null) return;
+    if (_onboardedLocally == true) {
+      _goNext();
+      return;
+    }
     final profile = ref.read(profileProvider);
     if (profile.hasValue || profile.hasError) _goNext();
   }
@@ -58,26 +83,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (_navigated || !mounted) return;
     _navigated = true;
     final row = ref.read(profileProvider).valueOrNull;
-    if (_isOnboarded(row)) {
-      // Returning user: restore their data and skip straight to the dashboard.
-      ref.read(userProvider.notifier).hydrateFromProfile(row!);
+    if (_onboardedLocally == true || isProfileOnboarded(row)) {
+      // Returning user. Hydration + local-flag backfill for the server-row
+      // case happen inside profileProvider.
       context.go('/dashboard');
     } else {
       context.go('/onboarding/welcome');
     }
-  }
-
-  /// A profile counts as "onboarded" only when both name and calorie norm are
-  /// set. The `handle_new_user` trigger inserts an empty row at anonymous
-  /// sign-in, so a row merely existing does not mean onboarding is done.
-  static bool _isOnboarded(Map<String, dynamic>? row) {
-    if (row == null) return false;
-    final name = (row['name'] as String?)?.trim() ?? '';
-    final kcalRaw = row['calorie_norm'];
-    final kcal = kcalRaw is num
-        ? kcalRaw.toInt()
-        : int.tryParse(kcalRaw?.toString() ?? '') ?? 0;
-    return name.isNotEmpty && kcal > 0;
   }
 
   @override
@@ -95,7 +107,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     ref.listen(profileProvider, (_, __) => _tryNavigate());
     ref.watch(profileProvider);
     return Scaffold(
-      backgroundColor: SalamatColors.g1,
+      backgroundColor: SalamatTokens.background,
       body: Center(
         child: FadeTransition(
           opacity: _fade,
@@ -108,9 +120,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 'Salamat',
                 style: GoogleFonts.manrope(
                   fontSize: 36,
-                  fontWeight: FontWeight.w800,
-                  color: SalamatColors.surf,
+                  fontWeight: FontWeight.w700,
+                  color: SalamatTokens.textPrimary,
                   letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  color: SalamatTokens.accent,
                 ),
               ),
             ],
@@ -140,7 +161,7 @@ class _LeafPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = SalamatColors.surf
+      ..color = SalamatTokens.accent
       ..style = PaintingStyle.fill;
 
     final w = size.width;
@@ -154,7 +175,7 @@ class _LeafPainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     final vein = Paint()
-      ..color = SalamatColors.g1
+      ..color = SalamatTokens.background
       ..strokeWidth = size.width * 0.04
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;

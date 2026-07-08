@@ -16,7 +16,7 @@ class LongTermScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 10,
+      step: 9,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -8,7 +8,7 @@ import '../../theme/dimensions.dart';
 import '../../theme/elevation.dart';
 import '../../theme/text_styles.dart';
 
-const int kOnboardingTotalSteps = 18;
+const int kOnboardingTotalSteps = 17;
 
 /// Common scaffold for onboarding screens. Adds a subtle page gradient, a
 /// thicker progress bar with animated fill, generous spacing, and the

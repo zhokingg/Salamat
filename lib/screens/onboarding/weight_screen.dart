@@ -82,7 +82,7 @@ class _WeightScreenState extends ConsumerState<WeightScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 7,
+      step: 6,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

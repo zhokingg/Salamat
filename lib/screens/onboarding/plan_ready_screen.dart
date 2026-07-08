@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
 import '../../services/supabase_service.dart';
+import '../../services/onboarding_flag.dart';
 import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
 import 'widgets.dart';
@@ -59,7 +60,9 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
       _targetDate = target;
     });
 
-    _saveFuture = SupabaseService.upsertUser(
+    // Local flag FIRST — a dead network must never bounce this user back
+    // into onboarding on the next launch. The profile write below is sync.
+    _saveFuture = OnboardingFlag.setCompleted().then((_) => SupabaseService.upsertUser(
       name: u.name.isEmpty ? 'Friend' : u.name,
       gender: u.gender == Gender.female ? 'female' : 'male',
       age: age,
@@ -73,7 +76,7 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
         null => 'maintain',
       },
       dailyCalories: kcal,
-    );
+    ));
   }
 
   // Locale-aware short month label. The l10n setup ships ru and en — using

@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/onboarding_flag.dart';
 import '../services/supabase_service.dart';
+import 'user_provider.dart';
 
 /// Resolves once Supabase is initialized AND an (anonymous) session exists.
 ///
@@ -12,13 +14,32 @@ final bootstrapProvider = FutureProvider<void>((ref) async {
   await SupabaseService.init();
 });
 
+/// A profile row counts as "onboarded" only when both name and calorie norm
+/// are set. The `handle_new_user` trigger inserts an empty row at anonymous
+/// sign-in, so a row merely existing does not mean onboarding is done.
+bool isProfileOnboarded(Map<String, dynamic>? row) {
+  if (row == null) return false;
+  final name = (row['name'] as String?)?.trim() ?? '';
+  final kcalRaw = row['calorie_norm'];
+  final kcal = kcalRaw is num
+      ? kcalRaw.toInt()
+      : int.tryParse(kcalRaw?.toString() ?? '') ?? 0;
+  return name.isNotEmpty && kcal > 0;
+}
+
 /// Loads the persisted profile once, after [bootstrapProvider] settles so a
 /// real `auth.uid()` exists. Returns the raw `profiles` row, or null when
 /// there's no user, no row, or the read failed.
 ///
-/// The splash screen awaits this to decide between onboarding and the
-/// dashboard, and to hydrate `userProvider` for a returning user.
+/// Side effects for an onboarded row: hydrates [userProvider] (so a returning
+/// user's data appears even if the splash already navigated on the local
+/// flag) and sets the local onboarding flag (covers reinstall-with-profile).
 final profileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   await ref.watch(bootstrapProvider.future);
-  return SupabaseService.getProfile();
+  final row = await SupabaseService.getProfile();
+  if (isProfileOnboarded(row)) {
+    ref.read(userProvider.notifier).hydrateFromProfile(row!);
+    await OnboardingFlag.setCompleted();
+  }
+  return row;
 });

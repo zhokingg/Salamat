@@ -20,7 +20,7 @@ class SummaryScreen extends ConsumerWidget {
     final band = u.bmiBandLabel(loc);
 
     return OnboardingShell(
-      step: 13,
+      step: 12,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

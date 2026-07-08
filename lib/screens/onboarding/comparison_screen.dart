@@ -14,7 +14,7 @@ class ComparisonScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 15,
+      step: 14,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

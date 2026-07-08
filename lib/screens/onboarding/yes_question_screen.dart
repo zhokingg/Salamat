@@ -42,7 +42,7 @@ class YesQuestionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return OnboardingShell(
-      step: 14,
+      step: 13,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
