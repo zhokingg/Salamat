@@ -32,7 +32,7 @@ class ProfileScreen extends ConsumerWidget {
     final fullName = '${user.name} ${user.lastName}'.trim().isEmpty
         ? loc.profileGuest
         : '${user.name} ${user.lastName}'.trim();
-    final initials = user.initials.isEmpty ? '👤' : user.initials;
+    final initials = user.initials;
 
     final entriesCount =
         MealType.values.expand((t) => meals.forType(t)).length;
@@ -67,14 +67,20 @@ class ProfileScreen extends ConsumerWidget {
               color: SalamatColors.g1,
               shape: BoxShape.circle,
             ),
-            child: Text(
-              initials,
-              style: GoogleFonts.manrope(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: SalamatColors.surf,
-              ),
-            ),
+            child: initials.isEmpty
+                ? SalamatIcon(
+                    PhosphorIcons.user(PhosphorIconsStyle.duotone),
+                    size: 32,
+                    color: SalamatColors.surf,
+                  )
+                : Text(
+                    initials,
+                    style: GoogleFonts.manrope(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: SalamatColors.surf,
+                    ),
+                  ),
           ),
         ),
         const SizedBox(height: 12),

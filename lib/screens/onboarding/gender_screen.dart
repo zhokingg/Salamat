@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/user_provider.dart';
+import '../../theme/salamat_icons.dart';
+import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
 
 class GenderScreen extends ConsumerStatefulWidget {
@@ -41,14 +43,24 @@ class _GenderScreenState extends ConsumerState<GenderScreen> {
           const SizedBox(height: 24),
           OnboardingSelectCard(
             title: loc.genderFemale,
-            leading: const _Emoji('👩'),
+            leading: SalamatIcon(
+              PhosphorIcons.genderFemale(PhosphorIconsStyle.duotone),
+              size: 22,
+              color: SalamatTokens.accentDeep,
+              bubbleColor: SalamatTokens.bubbleMint,
+            ),
             selected: _selected == Gender.female,
             onTap: () => setState(() => _selected = Gender.female),
           ),
           const SizedBox(height: 12),
           OnboardingSelectCard(
             title: loc.genderMale,
-            leading: const _Emoji('👨'),
+            leading: SalamatIcon(
+              PhosphorIcons.genderMale(PhosphorIconsStyle.duotone),
+              size: 22,
+              color: SalamatTokens.accentDeep,
+              bubbleColor: SalamatTokens.bubbleMint,
+            ),
             selected: _selected == Gender.male,
             onTap: () => setState(() => _selected = Gender.male),
           ),
@@ -58,19 +70,6 @@ class _GenderScreenState extends ConsumerState<GenderScreen> {
       buttonLabel: loc.buttonNext,
       buttonEnabled: _selected != null,
       onContinue: _next,
-    );
-  }
-}
-
-class _Emoji extends StatelessWidget {
-  const _Emoji(this.value);
-  final String value;
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: Center(child: Text(value, style: const TextStyle(fontSize: 32))),
     );
   }
 }

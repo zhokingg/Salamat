@@ -5,7 +5,6 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
 import '../../theme/salamat_theme.dart';
@@ -46,7 +45,7 @@ class _BuildingScreenState extends State<BuildingScreen>
     final loc = AppLocalizations.of(context)!;
     final steps = [loc.buildingStep1, loc.buildingStep2, loc.buildingStep3];
     return Scaffold(
-      backgroundColor: SalamatColors.bg,
+      backgroundColor: SalamatTokens.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -72,7 +71,7 @@ class _BuildingScreenState extends State<BuildingScreen>
                   fontWeight: FontWeight.w800,
                   height: 1.2,
                   letterSpacing: -0.4,
-                  color: SalamatColors.ink,
+                  color: SalamatTokens.textPrimary,
                 ),
               ),
               const SizedBox(height: 40),
@@ -86,7 +85,7 @@ class _BuildingScreenState extends State<BuildingScreen>
                       Container(
                         height: 8,
                         decoration: BoxDecoration(
-                          color: SalamatColors.line,
+                          color: SalamatTokens.ringTrack,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: FractionallySizedBox(
@@ -94,7 +93,7 @@ class _BuildingScreenState extends State<BuildingScreen>
                           widthFactor: v,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: SalamatColors.g1,
+                              color: SalamatTokens.accentDeep,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -108,7 +107,7 @@ class _BuildingScreenState extends State<BuildingScreen>
                           style: GoogleFonts.manrope(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: SalamatColors.g1,
+                            color: SalamatTokens.accentDeep,
                           ),
                         ),
                       ),
@@ -144,10 +143,10 @@ class _ChecklistRow extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: done ? SalamatColors.g4 : SalamatColors.surf,
+        color: done ? SalamatTokens.pillBg : SalamatTokens.surfaceAlt,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: done ? SalamatColors.g3 : SalamatColors.line,
+          color: done ? SalamatTokens.pillBg : SalamatTokens.ringTrack,
         ),
       ),
       child: Row(
@@ -158,7 +157,7 @@ class _ChecklistRow extends StatelessWidget {
                 ? const Icon(
                     Icons.check_circle_rounded,
                     key: ValueKey('done'),
-                    color: SalamatColors.g1,
+                    color: SalamatTokens.accentDeep,
                     size: 22,
                   )
                 : const SizedBox(
@@ -167,7 +166,7 @@ class _ChecklistRow extends StatelessWidget {
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: SalamatColors.g1,
+                      color: SalamatTokens.accentDeep,
                     ),
                   ),
           ),
@@ -177,7 +176,7 @@ class _ChecklistRow extends StatelessWidget {
             style: GoogleFonts.manrope(
               fontSize: 14,
               fontWeight: done ? FontWeight.w700 : FontWeight.w500,
-              color: SalamatColors.ink,
+              color: SalamatTokens.textPrimary,
             ),
           ),
         ],

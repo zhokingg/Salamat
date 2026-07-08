@@ -429,6 +429,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String planReachLine(int kg, String month) {
+    return 'You’ll reach $kg kg around $month';
+  }
+
+  @override
+  String get planStartTracking => 'Start tracking';
+
+  @override
   String dashboardGreeting(String name) {
     return 'Hi, $name 👋';
   }

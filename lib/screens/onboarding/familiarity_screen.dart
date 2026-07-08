@@ -4,10 +4,9 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/elevation.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class FamiliarityScreen extends ConsumerStatefulWidget {
@@ -20,10 +19,11 @@ class FamiliarityScreen extends ConsumerStatefulWidget {
 class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
   Familiarity? _selected;
 
-  static const _icons = {
-    Familiarity.novice: LucideIcons.sprout,
-    Familiarity.intermediate: LucideIcons.bookOpen,
-    Familiarity.expert: LucideIcons.graduationCap,
+  static final _icons = {
+    Familiarity.novice: PhosphorIcons.plant(PhosphorIconsStyle.duotone),
+    Familiarity.intermediate:
+        PhosphorIcons.bookOpen(PhosphorIconsStyle.duotone),
+    Familiarity.expert: PhosphorIcons.medal(PhosphorIconsStyle.duotone),
   };
 
   @override
@@ -54,8 +54,7 @@ class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: const Color(0xFFFBF4DE),
-              borderRadius: BorderRadius.circular(SalamatElevation.tileRadius),
-              boxShadow: SalamatElevation.card,
+              borderRadius: BorderRadius.circular(16.0),
             ),
             child: Row(
               children: [
@@ -67,10 +66,10 @@ class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
                     color: const Color(0xFFF4D679),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    LucideIcons.lightbulb,
+                  child: PhosphorIcon(
+                    PhosphorIcons.lightbulb(PhosphorIconsStyle.duotone),
                     size: 16,
-                    color: Color(0xFF7A5A0F),
+                    color: const Color(0xFF7A5A0F),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -94,7 +93,7 @@ class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
               title: f.label(loc),
               subtitle: f.subtitle(loc),
               leading: OnboardingLeadingIcon(
-                icon: _icons[f] ?? LucideIcons.circle,
+                icon: _icons[f] ?? PhosphorIcons.circle(),
                 selected: _selected == f,
               ),
               selected: _selected == f,

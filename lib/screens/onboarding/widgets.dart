@@ -3,10 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
-import '../../theme/elevation.dart';
-import '../../theme/text_styles.dart';
+import '../../theme/salamat_theme.dart';
 
 const int kOnboardingTotalSteps = 17;
 
@@ -36,14 +34,8 @@ class OnboardingShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SalamatColors.bg,
-      body: Container(
-        // Subtle vertical wash — the page feels less flat without becoming
-        // a visible gradient.
-        decoration: const BoxDecoration(
-          gradient: SalamatElevation.pageGradient,
-        ),
-        child: SafeArea(
+      backgroundColor: SalamatTokens.background,
+      body: SafeArea(
           child: Column(
             children: [
               if (step != null)
@@ -92,7 +84,7 @@ class OnboardingShell extends StatelessWidget {
                           style: GoogleFonts.manrope(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: SalamatColors.i2,
+                            color: SalamatTokens.textMuted,
                           ),
                         ),
                       ),
@@ -103,12 +95,12 @@ class OnboardingShell extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }
 
-/// Thin progress bar that smoothly animates between step values.
+/// Segmented progress: accentDeep segments on a ringTrack base, with a
+/// muted step counter on the right.
 class OnboardingProgressBar extends StatelessWidget {
   const OnboardingProgressBar({
     super.key,
@@ -121,36 +113,40 @@ class OnboardingProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (step / total).clamp(0.0, 1.0);
-    return SizedBox(
-      height: 4,
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: SalamatColors.line.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: progress),
-            duration: const Duration(milliseconds: 450),
-            curve: Curves.easeOutCubic,
-            builder: (_, v, __) {
-              return FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: v,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: SalamatElevation.primaryGradient,
-                    borderRadius: BorderRadius.circular(2),
+    return Row(
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              for (var i = 0; i < total; i++) ...[
+                Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: i < step
+                          ? SalamatTokens.accentDeep
+                          : SalamatTokens.ringTrack,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              );
-            },
+                if (i != total - 1) const SizedBox(width: 3),
+              ],
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          '$step/$total',
+          style: GoogleFonts.manrope(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: SalamatTokens.textMuted,
+            height: 1.0,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -201,12 +197,10 @@ class _OnboardingPrimaryButtonState extends State<OnboardingPrimaryButton> {
             height: SalamatDims.buttonHeight,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: SalamatElevation.primaryGradient,
-              borderRadius: BorderRadius.circular(SalamatDims.buttonRadius),
-              boxShadow:
-                  widget.enabled ? SalamatElevation.primaryButton : null,
+              color: SalamatTokens.accentDeep,
+              borderRadius: BorderRadius.circular(SalamatTokens.radiusCta),
             ),
-            child: Text(widget.label, style: SalamatText.btn),
+            child: Text(widget.label, style: SalamatType.btn),
           ),
         ),
       ),
@@ -228,7 +222,7 @@ class OnboardingHeadline extends StatelessWidget {
       children: [
         Text(
           text,
-          style: SalamatText.h2,
+          style: SalamatType.h2,
         ).animate().fadeIn(duration: 320.ms).moveY(
               begin: 8,
               end: 0,
@@ -239,7 +233,7 @@ class OnboardingHeadline extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             subtitle!,
-            style: SalamatText.bodyMuted.copyWith(fontSize: 15),
+            style: SalamatType.caption.copyWith(fontSize: 15),
           ).animate().fadeIn(delay: 120.ms, duration: 320.ms),
         ],
       ],
@@ -292,14 +286,12 @@ class _OnboardingSelectCardState extends State<OnboardingSelectCard> {
           curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: selected ? SalamatColors.g4 : SalamatColors.surf,
-            borderRadius: BorderRadius.circular(SalamatElevation.cardRadius),
+            color: SalamatTokens.surfaceAlt,
+            borderRadius: BorderRadius.circular(SalamatTokens.radiusCard),
             border: Border.all(
-              color: selected ? SalamatColors.g1 : SalamatElevation.hairline,
-              width: selected ? 1.5 : 1,
+              color: selected ? SalamatTokens.accentDeep : Colors.transparent,
+              width: 2,
             ),
-            boxShadow:
-                selected ? SalamatElevation.selectedCard : SalamatElevation.card,
           ),
           child: Row(
             children: [
@@ -317,8 +309,8 @@ class _OnboardingSelectCardState extends State<OnboardingSelectCard> {
                       style: GoogleFonts.manrope(
                         fontSize: 16,
                         fontWeight:
-                            selected ? FontWeight.w800 : FontWeight.w600,
-                        color: SalamatColors.ink,
+                            selected ? FontWeight.w700 : FontWeight.w600,
+                        color: SalamatTokens.textPrimary,
                         letterSpacing: -0.1,
                       ),
                     ),
@@ -328,8 +320,8 @@ class _OnboardingSelectCardState extends State<OnboardingSelectCard> {
                         widget.subtitle!,
                         style: GoogleFonts.manrope(
                           fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: SalamatColors.i3,
+                          fontWeight: FontWeight.w500,
+                          color: SalamatTokens.textMuted,
                           height: 1.35,
                         ),
                       ),
@@ -367,15 +359,14 @@ class OnboardingLeadingIcon extends StatelessWidget {
       height: 40,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected
-            ? SalamatColors.g1.withValues(alpha: 0.12)
-            : SalamatColors.g4,
+        color: selected ? SalamatTokens.pillBg : SalamatTokens.bubbleMint,
         shape: BoxShape.circle,
       ),
       child: Icon(
         icon,
         size: 20,
-        color: selected ? SalamatColors.g1 : SalamatColors.i2,
+        color:
+            selected ? SalamatTokens.accentDeep : SalamatTokens.textMuted,
       ),
     );
   }
@@ -391,15 +382,17 @@ class _Radio extends StatelessWidget {
       width: 22,
       height: 22,
       decoration: BoxDecoration(
-        color: selected ? SalamatColors.g1 : Colors.transparent,
+        color: selected ? SalamatTokens.accentDeep : Colors.transparent,
         shape: BoxShape.circle,
         border: Border.all(
-          color: selected ? SalamatColors.g1 : SalamatColors.i3,
+          color:
+              selected ? SalamatTokens.accentDeep : SalamatTokens.iconQuiet,
           width: 1.5,
         ),
       ),
       child: selected
-          ? const Icon(Icons.check_rounded, size: 14, color: SalamatColors.surf)
+          ? const Icon(Icons.check_rounded,
+              size: 14, color: SalamatTokens.onAccent)
           : null,
     );
   }
@@ -451,8 +444,10 @@ class OnboardingWheelPicker extends StatelessWidget {
                   label,
                   style: GoogleFonts.manrope(
                     fontSize: selected ? 44 : 22,
-                    fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-                    color: selected ? SalamatColors.ink : SalamatColors.i3,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                    color: selected
+                        ? SalamatTokens.textPrimary
+                        : SalamatTokens.iconQuiet,
                     height: 1.0,
                     letterSpacing: selected ? -0.6 : 0,
                   ),
@@ -468,13 +463,13 @@ class OnboardingWheelPicker extends StatelessWidget {
               Container(
                 width: double.infinity,
                 height: 1,
-                color: SalamatElevation.hairline,
+                color: SalamatTokens.ringTrack,
               ),
               const SizedBox(height: _itemExtent),
               Container(
                 width: double.infinity,
                 height: 1,
-                color: SalamatElevation.hairline,
+                color: SalamatTokens.ringTrack,
               ),
             ],
           ),

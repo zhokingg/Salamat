@@ -5,8 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
-import '../../theme/elevation.dart';
+import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
 
 /// S2 — name entry. The dashboard greeting reads this value back.
@@ -90,10 +89,9 @@ class _PremiumTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: SalamatColors.surf,
-        borderRadius: BorderRadius.circular(SalamatElevation.tileRadius),
-        boxShadow: SalamatElevation.card,
-        border: Border.all(color: SalamatElevation.hairline),
+        color: SalamatTokens.surfaceAlt,
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: SalamatTokens.ringTrack),
       ),
       child: TextField(
         controller: controller,
@@ -101,11 +99,11 @@ class _PremiumTextField extends StatelessWidget {
         textCapitalization: TextCapitalization.words,
         textInputAction: TextInputAction.done,
         onSubmitted: onSubmitted,
-        cursorColor: SalamatColors.g1,
+        cursorColor: SalamatTokens.accentDeep,
         style: GoogleFonts.manrope(
           fontSize: 17,
           fontWeight: FontWeight.w700,
-          color: SalamatColors.ink,
+          color: SalamatTokens.textPrimary,
           letterSpacing: -0.1,
         ),
         decoration: InputDecoration(
@@ -113,7 +111,7 @@ class _PremiumTextField extends StatelessWidget {
           hintStyle: GoogleFonts.manrope(
             fontSize: 17,
             fontWeight: FontWeight.w500,
-            color: SalamatColors.i3,
+            color: SalamatTokens.iconQuiet,
           ),
           filled: false,
           border: InputBorder.none,

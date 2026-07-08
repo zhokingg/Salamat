@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/meals_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/colors.dart';
+import '../../theme/salamat_icons.dart';
+import '../../theme/salamat_theme.dart';
 import '../../theme/dimensions.dart';
 
 const Color _kProteinColor = SalamatColors.g2;
@@ -227,10 +229,14 @@ class _StreakCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                streak > 0 ? '🔥' : '🌱',
-                style: const TextStyle(fontSize: 28),
-              ),
+              streak > 0
+                  ? SalamatIcon.flame(size: 22)
+                  : SalamatIcon(
+                      PhosphorIcons.plant(PhosphorIconsStyle.duotone),
+                      size: 22,
+                      color: SalamatTokens.accent,
+                      bubbleColor: SalamatTokens.bubbleMint,
+                    ),
               const SizedBox(width: 10),
               Text(
                 streak > 0

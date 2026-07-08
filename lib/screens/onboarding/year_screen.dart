@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
 
 class YearScreen extends ConsumerStatefulWidget {
@@ -98,7 +98,7 @@ class _YearScreenState extends ConsumerState<YearScreen> {
               style: GoogleFonts.manrope(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: SalamatColors.g1,
+                color: SalamatTokens.accentDeep,
                 letterSpacing: -0.1,
               ),
             ),

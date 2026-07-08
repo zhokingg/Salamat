@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
+import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
 
 class WeightScreen extends ConsumerStatefulWidget {
@@ -66,8 +66,8 @@ class _WeightScreenState extends ConsumerState<WeightScreen> {
 
   Color get _bmiColor {
     final b = _bmi;
-    if (b < 18.5 || b >= 25.0) return SalamatColors.warn;
-    return SalamatColors.g2;
+    if (b < 18.5 || b >= 25.0) return SalamatTokens.amber;
+    return SalamatTokens.accent;
   }
 
   void _next() {
@@ -105,7 +105,7 @@ class _WeightScreenState extends ConsumerState<WeightScreen> {
                     onChanged: (i) => setState(() => _hIdx = i),
                   ),
                 ),
-                Container(width: 1, color: SalamatColors.line),
+                Container(width: 1, color: SalamatTokens.ringTrack),
                 Expanded(
                   child: _WheelColumn(
                     label: loc.weightWeightLabel,
@@ -164,7 +164,7 @@ class _WheelColumn extends StatelessWidget {
           style: GoogleFonts.manrope(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: SalamatColors.i3,
+            color: SalamatTokens.iconQuiet,
             letterSpacing: 1.0,
           ),
         ),
@@ -179,12 +179,22 @@ class _WheelColumn extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          valueLabel,
-          style: GoogleFonts.manrope(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: SalamatColors.g1,
+        // Value + unit as a pill chip (metric-only; imperial units would
+        // need a real conversion pass through the whole calorie pipeline).
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: SalamatTokens.pillBg,
+            borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+          ),
+          child: Text(
+            valueLabel,
+            style: GoogleFonts.manrope(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: SalamatTokens.pillText,
+              height: 1.0,
+            ),
           ),
         ),
       ],
@@ -210,9 +220,9 @@ class _BmiHint extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: SalamatColors.surf,
+        color: SalamatTokens.surfaceAlt,
         borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-        border: Border.all(color: SalamatColors.line),
+        border: Border.all(color: SalamatTokens.ringTrack),
       ),
       child: Row(
         children: [
@@ -221,7 +231,7 @@ class _BmiHint extends StatelessWidget {
             style: GoogleFonts.manrope(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: SalamatColors.i2,
+              color: SalamatTokens.textMuted,
             ),
           ),
           Text(
@@ -229,7 +239,7 @@ class _BmiHint extends StatelessWidget {
             style: GoogleFonts.manrope(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: SalamatColors.ink,
+              color: SalamatTokens.textPrimary,
             ),
           ),
           const SizedBox(width: 8),

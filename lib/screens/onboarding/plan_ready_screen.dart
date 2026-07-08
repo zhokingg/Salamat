@@ -7,8 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/user_provider.dart';
 import '../../services/supabase_service.dart';
 import '../../services/onboarding_flag.dart';
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
+import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class PlanReadyScreen extends ConsumerStatefulWidget {
@@ -95,6 +96,21 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
     return '${d.day} $m';
   }
 
+  /// Month of the projected target date, in a form that reads naturally in
+  /// the sentence ("in September" / «в сентябре» — prepositional case).
+  String _reachMonth(AppLocalizations loc) {
+    const ru = [
+      'январе', 'феврале', 'марте', 'апреле', 'мае', 'июне',
+      'июле', 'августе', 'сентябре', 'октябре', 'ноябре', 'декабре',
+    ];
+    const en = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    final m = _targetDate.month - 1;
+    return loc.localeName == 'ru' ? ru[m] : en[m];
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
@@ -115,16 +131,16 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
               fontWeight: FontWeight.w800,
               height: 1.2,
               letterSpacing: -0.6,
-              color: SalamatColors.ink,
+              color: SalamatTokens.textPrimary,
             ),
           ),
           const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: SalamatColors.surf,
+              color: SalamatTokens.surfaceAlt,
               borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-              border: Border.all(color: SalamatColors.line),
+              border: Border.all(color: SalamatTokens.ringTrack),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -164,73 +180,107 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: SalamatColors.i2,
+                    color: SalamatTokens.textMuted,
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
+          // Calorie budget — the hero number of the plan (per mockup).
           Container(
-            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: SalamatColors.g4,
-              borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
+              color: SalamatTokens.surfaceAlt,
+              borderRadius: BorderRadius.circular(SalamatTokens.radiusCard),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('🔥', style: GoogleFonts.manrope(fontSize: 28)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loc.planCaloriesLabel,
+                Row(
+                  children: [
+                    SalamatIcon.flame(size: 22),
+                    const SizedBox(width: 10),
+                    Text(
+                      loc.planCaloriesLabel,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.6,
+                        color: SalamatTokens.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                _calories > 0
+                    ? TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: _calories.toDouble()),
+                        duration: const Duration(milliseconds: 900),
+                        curve: Curves.easeOutCubic,
+                        builder: (_, v, __) => Text(
+                          loc.planCaloriesValue(v.round()),
+                          style: GoogleFonts.manrope(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w600,
+                            color: SalamatTokens.textPrimary,
+                            letterSpacing: -0.6,
+                            height: 1.0,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        loc.valueDash,
                         style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.6,
-                          color: SalamatColors.i2,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                          color: SalamatTokens.textPrimary,
+                          height: 1.0,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      // Count-up animation on the kcal number — small but it
-                      // sells the "your plan just computed" moment.
-                      _calories > 0
-                          ? TweenAnimationBuilder<double>(
-                              tween: Tween(begin: 0, end: _calories.toDouble()),
-                              duration: const Duration(milliseconds: 900),
-                              curve: Curves.easeOutCubic,
-                              builder: (_, v, __) => Text(
-                                loc.planCaloriesValue(v.round()),
-                                style: GoogleFonts.manrope(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: SalamatColors.g1,
-                                  letterSpacing: -0.4,
-                                ),
-                              ),
-                            )
-                          : Text(
-                              loc.valueDash,
-                              style: GoogleFonts.manrope(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                                color: SalamatColors.g1,
-                                letterSpacing: -0.4,
-                              ),
-                            ),
-                    ],
-                  ),
+                const SizedBox(height: 14),
+                // Macro pills — reference 30/30/40 split of the budget.
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _MacroPill(
+                      label: loc.dashboardMacroProtein,
+                      grams: (_calories * 0.30 / 4).round(),
+                      unit: loc.gramsUnit,
+                    ),
+                    _MacroPill(
+                      label: loc.dashboardMacroFat,
+                      grams: (_calories * 0.30 / 9).round(),
+                      unit: loc.gramsUnit,
+                    ),
+                    _MacroPill(
+                      label: loc.dashboardMacroCarbs,
+                      grams: (_calories * 0.40 / 4).round(),
+                      unit: loc.gramsUnit,
+                    ),
+                  ],
                 ),
+                if (current != target) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    loc.planReachLine(target, _reachMonth(loc)),
+                    style: GoogleFonts.manrope(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: SalamatTokens.accentDeep,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
           const Spacer(),
         ],
       ),
-      buttonLabel: loc.buttonContinue,
+      buttonLabel: loc.planStartTracking,
       onContinue: () async {
         // Ensure the profile write finished before leaving onboarding, so a
         // returning user is always recognised on the next launch.
@@ -255,7 +305,7 @@ class _Endpoint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = highlighted ? SalamatColors.g1 : SalamatColors.i2;
+    final c = highlighted ? SalamatTokens.accentDeep : SalamatTokens.textMuted;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -265,7 +315,7 @@ class _Endpoint extends StatelessWidget {
             fontSize: 10,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.0,
-            color: SalamatColors.i3,
+            color: SalamatTokens.iconQuiet,
           ),
         ),
         const SizedBox(height: 4),
@@ -284,7 +334,7 @@ class _Endpoint extends StatelessWidget {
           style: GoogleFonts.manrope(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: SalamatColors.i3,
+            color: SalamatTokens.iconQuiet,
           ),
         ),
       ],
@@ -303,17 +353,17 @@ class _PlanChartPainter extends CustomPainter {
     final h = size.height;
 
     final axis = Paint()
-      ..color = SalamatColors.line
+      ..color = SalamatTokens.ringTrack
       ..strokeWidth = 1;
     canvas.drawLine(Offset(0, h - 1), Offset(w, h - 1), axis);
 
     final line = Paint()
-      ..color = SalamatColors.g1
+      ..color = SalamatTokens.accentDeep
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
     final fill = Paint()
-      ..color = SalamatColors.g1.withValues(alpha: 0.08)
+      ..color = SalamatTokens.accentDeep.withValues(alpha: 0.08)
       ..style = PaintingStyle.fill;
 
     final path = Path();
@@ -344,7 +394,7 @@ class _PlanChartPainter extends CustomPainter {
     canvas.drawPath(filledPath, fill);
     canvas.drawPath(path, line);
 
-    final dot = Paint()..color = SalamatColors.g1;
+    final dot = Paint()..color = SalamatTokens.accentDeep;
     final endEase = 1.0;
     final double endY;
     if (losing) {
@@ -359,4 +409,37 @@ class _PlanChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+
+class _MacroPill extends StatelessWidget {
+  const _MacroPill({
+    required this.label,
+    required this.grams,
+    required this.unit,
+  });
+
+  final String label;
+  final int grams;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: SalamatTokens.pillBg,
+        borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+      ),
+      child: Text(
+        '$label \u00b7 $grams $unit',
+        style: GoogleFonts.manrope(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: SalamatTokens.pillText,
+          height: 1.0,
+        ),
+      ),
+    );
+  }
 }

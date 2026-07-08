@@ -3,8 +3,9 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
+import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class SocialProofScreen extends StatelessWidget {
@@ -27,7 +28,7 @@ class SocialProofScreen extends StatelessWidget {
               fontWeight: FontWeight.w800,
               height: 1.2,
               letterSpacing: -0.6,
-              color: SalamatColors.ink,
+              color: SalamatTokens.textPrimary,
             ),
           ),
           const SizedBox(height: 32),
@@ -36,9 +37,28 @@ class SocialProofScreen extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Positioned(left: 90, child: _Avatar(emoji: '👨🏽', bg: SalamatColors.g3)),
-                Positioned(right: 90, child: _Avatar(emoji: '👩🏻', bg: SalamatColors.warn)),
-                _Avatar(emoji: '👩🏽', bg: SalamatColors.g1, big: true),
+                Positioned(
+                  left: 90,
+                  child: _Avatar(
+                    icon: PhosphorIcons.user(PhosphorIconsStyle.duotone),
+                    fg: SalamatTokens.accentDeep,
+                    bg: SalamatTokens.pillBg,
+                  ),
+                ),
+                Positioned(
+                  right: 90,
+                  child: _Avatar(
+                    icon: PhosphorIcons.user(PhosphorIconsStyle.duotone),
+                    fg: SalamatTokens.onAccent,
+                    bg: SalamatTokens.amber,
+                  ),
+                ),
+                _Avatar(
+                  icon: PhosphorIcons.user(PhosphorIconsStyle.duotone),
+                  fg: SalamatTokens.onAccent,
+                  bg: SalamatTokens.accentDeep,
+                  big: true,
+                ),
               ],
             ),
           ),
@@ -48,7 +68,7 @@ class SocialProofScreen extends StatelessWidget {
             style: GoogleFonts.manrope(
               fontSize: 44,
               fontWeight: FontWeight.w800,
-              color: SalamatColors.g1,
+              color: SalamatTokens.accentDeep,
               letterSpacing: -1.5,
               height: 1.0,
             ),
@@ -59,7 +79,7 @@ class SocialProofScreen extends StatelessWidget {
             style: GoogleFonts.manrope(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: SalamatColors.i2,
+              color: SalamatTokens.textMuted,
             ),
           ),
           const SizedBox(height: 24),
@@ -67,7 +87,7 @@ class SocialProofScreen extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: SalamatColors.g4,
+              color: SalamatTokens.pillBg,
               borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
             ),
             child: Column(
@@ -77,7 +97,7 @@ class SocialProofScreen extends StatelessWidget {
                   style: GoogleFonts.manrope(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
-                    color: SalamatColors.g1,
+                    color: SalamatTokens.accentDeep,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -87,7 +107,7 @@ class SocialProofScreen extends StatelessWidget {
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: SalamatColors.ink,
+                    color: SalamatTokens.textPrimary,
                     height: 1.4,
                   ),
                 ),
@@ -104,8 +124,14 @@ class SocialProofScreen extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.emoji, required this.bg, this.big = false});
-  final String emoji;
+  const _Avatar({
+    required this.icon,
+    required this.fg,
+    required this.bg,
+    this.big = false,
+  });
+  final PhosphorIconData icon;
+  final Color fg;
   final Color bg;
   final bool big;
 
@@ -119,9 +145,9 @@ class _Avatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         shape: BoxShape.circle,
-        border: Border.all(color: SalamatColors.surf, width: 4),
+        border: Border.all(color: SalamatTokens.surfaceAlt, width: 4),
       ),
-      child: Text(emoji, style: TextStyle(fontSize: big ? 40 : 32)),
+      child: PhosphorIcon(icon, size: big ? 36 : 28, color: fg),
     );
   }
 }

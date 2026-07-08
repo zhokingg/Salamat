@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../providers/user_provider.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class GoalScreen extends ConsumerStatefulWidget {
@@ -15,11 +15,11 @@ class GoalScreen extends ConsumerStatefulWidget {
 }
 
 // Line icons in place of emoji — same semantic mapping, premium feel.
-const _icon = {
-  Goal.lose: LucideIcons.trendingDown,
-  Goal.gain: LucideIcons.dumbbell,
-  Goal.maintain: LucideIcons.target,
-  Goal.healthy: LucideIcons.salad,
+final _icon = {
+  Goal.lose: PhosphorIcons.trendDown(PhosphorIconsStyle.duotone),
+  Goal.gain: PhosphorIcons.barbell(PhosphorIconsStyle.duotone),
+  Goal.maintain: PhosphorIcons.target(PhosphorIconsStyle.duotone),
+  Goal.healthy: PhosphorIcons.heartbeat(PhosphorIconsStyle.duotone),
 };
 
 class _GoalScreenState extends ConsumerState<GoalScreen> {
@@ -53,7 +53,7 @@ class _GoalScreenState extends ConsumerState<GoalScreen> {
               title: Goal.values[i].label(loc),
               subtitle: Goal.values[i].subtitle(loc),
               leading: OnboardingLeadingIcon(
-                icon: _icon[Goal.values[i]] ?? LucideIcons.circle,
+                icon: _icon[Goal.values[i]] ?? PhosphorIcons.circle(),
                 selected: _selected == Goal.values[i],
               ),
               selected: _selected == Goal.values[i],

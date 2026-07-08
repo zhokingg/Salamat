@@ -5,7 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'salamat_theme.dart';
 
 export 'package:phosphor_flutter/phosphor_flutter.dart'
-    show PhosphorIcons, PhosphorIconsStyle, PhosphorIconData;
+    show PhosphorIcon, PhosphorIcons, PhosphorIconsStyle, PhosphorIconData;
 
 /// Phosphor icon wrapper with an optional sticker "bubble" circle behind it.
 ///
@@ -150,7 +150,7 @@ class FoodIllustration extends StatelessWidget {
     (
       [
         'завтрак', 'яичниц', 'омлет', 'яйц', 'каш', 'овсян', 'сырник',
-        'блин', 'оладь', 'egg', 'breakfast',
+        'блин', 'оладь', 'egg', 'omelet', 'breakfast',
       ],
       'icon_22'
     ),
@@ -197,7 +197,7 @@ class FoodIllustration extends StatelessWidget {
       [
         'яблок', 'банан', 'виноград', 'дын', 'арбуз', 'груш', 'апельсин',
         'мандарин', 'урюк', 'кураг', 'изюм', 'персик', 'гранат', 'хурм',
-        'ягод', 'клубник', 'фрукт',
+        'ягод', 'клубник', 'фрукт', 'apple', 'banana', 'fruit',
       ],
       'icon_14'
     ),

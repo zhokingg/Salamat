@@ -153,6 +153,8 @@
   "planMaintain": "Удерживать вес",
   "planCaloriesLabel": "Ваша норма калорий",
   "planCaloriesValue": "{kcal} ккал / день",
+  "planReachLine": "Примерно в {month} вы достигнете {kg} кг",
+  "planStartTracking": "Начать трекинг",
 
   "dashboardGreeting": "Привет, {name} 👋",
   "dashboardGuestName": "друг",

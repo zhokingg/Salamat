@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../providers/user_provider.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class ActivityScreen extends ConsumerStatefulWidget {
@@ -29,11 +29,13 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     context.go('/onboarding/summary');
   }
 
-  static const _icons = {
-    ActivityLevel.sedentary: LucideIcons.armchair,
-    ActivityLevel.light: LucideIcons.footprints,
-    ActivityLevel.moderate: LucideIcons.activity,
-    ActivityLevel.veryActive: LucideIcons.dumbbell,
+  static final _icons = {
+    ActivityLevel.sedentary: PhosphorIcons.armchair(PhosphorIconsStyle.duotone),
+    ActivityLevel.light: PhosphorIcons.footprints(PhosphorIconsStyle.duotone),
+    ActivityLevel.moderate:
+        PhosphorIcons.personSimpleRun(PhosphorIconsStyle.duotone),
+    ActivityLevel.veryActive:
+        PhosphorIcons.barbell(PhosphorIconsStyle.duotone),
   };
 
   @override
@@ -52,7 +54,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
               title: lvl.label(loc),
               subtitle: lvl.subtitle(loc),
               leading: OnboardingLeadingIcon(
-                icon: _icons[lvl] ?? LucideIcons.circle,
+                icon: _icons[lvl] ?? PhosphorIcons.circle(),
                 selected: _selected == lvl,
               ),
               selected: _selected == lvl,

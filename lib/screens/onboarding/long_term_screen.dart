@@ -5,8 +5,9 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
+import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class LongTermScreen extends StatelessWidget {
@@ -26,9 +27,9 @@ class LongTermScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: SalamatColors.surf,
+              color: SalamatTokens.surfaceAlt,
               borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-              border: Border.all(color: SalamatColors.line),
+              border: Border.all(color: SalamatTokens.ringTrack),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,12 +43,12 @@ class LongTermScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _LegendRow(
-                  color: SalamatColors.g1,
+                  color: SalamatTokens.accentDeep,
                   label: loc.longTermLegendSalamat,
                 ),
                 const SizedBox(height: 6),
                 _LegendRow(
-                  color: SalamatColors.warn,
+                  color: SalamatTokens.amber,
                   label: loc.longTermLegendOthers,
                 ),
               ],
@@ -57,12 +58,16 @@ class LongTermScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: SalamatColors.g4,
+              color: SalamatTokens.pillBg,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Text('📊', style: GoogleFonts.manrope(fontSize: 22)),
+                SalamatIcon(
+                  PhosphorIcons.chartBar(PhosphorIconsStyle.duotone),
+                  size: 22,
+                  color: SalamatTokens.accentDeep,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -70,7 +75,7 @@ class LongTermScreen extends StatelessWidget {
                     style: GoogleFonts.manrope(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: SalamatColors.g1,
+                      color: SalamatTokens.accentDeep,
                       height: 1.35,
                     ),
                   ),
@@ -109,7 +114,7 @@ class _LegendRow extends StatelessWidget {
           style: GoogleFonts.manrope(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: SalamatColors.i2,
+            color: SalamatTokens.textMuted,
           ),
         ),
       ],
@@ -123,12 +128,12 @@ class _ChartPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
     final axis = Paint()
-      ..color = SalamatColors.line
+      ..color = SalamatTokens.ringTrack
       ..strokeWidth = 1;
     canvas.drawLine(Offset(0, h - 1), Offset(w, h - 1), axis);
 
     final salamat = Paint()
-      ..color = SalamatColors.g1
+      ..color = SalamatTokens.accentDeep
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -148,7 +153,7 @@ class _ChartPainter extends CustomPainter {
     canvas.drawPath(pathS, salamat);
 
     final other = Paint()
-      ..color = SalamatColors.warn
+      ..color = SalamatTokens.amber
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round

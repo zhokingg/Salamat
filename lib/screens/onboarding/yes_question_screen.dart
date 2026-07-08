@@ -3,8 +3,9 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
+import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 enum YesQuestion { lose, order, health }
@@ -20,16 +21,18 @@ class YesQuestionScreen extends StatelessWidget {
         YesQuestion.health => loc.yesHealthQuestion,
       };
 
-  String get _beforeEmoji => switch (question) {
-        YesQuestion.lose => '😟',
-        YesQuestion.order => '🍔',
-        YesQuestion.health => '💊',
+  PhosphorIconData get _beforeIcon => switch (question) {
+        YesQuestion.lose => PhosphorIcons.smileySad(PhosphorIconsStyle.duotone),
+        YesQuestion.order =>
+          PhosphorIcons.hamburger(PhosphorIconsStyle.duotone),
+        YesQuestion.health => PhosphorIcons.pill(PhosphorIconsStyle.duotone),
       };
 
-  String get _afterEmoji => switch (question) {
-        YesQuestion.lose => '🤩',
-        YesQuestion.order => '🥗',
-        YesQuestion.health => '💚',
+  PhosphorIconData get _afterIcon => switch (question) {
+        YesQuestion.lose => PhosphorIcons.smiley(PhosphorIconsStyle.duotone),
+        YesQuestion.order =>
+          PhosphorIcons.bowlFood(PhosphorIconsStyle.duotone),
+        YesQuestion.health => PhosphorIcons.heart(PhosphorIconsStyle.duotone),
       };
 
   String get _next => switch (question) {
@@ -54,7 +57,7 @@ class YesQuestionScreen extends StatelessWidget {
               fontWeight: FontWeight.w800,
               height: 1.2,
               letterSpacing: -0.6,
-              color: SalamatColors.ink,
+              color: SalamatTokens.textPrimary,
             ),
           ),
           const SizedBox(height: 32),
@@ -62,25 +65,25 @@ class YesQuestionScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _Illust(
-                  emoji: _beforeEmoji,
+                  icon: _beforeIcon,
+                  iconColor: SalamatTokens.textMuted,
                   caption: loc.yesCaptionBefore,
-                  bg: SalamatColors.line,
-                  emojiOpacity: 0.55,
+                  bg: SalamatTokens.ringTrack,
                 ),
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Icon(
                   Icons.arrow_forward_rounded,
-                  color: SalamatColors.i3,
+                  color: SalamatTokens.iconQuiet,
                 ),
               ),
               Expanded(
                 child: _Illust(
-                  emoji: _afterEmoji,
+                  icon: _afterIcon,
+                  iconColor: SalamatTokens.accentDeep,
                   caption: loc.yesCaptionAfter,
-                  bg: SalamatColors.g3,
-                  emojiOpacity: 1.0,
+                  bg: SalamatTokens.pillBg,
                 ),
               ),
             ],
@@ -98,15 +101,15 @@ class YesQuestionScreen extends StatelessWidget {
 
 class _Illust extends StatelessWidget {
   const _Illust({
-    required this.emoji,
+    required this.icon,
+    required this.iconColor,
     required this.caption,
     required this.bg,
-    required this.emojiOpacity,
   });
-  final String emoji;
+  final PhosphorIconData icon;
+  final Color iconColor;
   final String caption;
   final Color bg;
-  final double emojiOpacity;
 
   @override
   Widget build(BuildContext context) {
@@ -120,10 +123,7 @@ class _Illust extends StatelessWidget {
             color: bg,
             borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
           ),
-          child: Opacity(
-            opacity: emojiOpacity,
-            child: Text(emoji, style: const TextStyle(fontSize: 72)),
-          ),
+          child: PhosphorIcon(icon, size: 64, color: iconColor),
         ),
         const SizedBox(height: 8),
         Text(
@@ -132,7 +132,7 @@ class _Illust extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
-            color: SalamatColors.i3,
+            color: SalamatTokens.iconQuiet,
           ),
         ),
       ],

@@ -167,6 +167,9 @@
   "planCaloriesLabel": "Your calorie target",
   "planCaloriesValue": "{kcal} kcal / day",
   "@planCaloriesValue": {"placeholders": {"kcal": {"type": "int"}}},
+  "planReachLine": "You\u2019ll reach {kg} kg around {month}",
+  "@planReachLine": {"placeholders": {"kg": {"type": "int"}, "month": {"type": "String"}}},
+  "planStartTracking": "Start tracking",
 
   "dashboardGreeting": "Hi, {name} 👋",
   "@dashboardGreeting": {"placeholders": {"name": {"type": "String"}}},

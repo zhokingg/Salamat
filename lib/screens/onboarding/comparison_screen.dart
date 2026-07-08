@@ -3,8 +3,9 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
+import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class ComparisonScreen extends StatelessWidget {
@@ -31,8 +32,8 @@ class ComparisonScreen extends StatelessWidget {
                     child: _Bar(
                       label: loc.comparisonWithout,
                       heightFraction: 0.35,
-                      color: SalamatColors.line,
-                      labelColor: SalamatColors.i2,
+                      color: SalamatTokens.ringTrack,
+                      labelColor: SalamatTokens.textMuted,
                     ),
                   ),
                   const SizedBox(width: 28),
@@ -40,8 +41,8 @@ class ComparisonScreen extends StatelessWidget {
                     child: _Bar(
                       label: loc.comparisonWith,
                       heightFraction: 1.0,
-                      color: SalamatColors.warn,
-                      labelColor: SalamatColors.warn,
+                      color: SalamatTokens.amber,
+                      labelColor: SalamatTokens.amber,
                       featured: true,
                     ),
                   ),
@@ -53,12 +54,16 @@ class ComparisonScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: SalamatColors.g4,
+              color: SalamatTokens.pillBg,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Text('📈', style: GoogleFonts.manrope(fontSize: 20)),
+                SalamatIcon(
+                  PhosphorIcons.chartLineUp(PhosphorIconsStyle.duotone),
+                  size: 20,
+                  color: SalamatTokens.accentDeep,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -66,7 +71,7 @@ class ComparisonScreen extends StatelessWidget {
                     style: GoogleFonts.manrope(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: SalamatColors.g1,
+                      color: SalamatTokens.accentDeep,
                       height: 1.4,
                     ),
                   ),
@@ -117,7 +122,7 @@ class _Bar extends StatelessWidget {
             ),
             margin: const EdgeInsets.only(bottom: 6),
             decoration: BoxDecoration(
-              color: SalamatColors.warn,
+              color: SalamatTokens.amber,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
@@ -125,7 +130,7 @@ class _Bar extends StatelessWidget {
               style: GoogleFonts.manrope(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
-                color: SalamatColors.surf,
+                color: SalamatTokens.surfaceAlt,
               ),
             ),
           ),

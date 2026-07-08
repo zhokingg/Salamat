@@ -887,6 +887,18 @@ abstract class AppLocalizations {
   /// **'{kcal} kcal / day'**
   String planCaloriesValue(int kcal);
 
+  /// No description provided for @planReachLine.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ll reach {kg} kg around {month}'**
+  String planReachLine(int kg, String month);
+
+  /// No description provided for @planStartTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Start tracking'**
+  String get planStartTracking;
+
   /// No description provided for @dashboardGreeting.
   ///
   /// In en, this message translates to:

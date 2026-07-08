@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
 
 class TargetWeightScreen extends ConsumerStatefulWidget {
@@ -89,7 +89,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
       // health warnings, no swipe-away.
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: SalamatColors.surf,
+        backgroundColor: SalamatTokens.surfaceAlt,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
         ),
@@ -98,7 +98,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
           style: GoogleFonts.manrope(
             fontSize: 18,
             fontWeight: FontWeight.w800,
-            color: SalamatColors.ink,
+            color: SalamatTokens.textPrimary,
           ),
         ),
         content: Text(
@@ -107,7 +107,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
             fontSize: 14,
             fontWeight: FontWeight.w400,
             height: 1.45,
-            color: SalamatColors.i2,
+            color: SalamatTokens.textMuted,
           ),
         ),
         actionsAlignment: MainAxisAlignment.spaceBetween,
@@ -119,7 +119,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
               style: GoogleFonts.manrope(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: SalamatColors.g1,
+                color: SalamatTokens.accentDeep,
               ),
             ),
           ),
@@ -130,7 +130,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
               style: GoogleFonts.manrope(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: SalamatColors.i3,
+                color: SalamatTokens.iconQuiet,
               ),
             ),
           ),
@@ -165,7 +165,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: SalamatColors.g4,
+                color: SalamatTokens.pillBg,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -173,7 +173,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
                 style: GoogleFonts.manrope(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: SalamatColors.g1,
+                  color: SalamatTokens.accentDeep,
                 ),
               ),
             ),

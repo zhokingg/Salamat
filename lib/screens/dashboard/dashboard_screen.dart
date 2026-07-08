@@ -890,7 +890,12 @@ class _MealCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(type.emoji, style: const TextStyle(fontSize: 22)),
+                SalamatIcon(
+                  type.icon,
+                  size: 20,
+                  color: SalamatTokens.accentDeep,
+                  bubbleColor: SalamatTokens.bubbleMint,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -1001,4 +1006,17 @@ class _EntryRow extends StatelessWidget {
       ],
     );
   }
+}
+
+
+/// Meal-slot icons (Duotone) — replaces the old emoji markers.
+extension _MealTypeIcon on MealType {
+  PhosphorIconData get icon => switch (this) {
+        MealType.breakfast =>
+          PhosphorIcons.sunHorizon(PhosphorIconsStyle.duotone),
+        MealType.lunch => PhosphorIcons.sun(PhosphorIconsStyle.duotone),
+        MealType.dinner =>
+          PhosphorIcons.moonStars(PhosphorIconsStyle.duotone),
+        MealType.snack => PhosphorIcons.cookie(PhosphorIconsStyle.duotone),
+      };
 }

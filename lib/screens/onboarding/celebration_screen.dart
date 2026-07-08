@@ -8,7 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
+import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class CelebrationScreen extends ConsumerStatefulWidget {
@@ -52,15 +53,11 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
           body: Column(
             children: [
               const Spacer(),
-              Container(
-                width: 132,
-                height: 132,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: SalamatColors.g4,
-                  shape: BoxShape.circle,
-                ),
-                child: const Text('👍', style: TextStyle(fontSize: 76)),
+              SalamatIcon(
+                PhosphorIcons.thumbsUp(PhosphorIconsStyle.duotone),
+                size: 72,
+                color: SalamatTokens.accentDeep,
+                bubbleColor: SalamatTokens.bubbleMint,
               ),
               const SizedBox(height: 28),
               Text(
@@ -71,7 +68,7 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
                   fontWeight: FontWeight.w800,
                   height: 1.25,
                   letterSpacing: -0.4,
-                  color: SalamatColors.ink,
+                  color: SalamatTokens.textPrimary,
                 ),
               ),
               const SizedBox(height: 20),
@@ -81,7 +78,7 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: SalamatColors.g4,
+                  color: SalamatTokens.pillBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -90,7 +87,7 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: SalamatColors.g1,
+                    color: SalamatTokens.accentDeep,
                     height: 1.35,
                   ),
                 ),
@@ -112,10 +109,10 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
             minBlastForce: 6,
             gravity: 0.25,
             colors: const [
-              SalamatColors.g1,
-              SalamatColors.g2,
-              SalamatColors.g3,
-              SalamatColors.warn,
+              SalamatTokens.accentDeep,
+              SalamatTokens.accent,
+              SalamatTokens.pillBg,
+              SalamatTokens.amber,
             ],
           ),
         ),

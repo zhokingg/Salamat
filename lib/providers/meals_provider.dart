@@ -5,16 +5,14 @@ import '../services/supabase_service.dart';
 import 'bootstrap_provider.dart';
 
 /// Meal slot. Display labels come from AppLocalizations via the extension
-/// below — the enum itself only carries the emoji (purely visual, locale-agnostic).
+/// below — visuals (icons) live in the UI layer.
 enum MealType {
-  breakfast('🌅'),
-  lunch('☀️'),
-  dinner('🌙'),
-  snack('🥪');
+  breakfast,
+  lunch,
+  dinner,
+  snack;
 
-  const MealType(this.emoji);
 
-  final String emoji;
 }
 
 extension MealTypeLoc on MealType {

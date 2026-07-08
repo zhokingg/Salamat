@@ -3,7 +3,8 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/colors.dart';
+import '../../theme/salamat_icons.dart';
+import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -18,15 +19,11 @@ class WelcomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Spacer(),
-          Container(
-            width: 132,
-            height: 132,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: SalamatColors.g4,
-              shape: BoxShape.circle,
-            ),
-            child: const Text('🏆', style: TextStyle(fontSize: 72)),
+          SalamatIcon(
+            PhosphorIcons.trophy(PhosphorIconsStyle.duotone),
+            size: 72,
+            color: SalamatTokens.amber,
+            bubbleColor: SalamatTokens.bubbleAmber,
           ),
           const SizedBox(height: 32),
           Text(
@@ -37,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
               fontWeight: FontWeight.w800,
               height: 1.2,
               letterSpacing: -0.6,
-              color: SalamatColors.ink,
+              color: SalamatTokens.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -48,7 +45,7 @@ class WelcomeScreen extends StatelessWidget {
               fontSize: 15,
               fontWeight: FontWeight.w400,
               height: 1.4,
-              color: SalamatColors.i2,
+              color: SalamatTokens.textMuted,
             ),
           ),
           const SizedBox(height: 12),
@@ -59,7 +56,7 @@ class WelcomeScreen extends StatelessWidget {
               fontSize: 13,
               fontWeight: FontWeight.w600,
               height: 1.35,
-              color: SalamatColors.i2,
+              color: SalamatTokens.textMuted,
             ),
           ),
           const Spacer(flex: 2),

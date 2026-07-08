@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
 import '../../theme/dimensions.dart';
+import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
 
 class SummaryScreen extends ConsumerWidget {
@@ -64,12 +65,16 @@ class SummaryScreen extends ConsumerWidget {
                 height: 200,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: SalamatColors.g4,
+                  color: SalamatTokens.pillBg,
                   borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
                 ),
-                child: Text(
-                  u.gender == Gender.female ? '🧍‍♀️' : '🧍‍♂️',
-                  style: const TextStyle(fontSize: 84),
+                child: SalamatIcon(
+                  u.gender == Gender.female
+                      ? PhosphorIcons.personSimpleCircle(
+                          PhosphorIconsStyle.duotone)
+                      : PhosphorIcons.personSimple(PhosphorIconsStyle.duotone),
+                  size: 72,
+                  color: SalamatTokens.accentDeep,
                 ),
               ),
             ],
@@ -95,9 +100,9 @@ class _StatTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: SalamatColors.surf,
+        color: SalamatTokens.surfaceAlt,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: SalamatColors.line),
+        border: Border.all(color: SalamatTokens.ringTrack),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,7 +113,7 @@ class _StatTile extends StatelessWidget {
               fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.0,
-              color: SalamatColors.i3,
+              color: SalamatTokens.iconQuiet,
             ),
           ),
           const SizedBox(height: 4),
@@ -122,7 +127,7 @@ class _StatTile extends StatelessWidget {
                   style: GoogleFonts.manrope(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: SalamatColors.ink,
+                    color: SalamatTokens.textPrimary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -134,7 +139,7 @@ class _StatTile extends StatelessWidget {
                   style: GoogleFonts.manrope(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: SalamatColors.g1,
+                    color: SalamatTokens.accentDeep,
                   ),
                 ),
               ],
