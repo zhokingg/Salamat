@@ -81,9 +81,9 @@
   "@weightWeightValue": {"placeholders": {"kg": {"type": "int"}}},
 
   "bmiLabel": "BMI",
-  "bmiBandUnder": "Underweight",
+  "bmiBandUnder": "Slightly below normal",
   "bmiBandNormal": "Normal",
-  "bmiBandOver": "Slightly above",
+  "bmiBandOver": "Slightly above normal",
   "bmiBandObese": "Obese",
 
   "targetTitle": "What is your\ntarget weight?",
@@ -103,7 +103,9 @@
   "celebrationGain": "Gaining {kg} kg is a realistic goal.\nNot that hard at all!",
   "@celebrationGain": {"placeholders": {"kg": {"type": "int"}}},
   "celebrationMaintain": "Great choice —\nholding a healthy weight",
-  "celebrationStat": "Losing just 5% of your weight\nalready improves health",
+  "celebrationStatLose": "Losing just 5% of your weight\nalready improves health",
+  "celebrationStatGain": "Gaining 0.25\u20130.5 kg a week\nbuilds muscle, not fat",
+  "celebrationStatMaintain": "A stable weight lowers heart\nand metabolic risks",
 
   "longTermTitle": "Salamat builds\nlong-term results",
   "longTermLegendSalamat": "Salamat plan",
@@ -137,6 +139,8 @@
   "summaryStatActivity": "Activity",
 
   "yesLoseQuestion": "Want to lose weight?",
+  "yesGainQuestion": "Want to gain weight\nthe healthy way?",
+  "yesMaintainQuestion": "Want to hold\na comfortable weight?",
   "yesOrderQuestion": "Want to clean up\nyour eating?",
   "yesHealthQuestion": "Want to say goodbye\nto health problems?",
   "yesCaptionBefore": "Now",
@@ -263,7 +267,9 @@
   "paywallCancelAnytime": "Cancel anytime",
   "paywallStub": "Payments coming soon!",
   "paywallRestore": "Restore",
-  "paywallHeroHeadline": "Get full access to\nyour weight-loss plan",
+  "paywallHeroHeadlineLose": "Get full access to\nyour weight-loss plan",
+  "paywallHeroHeadlineGain": "Get full access to\nyour weight-gain plan",
+  "paywallHeroHeadlineMaintain": "Get full access to\nyour balance plan",
   "paywallUrgencyLine": "Reach {weight} kg by {date}",
   "@paywallUrgencyLine": {"placeholders": {"weight": {"type": "int"}, "date": {"type": "String"}}},
   "paywallScanEyebrow": "Recognized",

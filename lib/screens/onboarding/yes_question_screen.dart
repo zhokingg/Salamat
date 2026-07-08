@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../providers/user_provider.dart';
 import '../../theme/dimensions.dart';
 import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
@@ -10,13 +12,19 @@ import 'widgets.dart';
 
 enum YesQuestion { lose, order, health }
 
-class YesQuestionScreen extends StatelessWidget {
+class YesQuestionScreen extends ConsumerWidget {
   const YesQuestionScreen({super.key, required this.question});
 
   final YesQuestion question;
 
-  String _headline(AppLocalizations loc) => switch (question) {
-        YesQuestion.lose => loc.yesLoseQuestion,
+  /// First question adapts to the user's goal — asking a gainer whether
+  /// they want to lose weight reads like the app wasn't listening.
+  String _headline(AppLocalizations loc, Goal? goal) => switch (question) {
+        YesQuestion.lose => switch (goal) {
+            Goal.gain => loc.yesGainQuestion,
+            Goal.maintain || Goal.healthy => loc.yesMaintainQuestion,
+            _ => loc.yesLoseQuestion,
+          },
         YesQuestion.order => loc.yesOrderQuestion,
         YesQuestion.health => loc.yesHealthQuestion,
       };
@@ -42,8 +50,9 @@ class YesQuestionScreen extends StatelessWidget {
       };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context)!;
+    final goal = ref.watch(userProvider).goal;
     return OnboardingShell(
       step: 13,
       body: Column(
@@ -51,7 +60,7 @@ class YesQuestionScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
           Text(
-            _headline(loc),
+            _headline(loc, goal),
             style: GoogleFonts.manrope(
               fontSize: 28,
               fontWeight: FontWeight.w800,

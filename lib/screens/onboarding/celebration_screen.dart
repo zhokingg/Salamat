@@ -82,7 +82,13 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  loc.celebrationStat,
+                  switch (u.goal) {
+                    Goal.gain => loc.celebrationStatGain,
+                    Goal.maintain ||
+                    Goal.healthy =>
+                      loc.celebrationStatMaintain,
+                    _ => loc.celebrationStatLose,
+                  },
                   textAlign: TextAlign.center,
                   style: GoogleFonts.manrope(
                     fontSize: 13,

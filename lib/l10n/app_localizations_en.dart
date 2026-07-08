@@ -210,13 +210,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bmiLabel => 'BMI';
 
   @override
-  String get bmiBandUnder => 'Underweight';
+  String get bmiBandUnder => 'Slightly below normal';
 
   @override
   String get bmiBandNormal => 'Normal';
 
   @override
-  String get bmiBandOver => 'Slightly above';
+  String get bmiBandOver => 'Slightly above normal';
 
   @override
   String get bmiBandObese => 'Obese';
@@ -266,7 +266,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get celebrationMaintain => 'Great choice —\nholding a healthy weight';
 
   @override
-  String get celebrationStat => 'Losing just 5% of your weight\nalready improves health';
+  String get celebrationStatLose => 'Losing just 5% of your weight\nalready improves health';
+
+  @override
+  String get celebrationStatGain => 'Gaining 0.25–0.5 kg a week\nbuilds muscle, not fat';
+
+  @override
+  String get celebrationStatMaintain => 'A stable weight lowers heart\nand metabolic risks';
 
   @override
   String get longTermTitle => 'Salamat builds\nlong-term results';
@@ -351,6 +357,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yesLoseQuestion => 'Want to lose weight?';
+
+  @override
+  String get yesGainQuestion => 'Want to gain weight\nthe healthy way?';
+
+  @override
+  String get yesMaintainQuestion => 'Want to hold\na comfortable weight?';
 
   @override
   String get yesOrderQuestion => 'Want to clean up\nyour eating?';
@@ -695,7 +707,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallRestore => 'Restore';
 
   @override
-  String get paywallHeroHeadline => 'Get full access to\nyour weight-loss plan';
+  String get paywallHeroHeadlineLose => 'Get full access to\nyour weight-loss plan';
+
+  @override
+  String get paywallHeroHeadlineGain => 'Get full access to\nyour weight-gain plan';
+
+  @override
+  String get paywallHeroHeadlineMaintain => 'Get full access to\nyour balance plan';
 
   @override
   String paywallUrgencyLine(int weight, String date) {

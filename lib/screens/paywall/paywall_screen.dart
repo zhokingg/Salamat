@@ -132,7 +132,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   children: [
                     const _Hero(),
                     const SizedBox(height: 28),
-                    _Headline(text: loc.paywallHeroHeadline),
+                    _Headline(
+                      text: switch (user.goal) {
+                        Goal.gain => loc.paywallHeroHeadlineGain,
+                        Goal.maintain ||
+                        Goal.healthy =>
+                          loc.paywallHeroHeadlineMaintain,
+                        _ => loc.paywallHeroHeadlineLose,
+                      },
+                    ),
                     const SizedBox(height: 10),
                     _UrgencyLine(
                       text: loc.paywallUrgencyLine(

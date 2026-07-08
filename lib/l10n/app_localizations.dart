@@ -476,7 +476,7 @@ abstract class AppLocalizations {
   /// No description provided for @bmiBandUnder.
   ///
   /// In en, this message translates to:
-  /// **'Underweight'**
+  /// **'Slightly below normal'**
   String get bmiBandUnder;
 
   /// No description provided for @bmiBandNormal.
@@ -488,7 +488,7 @@ abstract class AppLocalizations {
   /// No description provided for @bmiBandOver.
   ///
   /// In en, this message translates to:
-  /// **'Slightly above'**
+  /// **'Slightly above normal'**
   String get bmiBandOver;
 
   /// No description provided for @bmiBandObese.
@@ -569,11 +569,23 @@ abstract class AppLocalizations {
   /// **'Great choice —\nholding a healthy weight'**
   String get celebrationMaintain;
 
-  /// No description provided for @celebrationStat.
+  /// No description provided for @celebrationStatLose.
   ///
   /// In en, this message translates to:
   /// **'Losing just 5% of your weight\nalready improves health'**
-  String get celebrationStat;
+  String get celebrationStatLose;
+
+  /// No description provided for @celebrationStatGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Gaining 0.25–0.5 kg a week\nbuilds muscle, not fat'**
+  String get celebrationStatGain;
+
+  /// No description provided for @celebrationStatMaintain.
+  ///
+  /// In en, this message translates to:
+  /// **'A stable weight lowers heart\nand metabolic risks'**
+  String get celebrationStatMaintain;
 
   /// No description provided for @longTermTitle.
   ///
@@ -742,6 +754,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Want to lose weight?'**
   String get yesLoseQuestion;
+
+  /// No description provided for @yesGainQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Want to gain weight\nthe healthy way?'**
+  String get yesGainQuestion;
+
+  /// No description provided for @yesMaintainQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Want to hold\na comfortable weight?'**
+  String get yesMaintainQuestion;
 
   /// No description provided for @yesOrderQuestion.
   ///
@@ -1355,11 +1379,23 @@ abstract class AppLocalizations {
   /// **'Restore'**
   String get paywallRestore;
 
-  /// No description provided for @paywallHeroHeadline.
+  /// No description provided for @paywallHeroHeadlineLose.
   ///
   /// In en, this message translates to:
   /// **'Get full access to\nyour weight-loss plan'**
-  String get paywallHeroHeadline;
+  String get paywallHeroHeadlineLose;
+
+  /// No description provided for @paywallHeroHeadlineGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Get full access to\nyour weight-gain plan'**
+  String get paywallHeroHeadlineGain;
+
+  /// No description provided for @paywallHeroHeadlineMaintain.
+  ///
+  /// In en, this message translates to:
+  /// **'Get full access to\nyour balance plan'**
+  String get paywallHeroHeadlineMaintain;
 
   /// No description provided for @paywallUrgencyLine.
   ///

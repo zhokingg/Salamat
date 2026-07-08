@@ -210,7 +210,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bmiLabel => 'ИМТ';
 
   @override
-  String get bmiBandUnder => 'Недовес';
+  String get bmiBandUnder => 'Чуть ниже нормы';
 
   @override
   String get bmiBandNormal => 'Норма';
@@ -266,7 +266,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get celebrationMaintain => 'Отличный выбор —\nудерживать здоровый вес';
 
   @override
-  String get celebrationStat => 'Снижение веса на 5%\nуже улучшает здоровье';
+  String get celebrationStatLose => 'Снижение веса на 5%\nуже улучшает здоровье';
+
+  @override
+  String get celebrationStatGain => 'Постепенный набор 0,25–0,5 кг в неделю\nпомогает набирать мышцы, а не жир';
+
+  @override
+  String get celebrationStatMaintain => 'Стабильный вес снижает риски\nдля сердца и обмена веществ';
 
   @override
   String get longTermTitle => 'Salamat создаёт\nдолгосрочный\nрезультат';
@@ -351,6 +357,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get yesLoseQuestion => 'Хотите похудеть?';
+
+  @override
+  String get yesGainQuestion => 'Хотите набрать вес\nбез вреда для здоровья?';
+
+  @override
+  String get yesMaintainQuestion => 'Хотите удерживать\nкомфортный вес?';
 
   @override
   String get yesOrderQuestion => 'Хотите навести\nпорядок в питании?';
@@ -697,7 +709,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallRestore => 'Восстановить';
 
   @override
-  String get paywallHeroHeadline => 'Полный доступ к вашему\nплану похудения';
+  String get paywallHeroHeadlineLose => 'Полный доступ к вашему\nплану похудения';
+
+  @override
+  String get paywallHeroHeadlineGain => 'Полный доступ к вашему\nплану набора веса';
+
+  @override
+  String get paywallHeroHeadlineMaintain => 'Полный доступ к вашему\nплану баланса';
 
   @override
   String paywallUrgencyLine(int weight, String date) {
