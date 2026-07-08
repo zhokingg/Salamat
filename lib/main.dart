@@ -5,15 +5,16 @@ import 'package:salamat/l10n/app_localizations.dart';
 
 import 'providers/locale_provider.dart';
 import 'router.dart';
-import 'theme/colors.dart';
-import 'theme/text_styles.dart';
+import 'theme/salamat_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
+      // Light theme → dark status-bar icons.
       statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
     ),
   );
   // Supabase init + anonymous sign-in are driven by `bootstrapProvider`, which
@@ -34,20 +35,7 @@ class SalamatApp extends ConsumerWidget {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: SalamatColors.bg,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: SalamatColors.g1,
-          primary: SalamatColors.g1,
-          secondary: SalamatColors.g2,
-          surface: SalamatColors.surf,
-          onPrimary: SalamatColors.surf,
-          onSurface: SalamatColors.ink,
-        ),
-        textTheme: SalamatText.theme,
-        splashFactory: InkRipple.splashFactory,
-      ),
+      theme: SalamatTheme.light,
     );
   }
 }
