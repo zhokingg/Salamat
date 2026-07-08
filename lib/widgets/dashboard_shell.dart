@@ -43,7 +43,7 @@ class DashboardShell extends ConsumerWidget {
     return 0;
   }
 
-  void _onFabPressed(BuildContext context, WidgetRef ref) {
+  void _onCameraPressed(BuildContext context, WidgetRef ref) {
     final sub = ref.read(subscriptionProvider);
     if (sub.canTakePhoto) {
       context.push('/camera');
@@ -61,25 +61,11 @@ class DashboardShell extends ConsumerWidget {
     return Scaffold(
       backgroundColor: SalamatTokens.background,
       body: child,
-      floatingActionButton: SizedBox(
-        width: SalamatDims.fabSize,
-        height: SalamatDims.fabSize,
-        child: FloatingActionButton(
-          backgroundColor: SalamatTokens.accentDeep,
-          elevation: 0,
-          shape: const CircleBorder(),
-          onPressed: () => _onFabPressed(context, ref),
-          child: SalamatIcon(
-            PhosphorIcons.camera(PhosphorIconsStyle.duotone),
-            color: SalamatTokens.onAccent,
-            size: 26,
-          ),
-        ),
+      bottomNavigationBar: _TabBar(
+        index: index,
+        tabs: _tabs,
+        onCamera: () => _onCameraPressed(context, ref),
       ),
-      // With 3 tabs a centre-docked FAB can't sit in a clean gap — it
-      // floats above the nav on the right instead.
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: _TabBar(index: index, tabs: _tabs),
     );
   }
 }
@@ -106,10 +92,15 @@ class _TabItem {
 /// Floating pill navigation: transparent strip hosting a borderless cream
 /// pill — depth comes from the color layer on the sage canvas.
 class _TabBar extends StatelessWidget {
-  const _TabBar({required this.index, required this.tabs});
+  const _TabBar({
+    required this.index,
+    required this.tabs,
+    required this.onCamera,
+  });
 
   final int index;
   final List<_TabItem> tabs;
+  final VoidCallback onCamera;
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +118,9 @@ class _TabBar extends StatelessWidget {
           child: Row(
             children: [
               _tabButton(context, 0),
+              // Camera is an ACTION slot, not a tab: it opens the camera on
+              // top of the current tab and never becomes "selected".
+              Expanded(child: _CameraButton(onTap: onCamera)),
               _tabButton(context, 1),
               _tabButton(context, 2),
             ],
@@ -161,6 +155,39 @@ class _TabBar extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Round accentDeep camera action in the nav pill — ~20% larger than the
+/// neighbouring tab icons to read as the primary action.
+class _CameraButton extends StatelessWidget {
+  const _CameraButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(28),
+      child: Center(
+        child: Container(
+          width: 48,
+          height: 48,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: SalamatTokens.accentDeep,
+            shape: BoxShape.circle,
+          ),
+          child: SalamatIcon(
+            PhosphorIcons.camera(PhosphorIconsStyle.duotone),
+            size: 24,
+            color: SalamatTokens.onAccent,
+          ),
         ),
       ),
     );
