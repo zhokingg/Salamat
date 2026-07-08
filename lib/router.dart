@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'providers/meals_provider.dart';
 import 'screens/camera/camera_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/onboarding/activity_screen.dart';
 import 'screens/onboarding/building_screen.dart';
 import 'screens/onboarding/celebration_screen.dart';
 import 'screens/onboarding/comparison_screen.dart';
-import 'screens/onboarding/country_screen.dart';
 import 'screens/onboarding/familiarity_screen.dart';
 import 'screens/onboarding/gender_screen.dart';
 import 'screens/onboarding/goal_screen.dart';
@@ -25,7 +23,6 @@ import 'screens/onboarding/yes_question_screen.dart';
 import 'screens/paywall/paywall_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/progress/progress_screen.dart';
-import 'screens/search/search_screen.dart';
 import 'screens/splash/splash_screen.dart';
 import 'widgets/dashboard_shell.dart';
 
@@ -44,10 +41,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/onboarding/name',
       builder: (context, state) => const NameScreen(),
-    ),
-    GoRoute(
-      path: '/onboarding/country',
-      builder: (context, state) => const CountryScreen(),
     ),
     GoRoute(
       path: '/onboarding/goal',
@@ -127,14 +120,6 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/dashboard',
           builder: (context, state) => const DashboardScreen(),
-        ),
-        GoRoute(
-          path: '/search',
-          builder: (context, state) => SearchScreen(
-            initialMealType: state.extra is MealType
-                ? state.extra as MealType
-                : null,
-          ),
         ),
         GoRoute(
           path: '/progress',

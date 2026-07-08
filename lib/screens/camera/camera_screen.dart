@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../providers/meals_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../manual_entry/manual_entry_sheet.dart';
 import '../../services/photo_recognition_service.dart';
 import '../../services/supabase_service.dart';
 import '../../theme/colors.dart';
@@ -376,6 +377,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     ref.read(mealsProvider.notifier).add(
           MealType.lunch,
           MealEntry(
+            source: 'photo',
             id: const Uuid().v4(),
             name: r.name,
             grams: r.grams.toDouble(),
@@ -702,6 +704,28 @@ class _OutOfPhotosStub extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: SalamatDims.buttonHeight,
+              child: ElevatedButton(
+                onPressed: () => showManualEntrySheet(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: SalamatColors.g1,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      SalamatDims.buttonRadius,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.manualAddButton,
+                  style: SalamatText.btnDark,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
               height: SalamatDims.buttonHeight,

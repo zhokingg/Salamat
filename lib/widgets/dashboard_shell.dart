@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 
 import '../providers/subscription_provider.dart';
-import '../theme/colors.dart';
+import '../screens/manual_entry/photo_limit_sheet.dart';
 import '../theme/dimensions.dart';
-import '../theme/text_styles.dart';
+import '../theme/salamat_icons.dart';
+import '../theme/salamat_theme.dart';
 
 class DashboardShell extends ConsumerWidget {
   const DashboardShell({super.key, required this.child});
@@ -15,11 +17,23 @@ class DashboardShell extends ConsumerWidget {
 
   // Tabs carry the icon + path as data; the label is resolved per-locale
   // from AppLocalizations at render time (was previously hardcoded English).
-  static const List<_TabItem> _tabs = [
-    _TabItem(icon: Icons.home_rounded, path: '/dashboard', labelKey: _NavLabel.home),
-    _TabItem(icon: Icons.search_rounded, path: '/search', labelKey: _NavLabel.search),
-    _TabItem(icon: Icons.bar_chart_rounded, path: '/progress', labelKey: _NavLabel.progress),
-    _TabItem(icon: Icons.person_rounded, path: '/profile', labelKey: _NavLabel.profile),
+  // Navigation icons use the Regular Phosphor weight per the icon system.
+  static final List<_TabItem> _tabs = [
+    _TabItem(
+      icon: PhosphorIcons.house(),
+      path: '/dashboard',
+      labelKey: _NavLabel.home,
+    ),
+    _TabItem(
+      icon: PhosphorIcons.chartBar(),
+      path: '/progress',
+      labelKey: _NavLabel.progress,
+    ),
+    _TabItem(
+      icon: PhosphorIcons.user(),
+      path: '/profile',
+      labelKey: _NavLabel.profile,
+    ),
   ];
 
   int _currentIndex(String location) {
@@ -34,7 +48,8 @@ class DashboardShell extends ConsumerWidget {
     if (sub.canTakePhoto) {
       context.push('/camera');
     } else {
-      context.push('/paywall');
+      // Free daily scan spent: offer manual logging first, Pro second.
+      showPhotoLimitSheet(context);
     }
   }
 
@@ -44,30 +59,32 @@ class DashboardShell extends ConsumerWidget {
     final index = _currentIndex(location);
 
     return Scaffold(
-      backgroundColor: SalamatColors.bg,
+      backgroundColor: SalamatTokens.background,
       body: child,
       floatingActionButton: SizedBox(
         width: SalamatDims.fabSize,
         height: SalamatDims.fabSize,
         child: FloatingActionButton(
-          backgroundColor: SalamatColors.g1,
+          backgroundColor: SalamatTokens.accentDeep,
           elevation: 0,
           shape: const CircleBorder(),
           onPressed: () => _onFabPressed(context, ref),
-          child: const Icon(
-            Icons.camera_alt_rounded,
-            color: SalamatColors.surf,
+          child: SalamatIcon(
+            PhosphorIcons.camera(PhosphorIconsStyle.duotone),
+            color: SalamatTokens.onAccent,
             size: 26,
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // With 3 tabs a centre-docked FAB can't sit in a clean gap — it
+      // floats above the nav on the right instead.
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _TabBar(index: index, tabs: _tabs),
     );
   }
 }
 
-enum _NavLabel { home, search, progress, profile }
+enum _NavLabel { home, progress, profile }
 
 class _TabItem {
   const _TabItem({
@@ -75,18 +92,19 @@ class _TabItem {
     required this.path,
     required this.labelKey,
   });
-  final IconData icon;
+  final PhosphorIconData icon;
   final String path;
   final _NavLabel labelKey;
 
   String label(AppLocalizations loc) => switch (labelKey) {
         _NavLabel.home => loc.navHome,
-        _NavLabel.search => loc.navSearch,
         _NavLabel.progress => loc.navProgress,
         _NavLabel.profile => loc.navProfile,
       };
 }
 
+/// Floating pill navigation: transparent strip hosting a borderless cream
+/// pill — depth comes from the color layer on the sage canvas.
 class _TabBar extends StatelessWidget {
   const _TabBar({required this.index, required this.tabs});
 
@@ -97,20 +115,22 @@ class _TabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: SalamatDims.tabBarHeight,
-      decoration: const BoxDecoration(
-        color: SalamatColors.surf,
-        border: Border(top: BorderSide(color: SalamatColors.line)),
-      ),
+      color: Colors.transparent,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            _tabButton(context, 0),
-            _tabButton(context, 1),
-            const SizedBox(width: 72),
-            _tabButton(context, 2),
-            _tabButton(context, 3),
-          ],
+        child: Container(
+          decoration: BoxDecoration(
+            color: SalamatTokens.surface,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Row(
+            children: [
+              _tabButton(context, 0),
+              _tabButton(context, 1),
+              _tabButton(context, 2),
+            ],
+          ),
         ),
       ),
     );
@@ -120,20 +140,24 @@ class _TabBar extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
     final tab = tabs[i];
     final selected = i == index;
-    final color = selected ? SalamatColors.g1 : SalamatColors.i3;
+    final color =
+        selected ? SalamatTokens.accentDeep : SalamatTokens.iconQuiet;
     return Expanded(
       child: InkWell(
         onTap: () => context.go(tab.path),
+        borderRadius: BorderRadius.circular(28),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(tab.icon, color: color, size: 26),
+            SalamatIcon(tab.icon, color: color, size: 26),
             const SizedBox(height: 4),
             Text(
               tab.label(loc),
-              style: SalamatText.caption.copyWith(
-                color: color,
+              style: GoogleFonts.manrope(
+                fontSize: 11,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: color,
+                height: 1.0,
               ),
             ),
           ],

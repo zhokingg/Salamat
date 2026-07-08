@@ -6,9 +6,10 @@ import 'package:flutter/foundation.dart';
 import '../providers/subscription_provider.dart';
 import 'supabase_service.dart';
 
-/// Food photo recognition + lifetime photo-quota tracking.
+/// Food photo recognition + daily photo-quota tracking.
 ///
-/// Free tier: 3 photos TOTAL (lifetime). Pro tier: 10/day.
+/// Free tier: 1 photo scan per day. Pro tier: 10/day. Manual logging is
+/// free and unlimited — it never touches this quota.
 ///
 /// Quota lives in `public.photo_usage` (migration 0001_init.sql) and is
 /// bumped via the `increment_photo_usage()` RPC (auth-scoped).
@@ -22,23 +23,33 @@ class PhotoRecognitionService {
 
   static const String _kFunctionName = 'recognize-food';
 
-  /// Returns true if [userId] is allowed to take another photo.
-  /// Pro: always true. Free: true iff lifetime total in `photo_usage` < 3.
+  /// Returns true if [userId] is allowed to take another photo TODAY.
+  /// Pro: within the Pro daily quota. Free: 1 scan per local day.
   /// Not-signed-in or backend error: fail-open (return true).
+  ///
+  /// The `photo_usage` table keys rows by the SERVER date; the filter below
+  /// uses the LOCAL date, so around local midnight the server backstop can
+  /// briefly disagree — the client-side counter in [SubscriptionState] is
+  /// the primary daily gate.
   static Future<bool> canUsePhoto(String userId, bool isPro) async {
-    if (isPro) return true;
     if (!SupabaseService.isReady || !SupabaseService.isSignedIn) {
       return true;
     }
     try {
+      final now = DateTime.now();
+      final today = '${now.year.toString().padLeft(4, '0')}-'
+          '${now.month.toString().padLeft(2, '0')}-'
+          '${now.day.toString().padLeft(2, '0')}';
       final rows = await SupabaseService.client
           .from('photo_usage')
-          .select('count');
-      final total = (rows as List).fold<int>(
+          .select('count')
+          .eq('day', today);
+      final usedToday = (rows as List).fold<int>(
         0,
         (sum, r) => sum + (((r as Map)['count'] as num?)?.toInt() ?? 0),
       );
-      return total < kFreeLifetimePhotoLimit;
+      final limit = isPro ? kProDailyPhotoLimit : kFreeDailyPhotoLimit;
+      return usedToday < limit;
     } catch (e) {
       if (kDebugMode) debugPrint('canUsePhoto error: $e');
       return true;

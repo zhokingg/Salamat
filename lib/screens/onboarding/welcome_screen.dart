@@ -51,6 +51,17 @@ class WelcomeScreen extends StatelessWidget {
               color: SalamatColors.i2,
             ),
           ),
+          const SizedBox(height: 12),
+          Text(
+            loc.welcomeFreeLine,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.manrope(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+              color: SalamatColors.i2,
+            ),
+          ),
           const Spacer(flex: 2),
         ],
       ),

@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/meals_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../screens/manual_entry/manual_entry_sheet.dart';
 import '../../screens/onboarding/widgets.dart' show CountUp;
 import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
@@ -176,18 +176,68 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             ),
           ),
         ),
+        if (allEntries.isEmpty) ...[
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              height: 48,
+              child: OutlinedButton(
+                onPressed: () => showManualEntrySheet(context),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: SalamatTokens.accentDeep,
+                  side: const BorderSide(
+                      color: SalamatTokens.accent, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(SalamatTokens.radiusCta),
+                  ),
+                ),
+                child: Text(
+                  loc.manualAddButton,
+                  style: GoogleFonts.manrope(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 28),
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: SalamatDims.screenPadding,
           ),
-          child: Text(
-            loc.dashboardMeals,
-            style: GoogleFonts.manrope(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: SalamatTokens.textPrimary,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  loc.dashboardMeals,
+                  style: GoogleFonts.manrope(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: SalamatTokens.textPrimary,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => showManualEntrySheet(context),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 36),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  loc.manualAddButton,
+                  style: GoogleFonts.manrope(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: SalamatTokens.accentDeep,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 12),
@@ -198,9 +248,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               type: _kMealViews[i].type,
               entries: meals.forType(_kMealViews[i].type),
               totalKcal: meals.totalKcal(_kMealViews[i].type),
-              onTap: () => context.push(
-                '/search',
-                extra: _kMealViews[i].type,
+              onTap: () => showManualEntrySheet(
+                context,
+                initialMealType: _kMealViews[i].type,
               ),
             ),
           ),

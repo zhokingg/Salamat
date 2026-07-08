@@ -1,35 +1,53 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Free tier: 3 photos TOTAL (lifetime), enforced server-side via
-/// `photo_usage` in [PhotoRecognitionService.canUsePhoto]. This constant is
-/// the single source of truth for the free quota — the service imports it so
-/// the gate and the UI counter never drift apart.
-const int kFreeLifetimePhotoLimit = 3;
+/// Free tier: 1 photo scan PER DAY, reset at local midnight. Manual logging
+/// is free and unlimited. The server-side `photo_usage` table (per-day rows)
+/// backs this up in [PhotoRecognitionService.canUsePhoto].
+const int kFreeDailyPhotoLimit = 1;
 
-/// Pro tier: 10 photos per day.
+/// Pro tier: 10 photo scans per day.
 const int kProDailyPhotoLimit = 10;
 
 class SubscriptionState {
   const SubscriptionState({
     this.isPro = false,
     this.photosUsed = 0,
+    this.usageDay,
   });
 
   final bool isPro;
 
-  /// Photos consumed in the active window: lifetime total for free users,
-  /// today's count for Pro users.
+  /// Photo scans consumed on [usageDay].
   final int photosUsed;
 
-  /// Active quota: 3 lifetime for free, 10/day for Pro.
-  int get photoLimit => isPro ? kProDailyPhotoLimit : kFreeLifetimePhotoLimit;
+  /// Local calendar day the counter belongs to. A new local date means the
+  /// counter is stale and the quota is fresh again.
+  final DateTime? usageDay;
 
-  bool get canTakePhoto => photosUsed < photoLimit;
+  int get photoLimit => isPro ? kProDailyPhotoLimit : kFreeDailyPhotoLimit;
 
-  SubscriptionState copyWith({bool? isPro, int? photosUsed}) {
+  /// Photos used TODAY (local date) — 0 if the stored counter is from a
+  /// previous day.
+  int get photosUsedToday {
+    final day = usageDay;
+    if (day == null) return 0;
+    final now = DateTime.now();
+    final sameDay =
+        day.year == now.year && day.month == now.month && day.day == now.day;
+    return sameDay ? photosUsed : 0;
+  }
+
+  bool get canTakePhoto => photosUsedToday < photoLimit;
+
+  SubscriptionState copyWith({
+    bool? isPro,
+    int? photosUsed,
+    DateTime? usageDay,
+  }) {
     return SubscriptionState(
       isPro: isPro ?? this.isPro,
       photosUsed: photosUsed ?? this.photosUsed,
+      usageDay: usageDay ?? this.usageDay,
     );
   }
 }
@@ -39,15 +57,19 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
   SubscriptionState build() => const SubscriptionState();
 
   void usePhoto() {
-    state = state.copyWith(photosUsed: state.photosUsed + 1);
+    final now = DateTime.now();
+    state = state.copyWith(
+      photosUsed: state.photosUsedToday + 1,
+      usageDay: DateTime(now.year, now.month, now.day),
+    );
   }
 
   void activatePro() {
     state = state.copyWith(isPro: true);
   }
 
-  /// Resets the Pro per-day counter. No-op for the free lifetime quota,
-  /// which is tracked server-side.
+  /// Explicit counter reset (the local-date check in [SubscriptionState]
+  /// already makes stale counters read as 0).
   void resetDaily() {
     state = state.copyWith(photosUsed: 0);
   }

@@ -42,6 +42,7 @@ class MealEntry {
     required this.protein,
     required this.fat,
     required this.carbs,
+    this.source = '',
   });
 
   final String id;
@@ -51,6 +52,11 @@ class MealEntry {
   final double protein;
   final double fat;
   final double carbs;
+
+  /// How the entry was created: 'photo' | 'manual'. Client-side only for
+  /// now — persisting it needs a `source` column migration in `meals`
+  /// (Supabase intentionally untouched); rows loaded from the DB carry ''.
+  final String source;
 }
 
 class MealsState {
