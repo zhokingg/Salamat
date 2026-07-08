@@ -36,6 +36,55 @@ class AppLocalizationsRu extends AppLocalizations {
   String get valueDash => '—';
 
   @override
+  String get manualTitle => 'Добавить блюдо вручную';
+
+  @override
+  String get manualNameLabel => 'Название блюда';
+
+  @override
+  String get manualKcalLabel => 'Калории (ккал)';
+
+  @override
+  String get manualKcalError => 'Введите 1–5000 ккал';
+
+  @override
+  String get manualAddDetails => 'Добавить детали';
+
+  @override
+  String get manualProtein => 'Белки, г';
+
+  @override
+  String get manualFat => 'Жиры, г';
+
+  @override
+  String get manualCarbs => 'Углеводы, г';
+
+  @override
+  String get manualPortion => 'Порция, г';
+
+  @override
+  String manualAddToMeal(String meal) {
+    return 'Добавить в $meal';
+  }
+
+  @override
+  String manualAddedSnack(String meal) {
+    return 'Добавлено в $meal ✓';
+  }
+
+  @override
+  String get manualAddButton => 'Добавить вручную';
+
+  @override
+  String get limitTitle => 'Бесплатный скан на сегодня использован';
+
+  @override
+  String get limitGoPro => 'Перейти на Pro';
+
+  @override
+  String get welcomeFreeLine => 'Бесплатно · 1 фото-скан в день · ручной ввод без ограничений';
+
+  @override
   String get welcomeHeadline => 'Ваш вес БУДЕТ\nдостигнут в нашем\nприложении';
 
   @override
@@ -167,7 +216,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bmiBandNormal => 'Норма';
 
   @override
-  String get bmiBandOver => 'Избыток';
+  String get bmiBandOver => 'Чуть выше нормы';
 
   @override
   String get bmiBandObese => 'Ожирение';
@@ -406,6 +455,35 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get dashboardLeftLabel => 'осталось';
+
+  @override
+  String get dashboardOverflowLabel => 'перебор';
+
+  @override
+  String get dashboardLastMeal => 'ПОСЛЕДНИЙ ПРИЁМ';
+
+  @override
+  String get dashboardCaloriesBudget => 'Бюджет калорий';
+
+  @override
+  String get dashboardWater => 'Вода';
+
+  @override
+  String dashboardWaterLiters(String n) {
+    return '$n л';
+  }
+
+  @override
+  String get dashboardSnapFirstMeal => 'Сфотографируй первое блюдо';
+
+  @override
+  String get dashboardOffline => 'Офлайн — показаны локальные данные';
+
+  @override
+  String get retryButton => 'Повторить';
+
+  @override
   String get dashboardMacroProtein => 'БЕЛКИ';
 
   @override
@@ -446,9 +524,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get navHome => 'Главная';
-
-  @override
-  String get navSearch => 'Поиск';
 
   @override
   String get navProgress => 'Прогресс';
@@ -492,64 +567,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mealSnackLower => 'перекус';
-
-  @override
-  String get searchTitle => 'Добавить еду';
-
-  @override
-  String get searchHint => 'Поиск блюда...';
-
-  @override
-  String searchPer100(int kcal) {
-    return '$kcal ккал · на 100г';
-  }
-
-  @override
-  String get searchAddTo => 'Добавить в';
-
-  @override
-  String get searchEmpty => 'Ничего не найдено';
-
-  @override
-  String get searchOffline => 'Нет связи — показываем базовый список';
-
-  @override
-  String get portionPer100 => 'на 100г';
-
-  @override
-  String get portionPresetSmall => 'С';
-
-  @override
-  String get portionPresetMedium => 'М';
-
-  @override
-  String get portionPresetLarge => 'Б';
-
-  @override
-  String get portionPresetCustom => 'Своя';
-
-  @override
-  String get portionCustomHint => 'Граммы';
-
-  @override
-  String portionGramsShort(int g) {
-    return '$g г';
-  }
-
-  @override
-  String portionKcalWithGrams(int g) {
-    return 'ккал · $g г';
-  }
-
-  @override
-  String portionAddToMeal(String meal) {
-    return 'Добавить в $meal';
-  }
-
-  @override
-  String portionAddedSnack(String meal) {
-    return 'Добавлено в $meal ✓';
-  }
 
   @override
   String get cameraPermissionTitle => 'Нужен доступ к камере';
@@ -610,7 +627,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cameraRetake => '↺ Переснять';
 
   @override
-  String get cameraOutOfPhotos => 'Вы использовали все 3 бесплатных фото.\nПерейдите на Pro — 10 фото в день. 📸';
+  String get cameraOutOfPhotos => 'Бесплатный скан на сегодня использован';
 
   @override
   String get cameraTryPro => 'Попробовать Pro';
@@ -633,13 +650,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallTitleLine2 => 'с Salamat Pro';
 
   @override
-  String get paywallSubtitle => '3 фото бесплатно.\nС Pro — 10 фото в день + прогноз + анализ.';
+  String get paywallSubtitle => '1 бесплатный скан в день.\nС Pro — 10 сканов в день + прогноз + анализ.';
 
   @override
   String get paywallLimitBadge => 'Лимит фото исчерпан';
 
   @override
-  String get paywallFeature1Title => '10 фото в день';
+  String get paywallFeature1Title => '10 фото-сканов в день';
 
   @override
   String get paywallFeature1Sub => 'Фотай каждый приём пищи';
@@ -651,22 +668,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallFeature2Sub => 'Видишь когда достигнешь цели';
 
   @override
-  String get paywallFeature3Title => 'История без лимита';
+  String get paywallFeature3Title => 'Полная история и тренды';
 
   @override
   String get paywallFeature3Sub => 'Весь дневник питания';
 
   @override
-  String get paywallTierWeekLabel => 'НЕДЕЛЯ';
-
-  @override
-  String get paywallTierMonthLabel => 'МЕСЯЦ';
-
-  @override
-  String get paywallTierYearLabel => 'ГОД';
-
-  @override
-  String get paywallPopular => 'Популярный';
+  String get paywallPopular => 'Выгоднее всего';
 
   @override
   String get paywallTrialButton => 'Попробовать бесплатно — 7 дней';
@@ -703,9 +711,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallTier1mo => '1 МЕСЯЦ';
 
   @override
-  String get paywallTier3mo => '3 МЕСЯЦА';
-
-  @override
   String get paywallTier12mo => '12 МЕСЯЦЕВ';
 
   @override
@@ -714,11 +719,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String paywallPerMonthValue(String price) {
     return '$price/мес';
-  }
-
-  @override
-  String paywallTotal(String price) {
-    return '$price всего';
   }
 
   @override

@@ -36,6 +36,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get valueDash => '—';
 
   @override
+  String get manualTitle => 'Add meal manually';
+
+  @override
+  String get manualNameLabel => 'Dish name';
+
+  @override
+  String get manualKcalLabel => 'Calories (kcal)';
+
+  @override
+  String get manualKcalError => 'Enter 1–5000 kcal';
+
+  @override
+  String get manualAddDetails => 'Add details';
+
+  @override
+  String get manualProtein => 'Protein, g';
+
+  @override
+  String get manualFat => 'Fat, g';
+
+  @override
+  String get manualCarbs => 'Carbs, g';
+
+  @override
+  String get manualPortion => 'Portion, g';
+
+  @override
+  String manualAddToMeal(String meal) {
+    return 'Add to $meal';
+  }
+
+  @override
+  String manualAddedSnack(String meal) {
+    return 'Added to $meal ✓';
+  }
+
+  @override
+  String get manualAddButton => 'Add manually';
+
+  @override
+  String get limitTitle => 'Your free scan for today is used';
+
+  @override
+  String get limitGoPro => 'Go Pro';
+
+  @override
+  String get welcomeFreeLine => 'Free · 1 photo scan a day · unlimited manual logging';
+
+  @override
   String get welcomeHeadline => 'Your weight WILL be reached\nin our app';
 
   @override
@@ -167,7 +216,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bmiBandNormal => 'Normal';
 
   @override
-  String get bmiBandOver => 'Overweight';
+  String get bmiBandOver => 'Slightly above';
 
   @override
   String get bmiBandObese => 'Obese';
@@ -406,6 +455,35 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get dashboardLeftLabel => 'left';
+
+  @override
+  String get dashboardOverflowLabel => 'over';
+
+  @override
+  String get dashboardLastMeal => 'LAST MEAL';
+
+  @override
+  String get dashboardCaloriesBudget => 'Calories budget';
+
+  @override
+  String get dashboardWater => 'Water';
+
+  @override
+  String dashboardWaterLiters(String n) {
+    return '$n L';
+  }
+
+  @override
+  String get dashboardSnapFirstMeal => 'Snap your first meal';
+
+  @override
+  String get dashboardOffline => 'Offline — showing local data';
+
+  @override
+  String get retryButton => 'Retry';
+
+  @override
   String get dashboardMacroProtein => 'PROTEIN';
 
   @override
@@ -444,9 +522,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navHome => 'Home';
-
-  @override
-  String get navSearch => 'Search';
 
   @override
   String get navProgress => 'Progress';
@@ -490,64 +565,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mealSnackLower => 'snack';
-
-  @override
-  String get searchTitle => 'Add food';
-
-  @override
-  String get searchHint => 'Search dishes...';
-
-  @override
-  String searchPer100(int kcal) {
-    return '$kcal kcal · per 100g';
-  }
-
-  @override
-  String get searchAddTo => 'Add to';
-
-  @override
-  String get searchEmpty => 'Nothing found';
-
-  @override
-  String get searchOffline => 'No connection — showing core list';
-
-  @override
-  String get portionPer100 => 'per 100g';
-
-  @override
-  String get portionPresetSmall => 'S';
-
-  @override
-  String get portionPresetMedium => 'M';
-
-  @override
-  String get portionPresetLarge => 'L';
-
-  @override
-  String get portionPresetCustom => 'Custom';
-
-  @override
-  String get portionCustomHint => 'Grams';
-
-  @override
-  String portionGramsShort(int g) {
-    return '$g g';
-  }
-
-  @override
-  String portionKcalWithGrams(int g) {
-    return 'kcal · $g g';
-  }
-
-  @override
-  String portionAddToMeal(String meal) {
-    return 'Add to $meal';
-  }
-
-  @override
-  String portionAddedSnack(String meal) {
-    return 'Added to $meal ✓';
-  }
 
   @override
   String get cameraPermissionTitle => 'Camera access needed';
@@ -608,7 +625,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraRetake => '↺ Retake';
 
   @override
-  String get cameraOutOfPhotos => 'You\'ve used all 3 free photos.\nUpgrade to Pro — 10 photos a day. 📸';
+  String get cameraOutOfPhotos => 'Your free scan for today is used';
 
   @override
   String get cameraTryPro => 'Try Pro';
@@ -631,13 +648,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTitleLine2 => 'with Salamat Pro';
 
   @override
-  String get paywallSubtitle => '3 free photos.\nWith Pro — 10 photos a day + forecast + analysis.';
+  String get paywallSubtitle => '1 free scan a day.\nWith Pro — 10 scans a day + forecast + analysis.';
 
   @override
   String get paywallLimitBadge => 'Photo limit reached';
 
   @override
-  String get paywallFeature1Title => '10 photos a day';
+  String get paywallFeature1Title => '10 photo scans a day';
 
   @override
   String get paywallFeature1Sub => 'Snap every meal';
@@ -649,22 +666,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallFeature2Sub => 'See when you reach your goal';
 
   @override
-  String get paywallFeature3Title => 'Unlimited history';
+  String get paywallFeature3Title => 'Full history & trends';
 
   @override
   String get paywallFeature3Sub => 'Your whole food diary';
 
   @override
-  String get paywallTierWeekLabel => 'WEEK';
-
-  @override
-  String get paywallTierMonthLabel => 'MONTH';
-
-  @override
-  String get paywallTierYearLabel => 'YEAR';
-
-  @override
-  String get paywallPopular => 'Popular';
+  String get paywallPopular => 'Best value';
 
   @override
   String get paywallTrialButton => 'Try free — 7 days';
@@ -701,9 +709,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTier1mo => '1 MONTH';
 
   @override
-  String get paywallTier3mo => '3 MONTHS';
-
-  @override
   String get paywallTier12mo => '12 MONTHS';
 
   @override
@@ -712,11 +717,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String paywallPerMonthValue(String price) {
     return '$price/mo';
-  }
-
-  @override
-  String paywallTotal(String price) {
-    return '$price total';
   }
 
   @override

@@ -149,6 +149,96 @@ abstract class AppLocalizations {
   /// **'—'**
   String get valueDash;
 
+  /// No description provided for @manualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add meal manually'**
+  String get manualTitle;
+
+  /// No description provided for @manualNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dish name'**
+  String get manualNameLabel;
+
+  /// No description provided for @manualKcalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories (kcal)'**
+  String get manualKcalLabel;
+
+  /// No description provided for @manualKcalError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–5000 kcal'**
+  String get manualKcalError;
+
+  /// No description provided for @manualAddDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Add details'**
+  String get manualAddDetails;
+
+  /// No description provided for @manualProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein, g'**
+  String get manualProtein;
+
+  /// No description provided for @manualFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat, g'**
+  String get manualFat;
+
+  /// No description provided for @manualCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbs, g'**
+  String get manualCarbs;
+
+  /// No description provided for @manualPortion.
+  ///
+  /// In en, this message translates to:
+  /// **'Portion, g'**
+  String get manualPortion;
+
+  /// No description provided for @manualAddToMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to {meal}'**
+  String manualAddToMeal(String meal);
+
+  /// No description provided for @manualAddedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to {meal} ✓'**
+  String manualAddedSnack(String meal);
+
+  /// No description provided for @manualAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add manually'**
+  String get manualAddButton;
+
+  /// No description provided for @limitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free scan for today is used'**
+  String get limitTitle;
+
+  /// No description provided for @limitGoPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Pro'**
+  String get limitGoPro;
+
+  /// No description provided for @welcomeFreeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Free · 1 photo scan a day · unlimited manual logging'**
+  String get welcomeFreeLine;
+
   /// No description provided for @welcomeHeadline.
   ///
   /// In en, this message translates to:
@@ -398,7 +488,7 @@ abstract class AppLocalizations {
   /// No description provided for @bmiBandOver.
   ///
   /// In en, this message translates to:
-  /// **'Overweight'**
+  /// **'Slightly above'**
   String get bmiBandOver;
 
   /// No description provided for @bmiBandObese.
@@ -833,6 +923,60 @@ abstract class AppLocalizations {
   /// **'over by {over}'**
   String dashboardOverflow(int over);
 
+  /// No description provided for @dashboardLeftLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'left'**
+  String get dashboardLeftLabel;
+
+  /// No description provided for @dashboardOverflowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'over'**
+  String get dashboardOverflowLabel;
+
+  /// No description provided for @dashboardLastMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'LAST MEAL'**
+  String get dashboardLastMeal;
+
+  /// No description provided for @dashboardCaloriesBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories budget'**
+  String get dashboardCaloriesBudget;
+
+  /// No description provided for @dashboardWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get dashboardWater;
+
+  /// No description provided for @dashboardWaterLiters.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} L'**
+  String dashboardWaterLiters(String n);
+
+  /// No description provided for @dashboardSnapFirstMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Snap your first meal'**
+  String get dashboardSnapFirstMeal;
+
+  /// No description provided for @dashboardOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline — showing local data'**
+  String get dashboardOffline;
+
+  /// No description provided for @retryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryButton;
+
   /// No description provided for @dashboardMacroProtein.
   ///
   /// In en, this message translates to:
@@ -892,12 +1036,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home'**
   String get navHome;
-
-  /// No description provided for @navSearch.
-  ///
-  /// In en, this message translates to:
-  /// **'Search'**
-  String get navSearch;
 
   /// No description provided for @navProgress.
   ///
@@ -976,102 +1114,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'snack'**
   String get mealSnackLower;
-
-  /// No description provided for @searchTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Add food'**
-  String get searchTitle;
-
-  /// No description provided for @searchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search dishes...'**
-  String get searchHint;
-
-  /// No description provided for @searchPer100.
-  ///
-  /// In en, this message translates to:
-  /// **'{kcal} kcal · per 100g'**
-  String searchPer100(int kcal);
-
-  /// No description provided for @searchAddTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to'**
-  String get searchAddTo;
-
-  /// No description provided for @searchEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing found'**
-  String get searchEmpty;
-
-  /// No description provided for @searchOffline.
-  ///
-  /// In en, this message translates to:
-  /// **'No connection — showing core list'**
-  String get searchOffline;
-
-  /// No description provided for @portionPer100.
-  ///
-  /// In en, this message translates to:
-  /// **'per 100g'**
-  String get portionPer100;
-
-  /// No description provided for @portionPresetSmall.
-  ///
-  /// In en, this message translates to:
-  /// **'S'**
-  String get portionPresetSmall;
-
-  /// No description provided for @portionPresetMedium.
-  ///
-  /// In en, this message translates to:
-  /// **'M'**
-  String get portionPresetMedium;
-
-  /// No description provided for @portionPresetLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'L'**
-  String get portionPresetLarge;
-
-  /// No description provided for @portionPresetCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get portionPresetCustom;
-
-  /// No description provided for @portionCustomHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Grams'**
-  String get portionCustomHint;
-
-  /// No description provided for @portionGramsShort.
-  ///
-  /// In en, this message translates to:
-  /// **'{g} g'**
-  String portionGramsShort(int g);
-
-  /// No description provided for @portionKcalWithGrams.
-  ///
-  /// In en, this message translates to:
-  /// **'kcal · {g} g'**
-  String portionKcalWithGrams(int g);
-
-  /// No description provided for @portionAddToMeal.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to {meal}'**
-  String portionAddToMeal(String meal);
-
-  /// No description provided for @portionAddedSnack.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to {meal} ✓'**
-  String portionAddedSnack(String meal);
 
   /// No description provided for @cameraPermissionTitle.
   ///
@@ -1184,7 +1226,7 @@ abstract class AppLocalizations {
   /// No description provided for @cameraOutOfPhotos.
   ///
   /// In en, this message translates to:
-  /// **'You\'ve used all 3 free photos.\nUpgrade to Pro — 10 photos a day. 📸'**
+  /// **'Your free scan for today is used'**
   String get cameraOutOfPhotos;
 
   /// No description provided for @cameraTryPro.
@@ -1226,7 +1268,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'3 free photos.\nWith Pro — 10 photos a day + forecast + analysis.'**
+  /// **'1 free scan a day.\nWith Pro — 10 scans a day + forecast + analysis.'**
   String get paywallSubtitle;
 
   /// No description provided for @paywallLimitBadge.
@@ -1238,7 +1280,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallFeature1Title.
   ///
   /// In en, this message translates to:
-  /// **'10 photos a day'**
+  /// **'10 photo scans a day'**
   String get paywallFeature1Title;
 
   /// No description provided for @paywallFeature1Sub.
@@ -1262,7 +1304,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallFeature3Title.
   ///
   /// In en, this message translates to:
-  /// **'Unlimited history'**
+  /// **'Full history & trends'**
   String get paywallFeature3Title;
 
   /// No description provided for @paywallFeature3Sub.
@@ -1271,28 +1313,10 @@ abstract class AppLocalizations {
   /// **'Your whole food diary'**
   String get paywallFeature3Sub;
 
-  /// No description provided for @paywallTierWeekLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'WEEK'**
-  String get paywallTierWeekLabel;
-
-  /// No description provided for @paywallTierMonthLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'MONTH'**
-  String get paywallTierMonthLabel;
-
-  /// No description provided for @paywallTierYearLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'YEAR'**
-  String get paywallTierYearLabel;
-
   /// No description provided for @paywallPopular.
   ///
   /// In en, this message translates to:
-  /// **'Popular'**
+  /// **'Best value'**
   String get paywallPopular;
 
   /// No description provided for @paywallTrialButton.
@@ -1355,12 +1379,6 @@ abstract class AppLocalizations {
   /// **'1 MONTH'**
   String get paywallTier1mo;
 
-  /// No description provided for @paywallTier3mo.
-  ///
-  /// In en, this message translates to:
-  /// **'3 MONTHS'**
-  String get paywallTier3mo;
-
   /// No description provided for @paywallTier12mo.
   ///
   /// In en, this message translates to:
@@ -1378,12 +1396,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{price}/mo'**
   String paywallPerMonthValue(String price);
-
-  /// No description provided for @paywallTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'{price} total'**
-  String paywallTotal(String price);
 
   /// No description provided for @paywallSaveBadge.
   ///

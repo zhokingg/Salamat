@@ -15,11 +15,10 @@ import '../../theme/dimensions.dart';
 import '../../theme/elevation.dart';
 import '../../theme/text_styles.dart';
 
-enum _Tier { month1, month3, year }
+enum _Tier { month1, year }
 
 String _tierLabel(AppLocalizations loc, _Tier t) => switch (t) {
       _Tier.month1 => loc.paywallTier1mo,
-      _Tier.month3 => loc.paywallTier3mo,
       _Tier.year => loc.paywallTier12mo,
     };
 
@@ -114,7 +113,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final loc = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
     final t = _targetSnapshot(user);
-    final prices = pricesFor(user.country);
+    // Prices are always USD — country selection was removed from onboarding.
+    final prices = kPaywallPrices[Currency.usd]!;
 
     return Scaffold(
       backgroundColor: SalamatColors.bg,
@@ -484,8 +484,8 @@ class _TierRow extends StatelessWidget {
   final PaywallPrices prices;
   final ValueChanged<_Tier> onSelect;
 
-  // Display order: 1 month / 12 months (popular, centered) / 3 months
-  static const _order = [_Tier.month1, _Tier.year, _Tier.month3];
+  // Two tiers, stacked: Annual (best value, default) on top, Monthly below.
+  static const _order = [_Tier.year, _Tier.month1];
 
   /// Build one card's content for the given tier from the active price set.
   ({
@@ -510,14 +510,6 @@ class _TierRow extends StatelessWidget {
           popular: true,
           discount: 58,
         );
-      case _Tier.month3:
-        // 3-month: total big, per-month equivalent small (matches annual).
-        return (
-          main: prices.threeMonths,
-          sub: prices.threeMonthsPerMo,
-          popular: false,
-          discount: 38,
-        );
     }
   }
 
@@ -530,32 +522,27 @@ class _TierRow extends StatelessWidget {
         SalamatDims.screenPadding,
         0,
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < _order.length; i++) ...[
-              Expanded(
-                child: _TierCard(
-                  tier: _order[i],
-                  spec: _spec(_order[i]),
-                  selected: selected == _order[i],
-                  onTap: () => onSelect(_order[i]),
-                ).animate().fadeIn(
-                      delay: (260 + i * 80).ms,
-                      duration: 320.ms,
-                    ).moveY(
-                      begin: 6,
-                      end: 0,
-                      delay: (260 + i * 80).ms,
-                      duration: 320.ms,
-                      curve: Curves.easeOutCubic,
-                    ),
-              ),
-              if (i != _order.length - 1) const SizedBox(width: 10),
-            ],
+      child: Column(
+        children: [
+          for (var i = 0; i < _order.length; i++) ...[
+            _TierCard(
+              tier: _order[i],
+              spec: _spec(_order[i]),
+              selected: selected == _order[i],
+              onTap: () => onSelect(_order[i]),
+            ).animate().fadeIn(
+                  delay: (260 + i * 80).ms,
+                  duration: 320.ms,
+                ).moveY(
+                  begin: 6,
+                  end: 0,
+                  delay: (260 + i * 80).ms,
+                  duration: 320.ms,
+                  curve: Curves.easeOutCubic,
+                ),
+            if (i != _order.length - 1) const SizedBox(height: 10),
           ],
-        ),
+        ],
       ),
     );
   }
