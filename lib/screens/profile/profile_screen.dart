@@ -11,8 +11,11 @@ import '../../providers/locale_provider.dart';
 import '../../providers/meals_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../services/onboarding_flag.dart';
 import '../../services/supabase_service.dart';
 import '../../theme/colors.dart';
+import '../../theme/salamat_icons.dart';
+import '../../theme/salamat_theme.dart';
 import '../../theme/dimensions.dart';
 import '../../theme/text_styles.dart';
 
@@ -123,11 +126,7 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _DataCard(user: user),
         ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _ReferralCard(user: user),
-        ),
+
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -139,38 +138,38 @@ class ProfileScreen extends ConsumerWidget {
           child: _SettingsCard(
             items: [
               _SettingsItem(
-                emoji: '🔔',
+                icon: PhosphorIcons.bell(),
                 label: loc.profileSettingNotifications,
                 onTap: () =>
                     _showSoon(context, loc.profileSettingNotifications),
               ),
               _SettingsItem(
-                emoji: '📊',
+                icon: PhosphorIcons.target(),
                 label: loc.profileSettingMyGoal,
                 onTap: () => context.push('/onboarding/goal'),
               ),
               _SettingsItem(
-                emoji: '⚖️',
+                icon: PhosphorIcons.scales(),
                 label: loc.profileSettingUpdateWeight,
                 onTap: () => _showWeightDialog(context, ref),
               ),
               _SettingsItem(
-                emoji: '👑',
+                icon: PhosphorIcons.crown(),
                 label: loc.profileSettingPro,
                 onTap: () => context.push('/paywall'),
               ),
               _SettingsItem(
-                emoji: '📄',
+                icon: PhosphorIcons.fileText(),
                 label: loc.profileSettingPrivacy,
                 onTap: () => _openUrl(LegalUrls.privacyPolicy),
               ),
               _SettingsItem(
-                emoji: '📜',
+                icon: PhosphorIcons.scroll(),
                 label: loc.profileSettingTerms,
                 onTap: () => _openUrl(LegalUrls.termsOfService),
               ),
               _SettingsItem(
-                emoji: '🚪',
+                icon: PhosphorIcons.signOut(),
                 label: loc.profileSettingLogout,
                 onTap: () => _logout(context, ref),
               ),
@@ -274,6 +273,7 @@ class ProfileScreen extends ConsumerWidget {
     Navigator.of(context).pop(); // dismiss the progress spinner
 
     if (ok) {
+      OnboardingFlag.clear();
       ref.invalidate(userProvider);
       ref.invalidate(mealsProvider);
       ref.invalidate(subscriptionProvider);
@@ -424,6 +424,9 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   void _logout(BuildContext context, WidgetRef ref) {
+    // Clear the local flag too — otherwise the next launch would route a
+    // logged-out user straight to an empty dashboard.
+    OnboardingFlag.clear();
     ref.invalidate(userProvider);
     ref.invalidate(mealsProvider);
     ref.invalidate(subscriptionProvider);
@@ -446,7 +449,11 @@ class _LanguageRow extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Text('🌐', style: TextStyle(fontSize: 20)),
+          SalamatIcon(
+            PhosphorIcons.globe(),
+            size: 20,
+            color: SalamatTokens.iconQuiet,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -659,108 +666,14 @@ class _DataCard extends StatelessWidget {
   }
 }
 
-class _ReferralCard extends StatelessWidget {
-  const _ReferralCard({required this.user});
-
-  final UserState user;
-
-  String _handle() {
-    final base = user.name.trim().toLowerCase();
-    return base.isEmpty ? 'friend' : base;
-  }
-
-  Future<void> _copy(BuildContext context) async {
-    final loc = AppLocalizations.of(context)!;
-    final link = 'salamat.fit/r/${_handle()}';
-    await Clipboard.setData(ClipboardData(text: link));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: SalamatColors.g1,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        content: Text(
-          loc.profileReferralCopied,
-          style: GoogleFonts.manrope(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: SalamatColors.surf,
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: SalamatColors.g4,
-        borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-        border: Border.all(color: SalamatColors.g3),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            loc.profileReferralTitle,
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: SalamatColors.g1,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            loc.profileReferralSubtitle,
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: SalamatColors.i2,
-            ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            height: 46,
-            child: OutlinedButton(
-              onPressed: () => _copy(context),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: SalamatColors.g1, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                backgroundColor: Colors.transparent,
-              ),
-              child: Text(
-                loc.profileReferralCopy,
-                style: GoogleFonts.manrope(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: SalamatColors.g1,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SettingsItem {
   const _SettingsItem({
-    required this.emoji,
+    required this.icon,
     required this.label,
     required this.onTap,
   });
 
-  final String emoji;
+  final PhosphorIconData icon;
   final String label;
   final VoidCallback onTap;
 }
@@ -796,7 +709,11 @@ class _SettingsCard extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Text(items[i].emoji, style: const TextStyle(fontSize: 20)),
+                    SalamatIcon(
+                      items[i].icon,
+                      size: 20,
+                      color: SalamatTokens.iconQuiet,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(

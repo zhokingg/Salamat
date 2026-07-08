@@ -31,8 +31,8 @@ class SalamatTokens {
   static const pillBg = Color(0xFFE9F2DC);
   static const pillText = Color(0xFF52802B);
   static const textPrimary = Color(0xFF35402A);
-  static const textMuted = Color(0xFF8A9478);
-  static const iconQuiet = Color(0xFFA9B396);
+  static const textMuted = Color(0xFF677257);
+  static const iconQuiet = Color(0xFF75816A);
   static const onAccent = Color(0xFFFFFFFF);
   static const danger = SalamatColors.danger;
 
