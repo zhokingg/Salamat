@@ -28,6 +28,7 @@ dependencies:
   confetti: ^0.7.0
   lucide_icons: ^0.257.0
   phosphor_flutter: ^2.1.0
+  flutter_svg: ^2.0.10
   flutter_animate: ^4.5.0
   url_launcher: ^6.3.0
   intl: any
@@ -44,6 +45,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/food_icons/
 
 # App launcher icon — Salamat brand sprout (green #26593C). Regenerate with:
 #   /Users/user/flutter/bin/dart run flutter_launcher_icons
