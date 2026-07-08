@@ -728,9 +728,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallNoPaymentNow => 'No payment now';
 
   @override
-  String get paywallTrustLine => '1,000,000 users · 83% reach their goal';
-
-  @override
   String get paywallFinePrint => 'Subscription renews automatically at the end of each period. Cancel anytime in your store account. Terms and Privacy apply.';
 
   @override

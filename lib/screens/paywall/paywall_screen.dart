@@ -152,7 +152,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ),
               _BottomBar(
                 onContinue: _purchase,
-                trustLine: loc.paywallTrustLine,
                 finePrint: loc.paywallFinePrint,
               ),
             ],
@@ -796,12 +795,10 @@ class _NoPaymentRow extends StatelessWidget {
 class _BottomBar extends StatelessWidget {
   const _BottomBar({
     required this.onContinue,
-    required this.trustLine,
     required this.finePrint,
   });
 
   final VoidCallback onContinue;
-  final String trustLine;
   final String finePrint;
 
   @override
@@ -830,8 +827,6 @@ class _BottomBar extends StatelessWidget {
           const _NoPaymentRow(),
           const SizedBox(height: 10),
           _PrimaryCta(label: loc.buttonContinue, onTap: onContinue),
-          const SizedBox(height: 10),
-          _TrustLine(text: trustLine),
           const SizedBox(height: 8),
           Text(
             finePrint,
@@ -950,34 +945,3 @@ class _PrimaryCtaState extends State<_PrimaryCta> {
   }
 }
 
-class _TrustLine extends StatelessWidget {
-  const _TrustLine({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(
-          LucideIcons.users,
-          size: 12,
-          color: SalamatColors.i3,
-        ),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w600,
-              color: SalamatColors.i3,
-              letterSpacing: 0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

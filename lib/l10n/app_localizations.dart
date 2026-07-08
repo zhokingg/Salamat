@@ -1409,12 +1409,6 @@ abstract class AppLocalizations {
   /// **'No payment now'**
   String get paywallNoPaymentNow;
 
-  /// No description provided for @paywallTrustLine.
-  ///
-  /// In en, this message translates to:
-  /// **'1,000,000 users · 83% reach their goal'**
-  String get paywallTrustLine;
-
   /// No description provided for @paywallFinePrint.
   ///
   /// In en, this message translates to:

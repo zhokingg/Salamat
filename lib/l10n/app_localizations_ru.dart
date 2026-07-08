@@ -730,9 +730,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallNoPaymentNow => 'Без оплаты сейчас';
 
   @override
-  String get paywallTrustLine => '1 000 000 пользователей · 83% достигают цели';
-
-  @override
   String get paywallFinePrint => 'Подписка продлевается автоматически в конце каждого периода. Отмените в любой момент в аккаунте магазина. Действуют Условия и Политика конфиденциальности.';
 
   @override

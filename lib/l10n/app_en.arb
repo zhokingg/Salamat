@@ -275,7 +275,6 @@
   "paywallSaveBadge": "−{percent}%",
   "@paywallSaveBadge": {"placeholders": {"percent": {"type": "int"}}},
   "paywallNoPaymentNow": "No payment now",
-  "paywallTrustLine": "1,000,000 users · 83% reach their goal",
   "paywallFinePrint": "Subscription renews automatically at the end of each period. Cancel anytime in your store account. Terms and Privacy apply.",
 
   "profileTitle": "Profile",
