@@ -152,7 +152,7 @@ class ProfileScreen extends ConsumerWidget {
               _SettingsItem(
                 icon: PhosphorIcons.target(),
                 label: loc.profileSettingMyGoal,
-                onTap: () => context.push('/onboarding/goal'),
+                onTap: () => context.push('/goal-edit'),
               ),
               _SettingsItem(
                 icon: PhosphorIcons.scales(),
@@ -420,6 +420,23 @@ class ProfileScreen extends ConsumerWidget {
             height: u.height ?? 170,
             weight: newValue.toDouble(),
           );
+      // Persist immediately — a local-only mutation silently reverts on the
+      // next restart (profile re-hydrates from the server row).
+      final updated = ref.read(userProvider);
+      SupabaseService.upsertUser(
+        name: updated.name.isEmpty ? 'Friend' : updated.name,
+        gender: updated.gender == Gender.female ? 'female' : 'male',
+        age: updated.age ?? 25,
+        heightCm: updated.height ?? 170,
+        weightKg: newValue.toDouble(),
+        goal: switch (updated.goal) {
+          Goal.lose => 'lose',
+          Goal.gain => 'gain',
+          _ => 'maintain',
+        },
+        dailyCalories: updated.calorieNorm ?? 2000,
+      );
+      SupabaseService.logWeight(newValue.toDouble());
     }
   }
 
