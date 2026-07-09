@@ -9,7 +9,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/meals_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/weight_provider.dart';
 import '../../screens/manual_entry/manual_entry_sheet.dart';
+import '../../widgets/update_weight_dialog.dart';
 import '../../screens/onboarding/widgets.dart' show CountUp;
 import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
@@ -70,7 +72,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     required bool offline,
   }) {
     final norm = user.calorieNorm ?? 2000;
-    final name = user.name.isNotEmpty ? user.name : loc.dashboardGuestName;
+    final greeting = user.name.trim().isNotEmpty
+        ? loc.dashboardGreeting(user.name.trim())
+        : loc.dashboardGreetingNoName;
     final consumed = meals.totalKcalAll;
     final overflow = consumed > norm;
     final left = norm - consumed;
@@ -84,6 +88,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     final allEntries =
         MealType.values.expand((t) => meals.forType(t)).toList();
     final lastEntry = allEntries.isEmpty ? null : allEntries.last;
+
+    // Macro totals for the bars. Manual entries logged without macros get a
+    // 30/30/40 estimate from their kcal (marked "~" in the diary) so the
+    // bars don't understate the day.
+    var protein = 0.0, fat = 0.0, carbs = 0.0;
+    for (final e in allEntries) {
+      if (e.isMacroEstimated) {
+        protein += e.estimatedProtein;
+        fat += e.estimatedFat;
+        carbs += e.estimatedCarbs;
+      } else {
+        protein += e.protein;
+        fat += e.fat;
+        carbs += e.carbs;
+      }
+    }
 
     // A day only counts toward the streak with at least one logged meal.
     final streak = allEntries.isEmpty ? 0 : 1;
@@ -109,7 +129,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                loc.dashboardGreeting(name),
+                greeting,
                 style: GoogleFonts.manrope(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -143,9 +163,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             overflow: overflow,
             norm: norm,
             left: left,
-            protein: meals.totalProtein,
-            fat: meals.totalFat,
-            carbs: meals.totalCarbs,
+            protein: protein,
+            fat: fat,
+            carbs: carbs,
           ),
         ),
         const SizedBox(height: 12),
@@ -166,6 +186,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             ),
           ),
         ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _WeightCard(
+            weight: user.weight,
+            logs: ref.watch(weightLogsProvider).valueOrNull ?? const [],
+            onAdd: () => showUpdateWeightDialog(context, ref),
+          ),
+        ),
+        if (left > 0) ...[
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _SnackIdeaCard(kcalLeft: left),
+          ),
+        ],
         if (allEntries.isEmpty) ...[
           const SizedBox(height: 12),
           Padding(
@@ -631,14 +667,28 @@ class _MacroBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '${value.round()} $unit',
-          style: GoogleFonts.manrope(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: SalamatTokens.textPrimary,
-            height: 1.0,
+        Text.rich(
+          TextSpan(
+            text: '${value.round()}',
+            style: GoogleFonts.manrope(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: SalamatTokens.textPrimary,
+              height: 1.0,
+            ),
+            children: [
+              TextSpan(
+                text: ' / ${target.round()} $unit',
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: SalamatTokens.textMuted,
+                ),
+              ),
+            ],
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 6),
         ClipRRect(
@@ -798,6 +848,225 @@ class _LastMealCard extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                     color: SalamatTokens.textMuted,
                     height: 1.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Cream weight card: current weight large, green "since start" delta and a
+/// mini sparkline from `weight_logs`. "+" opens the shared Update-weight
+/// dialog; tapping anywhere else is a doorway into the Progress tab.
+class _WeightCard extends StatelessWidget {
+  const _WeightCard({
+    required this.weight,
+    required this.logs,
+    required this.onAdd,
+  });
+
+  final double? weight;
+  final List<WeightLog> logs;
+  final VoidCallback onAdd;
+
+  static String _fmt(double v) =>
+      v == v.roundToDouble() ? '${v.round()}' : v.toStringAsFixed(1);
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final current = weight ?? (logs.isEmpty ? null : logs.last.kg);
+    final delta =
+        (current != null && logs.isNotEmpty) ? current - logs.first.kg : null;
+    return GestureDetector(
+      onTap: () => context.go('/progress'),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: SalamatTokens.card(),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.dashboardWeightTitle,
+                    style: GoogleFonts.manrope(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: SalamatTokens.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    current == null
+                        ? '—'
+                        : '${_fmt(current)} ${loc.profileKgShort}',
+                    style: GoogleFonts.manrope(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: SalamatTokens.textPrimary,
+                      height: 1.0,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  if (delta != null) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      loc.dashboardWeightSinceStart(
+                        '${delta >= 0 ? '+' : '−'}${_fmt(delta.abs())}',
+                      ),
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: SalamatTokens.accentDeep,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (logs.length >= 2) ...[
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 80,
+                height: 40,
+                child: CustomPaint(
+                  painter: _SparklinePainter(
+                    values: [for (final l in logs) l.kg],
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: onAdd,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: SalamatTokens.accentDeep,
+                  shape: BoxShape.circle,
+                ),
+                child: SalamatIcon(
+                  PhosphorIcons.plus(PhosphorIconsStyle.bold),
+                  size: 18,
+                  color: SalamatTokens.onAccent,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Weight-history polyline, last point emphasized. Values are normalized to
+/// the card's mini viewport; a flat history draws a mid-height line.
+class _SparklinePainter extends CustomPainter {
+  _SparklinePainter({required this.values});
+
+  final List<double> values;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (values.length < 2) return;
+    final shown = values.length > 14
+        ? values.sublist(values.length - 14)
+        : values;
+    final min = shown.reduce(math.min);
+    final max = shown.reduce(math.max);
+    final span = max - min;
+    const inset = 3.0;
+    final h = size.height - inset * 2;
+    final points = <Offset>[
+      for (var i = 0; i < shown.length; i++)
+        Offset(
+          size.width * i / (shown.length - 1),
+          span == 0
+              ? size.height / 2
+              : inset + h * (1 - (shown[i] - min) / span),
+        ),
+    ];
+    final line = Paint()
+      ..color = SalamatTokens.accent
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(
+      Path()..addPolygon(points, false),
+      line,
+    );
+    canvas.drawCircle(
+      points.last,
+      3,
+      Paint()..color = SalamatTokens.accentDeep,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _SparklinePainter oldDelegate) =>
+      oldDelegate.values != values;
+}
+
+/// White supportive-tone snack suggestion, rule-based on the calories left
+/// today. Hidden entirely by the caller once the budget is spent.
+class _SnackIdeaCard extends StatelessWidget {
+  const _SnackIdeaCard({required this.kcalLeft});
+
+  final int kcalLeft;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final text = kcalLeft > 400
+        ? loc.snackIdeaHearty
+        : kcalLeft >= 150
+            ? loc.snackIdeaLight
+            : loc.snackIdeaTiny;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: SalamatTokens.card(color: SalamatTokens.surfaceAlt),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SalamatIcon(
+            PhosphorIcons.cookie(PhosphorIconsStyle.duotone),
+            size: 20,
+            color: SalamatTokens.amber,
+            bubbleColor: SalamatTokens.bubbleAmber,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  loc.snackIdeaTitle,
+                  style: GoogleFonts.manrope(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: SalamatTokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  text,
+                  style: GoogleFonts.manrope(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: SalamatTokens.textMuted,
+                    height: 1.35,
                   ),
                 ),
               ],

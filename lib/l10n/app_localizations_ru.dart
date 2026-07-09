@@ -450,8 +450,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String dashboardGreeting(String name) {
-    return 'Привет, $name 👋';
+    return 'Привет, $name';
   }
+
+  @override
+  String get dashboardGreetingNoName => 'Привет!';
 
   @override
   String get dashboardGuestName => 'друг';
@@ -499,6 +502,31 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mealsNothingYet => 'Пока пусто';
+
+  @override
+  String get dashboardWeightTitle => 'ВЕС';
+
+  @override
+  String dashboardWeightSinceStart(String delta) {
+    return '$delta кг с начала';
+  }
+
+  @override
+  String get snackIdeaTitle => 'Идея перекуса';
+
+  @override
+  String get snackIdeaHearty => 'Запас ещё солидный — орехи, айран с лепёшкой или творог с фруктами зайдут отлично.';
+
+  @override
+  String get snackIdeaLight => 'Отлично впишется лёгкий перекус — яблоко, йогурт или горсть орехов.';
+
+  @override
+  String get snackIdeaTiny => 'На сегодня почти всё — чай, немного ягод или огурец, если хочется пожевать.';
+
+  @override
+  String mealsEstimatedMacros(int p, int f, int c) {
+    return '~Б$p Ж$f У$c';
+  }
 
   @override
   String get dashboardOffline => 'Офлайн — показаны локальные данные';

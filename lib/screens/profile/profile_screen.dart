@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,11 +12,11 @@ import '../../providers/subscription_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/onboarding_flag.dart';
 import '../../services/supabase_service.dart';
+import '../../widgets/update_weight_dialog.dart';
 import '../../theme/colors.dart';
 import '../../theme/salamat_icons.dart';
 import '../../theme/salamat_theme.dart';
 import '../../theme/dimensions.dart';
-import '../../theme/text_styles.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -157,7 +156,7 @@ class ProfileScreen extends ConsumerWidget {
               _SettingsItem(
                 icon: PhosphorIcons.scales(),
                 label: loc.profileSettingUpdateWeight,
-                onTap: () => _showWeightDialog(context, ref),
+                onTap: () => showUpdateWeightDialog(context, ref),
               ),
               _SettingsItem(
                 icon: PhosphorIcons.crown(),
@@ -324,120 +323,6 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _showWeightDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    const int minWeight = 40;
-    const int maxWeight = 300;
-    final loc = AppLocalizations.of(context)!;
-    final controller = TextEditingController(
-      text: ref.read(userProvider).weight?.round().toString() ?? '',
-    );
-    String? error;
-    final newValue = await showDialog<int>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          return AlertDialog(
-            backgroundColor: SalamatColors.surf,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            title: Text(
-              loc.profileUpdateWeightDialog,
-              style: GoogleFonts.manrope(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: SalamatColors.ink,
-              ),
-            ),
-            content: TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(
-                hintText: loc.profileWeightHint,
-                suffixText: loc.profileKgShort,
-                errorText: error,
-                hintStyle: SalamatText.body.copyWith(color: SalamatColors.i3),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      const BorderSide(color: SalamatColors.line, width: 2),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      const BorderSide(color: SalamatColors.g1, width: 2),
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(
-                  loc.buttonCancel,
-                  style: GoogleFonts.manrope(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: SalamatColors.i2,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  final parsed = int.tryParse(controller.text.trim());
-                  if (parsed == null ||
-                      parsed < minWeight ||
-                      parsed > maxWeight) {
-                    setDialogState(() => error =
-                        loc.profileWeightRangeError(minWeight, maxWeight));
-                    return;
-                  }
-                  Navigator.of(ctx).pop(parsed);
-                },
-                child: Text(
-                  loc.buttonSave,
-                  style: GoogleFonts.manrope(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: SalamatColors.g1,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-    if (newValue != null) {
-      final u = ref.read(userProvider);
-      ref.read(userProvider.notifier).setBody(
-            height: u.height ?? 170,
-            weight: newValue.toDouble(),
-          );
-      // Persist immediately — a local-only mutation silently reverts on the
-      // next restart (profile re-hydrates from the server row).
-      final updated = ref.read(userProvider);
-      SupabaseService.upsertUser(
-        name: updated.name.isEmpty ? 'Friend' : updated.name,
-        gender: updated.gender == Gender.female ? 'female' : 'male',
-        age: updated.age ?? 25,
-        heightCm: updated.height ?? 170,
-        weightKg: newValue.toDouble(),
-        goal: switch (updated.goal) {
-          Goal.lose => 'lose',
-          Goal.gain => 'gain',
-          _ => 'maintain',
-        },
-        dailyCalories: updated.calorieNorm ?? 2000,
-      );
-      SupabaseService.logWeight(newValue.toDouble());
-    }
   }
 
   Future<void> _openUrl(String url) async {

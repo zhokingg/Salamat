@@ -926,8 +926,14 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardGreeting.
   ///
   /// In en, this message translates to:
-  /// **'Hi, {name} 👋'**
+  /// **'Hi, {name}'**
   String dashboardGreeting(String name);
+
+  /// No description provided for @dashboardGreetingNoName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi!'**
+  String get dashboardGreetingNoName;
 
   /// No description provided for @dashboardGuestName.
   ///
@@ -1006,6 +1012,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing yet'**
   String get mealsNothingYet;
+
+  /// No description provided for @dashboardWeightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'WEIGHT'**
+  String get dashboardWeightTitle;
+
+  /// No description provided for @dashboardWeightSinceStart.
+  ///
+  /// In en, this message translates to:
+  /// **'{delta} kg since start'**
+  String dashboardWeightSinceStart(String delta);
+
+  /// No description provided for @snackIdeaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Snack idea'**
+  String get snackIdeaTitle;
+
+  /// No description provided for @snackIdeaHearty.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ve got room for a proper snack — nuts, ayran with flatbread, or cottage cheese with fruit.'**
+  String get snackIdeaHearty;
+
+  /// No description provided for @snackIdeaLight.
+  ///
+  /// In en, this message translates to:
+  /// **'A light bite fits nicely — an apple, a yogurt, or a small handful of nuts.'**
+  String get snackIdeaLight;
+
+  /// No description provided for @snackIdeaTiny.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there for today — tea, a few berries or a cucumber if you feel peckish.'**
+  String get snackIdeaTiny;
+
+  /// No description provided for @mealsEstimatedMacros.
+  ///
+  /// In en, this message translates to:
+  /// **'~P{p} F{f} C{c}'**
+  String mealsEstimatedMacros(int p, int f, int c);
 
   /// No description provided for @dashboardOffline.
   ///

@@ -226,9 +226,18 @@ class _EntryRow extends StatelessWidget {
     final time = entry.eatenAt != null
         ? DateFormat.Hm().format(entry.eatenAt!)
         : null;
-    final detail = time == null
-        ? loc.dashboardKcalWithValue(entry.kcal)
-        : '${loc.dashboardKcalWithValue(entry.kcal)} · $time';
+    final parts = <String>[
+      loc.dashboardKcalWithValue(entry.kcal),
+      // Macros estimated from kcal (30/30/40) — the "~" keeps it honest.
+      if (entry.isMacroEstimated)
+        loc.mealsEstimatedMacros(
+          entry.estimatedProtein.round(),
+          entry.estimatedFat.round(),
+          entry.estimatedCarbs.round(),
+        ),
+      if (time != null) time,
+    ];
+    final detail = parts.join(' · ');
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),

@@ -60,6 +60,16 @@ class MealEntry {
   /// When the entry was eaten — display only, populated from the DB row;
   /// entries created this session carry null until reloaded.
   final DateTime? eatenAt;
+
+  /// Entry has calories but no macros at all — typical of quick manual
+  /// logging. Such entries get a 30/30/40 kcal-split estimate (protein and
+  /// carbs 4 kcal/g, fat 9 kcal/g), shown with a "~" prefix in the diary.
+  bool get isMacroEstimated =>
+      kcal > 0 && protein == 0 && fat == 0 && carbs == 0;
+
+  double get estimatedProtein => kcal * 0.30 / 4;
+  double get estimatedFat => kcal * 0.30 / 9;
+  double get estimatedCarbs => kcal * 0.40 / 4;
 }
 
 class MealsState {
