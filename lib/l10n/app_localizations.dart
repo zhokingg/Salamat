@@ -1031,22 +1031,28 @@ abstract class AppLocalizations {
   /// **'Snack idea'**
   String get snackIdeaTitle;
 
+  /// No description provided for @dashboardWeightFirstLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Log your first weigh-in'**
+  String get dashboardWeightFirstLog;
+
   /// No description provided for @snackIdeaHearty.
   ///
   /// In en, this message translates to:
-  /// **'You’ve got room for a proper snack — nuts, ayran with flatbread, or cottage cheese with fruit.'**
+  /// **'There’s room for a proper snack — yogurt with fruit or a sandwich fits.'**
   String get snackIdeaHearty;
 
   /// No description provided for @snackIdeaLight.
   ///
   /// In en, this message translates to:
-  /// **'A light bite fits nicely — an apple, a yogurt, or a small handful of nuts.'**
+  /// **'You have room for 120–240 kcal — a handful of almonds or an apple fits nicely.'**
   String get snackIdeaLight;
 
   /// No description provided for @snackIdeaTiny.
   ///
   /// In en, this message translates to:
-  /// **'Almost there for today — tea, a few berries or a cucumber if you feel peckish.'**
+  /// **'Day’s almost complete — water or tea closes it gently.'**
   String get snackIdeaTiny;
 
   /// No description provided for @mealsEstimatedMacros.
@@ -1679,7 +1685,7 @@ abstract class AppLocalizations {
   /// **'Link copied!'**
   String get profileReferralCopied;
 
-  /// No description provided for @profileSettingNotifications.
+  /// UNUSED in v1.0 — reminders row removed until the feature ships in v1.1
   ///
   /// In en, this message translates to:
   /// **'Notifications'**

@@ -31,7 +31,6 @@ class ProfileScreen extends ConsumerWidget {
     final fullName = '${user.name} ${user.lastName}'.trim().isEmpty
         ? loc.profileGuest
         : '${user.name} ${user.lastName}'.trim();
-    final initials = user.initials;
 
     final entriesCount =
         MealType.values.expand((t) => meals.forType(t)).length;
@@ -56,53 +55,51 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: 24),
-        Center(
-          child: Container(
-            width: 80,
-            height: 80,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: SalamatColors.g1,
-              shape: BoxShape.circle,
-            ),
-            child: initials.isEmpty
-                ? SalamatIcon(
-                    PhosphorIcons.user(PhosphorIconsStyle.duotone),
-                    size: 32,
-                    color: SalamatColors.surf,
-                  )
-                : Text(
-                    initials,
-                    style: GoogleFonts.manrope(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: SalamatColors.surf,
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDims.screenPadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      fullName,
+                      style: GoogleFonts.manrope(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: SalamatTokens.textPrimary,
+                        letterSpacing: -0.2,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Flexible(
-              child: Text(
-                fullName,
-                style: GoogleFonts.manrope(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: SalamatColors.ink,
-                ),
-                overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 8),
+                  _PlanBadge(
+                    label:
+                        sub.isPro ? loc.profileBadgePro : loc.profileBadgeFree,
+                    isPro: sub.isPro,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 8),
-            _PlanBadge(
-              label: sub.isPro ? loc.profileBadgePro : loc.profileBadgeFree,
-              isPro: sub.isPro,
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                [
+                  if (user.goal != null) user.goal!.label(loc),
+                  if (user.calorieNorm != null)
+                    loc.dashboardKcalWithValue(user.calorieNorm!),
+                ].join(' · '),
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: SalamatTokens.textMuted,
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
         Padding(
@@ -142,12 +139,8 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _SettingsCard(
             items: [
-              _SettingsItem(
-                icon: PhosphorIcons.bell(),
-                label: loc.profileSettingNotifications,
-                onTap: () =>
-                    _showSoon(context, loc.profileSettingNotifications),
-              ),
+              // Reminders row intentionally absent until the feature ships
+              // (v1.1); its ARB keys stay marked as unused.
               _SettingsItem(
                 icon: PhosphorIcons.target(),
                 label: loc.profileSettingMyGoal,
@@ -304,26 +297,6 @@ class ProfileScreen extends ConsumerWidget {
     }
   }
 
-  void _showSoon(BuildContext context, String label) {
-    final loc = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: SalamatColors.g1,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        content: Text(
-          loc.profileSoonSuffix(label),
-          style: GoogleFonts.manrope(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: SalamatColors.surf,
-          ),
-        ),
-      ),
-    );
-  }
 
   Future<void> _openUrl(String url) async {
     final uri = Uri.tryParse(url);

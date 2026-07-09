@@ -515,13 +515,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get snackIdeaTitle => 'Идея перекуса';
 
   @override
-  String get snackIdeaHearty => 'Запас ещё солидный — орехи, айран с лепёшкой или творог с фруктами зайдут отлично.';
+  String get dashboardWeightFirstLog => 'Запишите первое взвешивание';
 
   @override
-  String get snackIdeaLight => 'Отлично впишется лёгкий перекус — яблоко, йогурт или горсть орехов.';
+  String get snackIdeaHearty => 'Ещё есть запас на полноценный перекус — йогурт с фруктами или сэндвич отлично впишутся.';
 
   @override
-  String get snackIdeaTiny => 'На сегодня почти всё — чай, немного ягод или огурец, если хочется пожевать.';
+  String get snackIdeaLight => 'Есть запас на 120–240 ккал — горсть миндаля или яблоко впишутся отлично.';
+
+  @override
+  String get snackIdeaTiny => 'День почти закрыт — вода или чай мягко его завершат.';
 
   @override
   String mealsEstimatedMacros(int p, int f, int c) {

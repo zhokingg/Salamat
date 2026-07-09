@@ -916,8 +916,8 @@ class _WeightCard extends StatelessWidget {
                       letterSpacing: -0.5,
                     ),
                   ),
-                  if (delta != null) ...[
-                    const SizedBox(height: 5),
+                  const SizedBox(height: 5),
+                  if (delta != null)
                     Text(
                       loc.dashboardWeightSinceStart(
                         '${delta >= 0 ? '+' : '−'}${_fmt(delta.abs())}',
@@ -927,8 +927,19 @@ class _WeightCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: SalamatTokens.accentDeep,
                       ),
+                    )
+                  else
+                    // No weigh-ins yet: the big number above falls back to
+                    // the profile weight; invite the first log instead of
+                    // showing an empty delta.
+                    Text(
+                      loc.dashboardWeightFirstLog,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: SalamatTokens.textMuted,
+                      ),
                     ),
-                  ],
                 ],
               ),
             ),
@@ -1043,8 +1054,8 @@ class _SnackIdeaCard extends StatelessWidget {
           SalamatIcon(
             PhosphorIcons.cookie(PhosphorIconsStyle.duotone),
             size: 20,
-            color: SalamatTokens.amber,
-            bubbleColor: SalamatTokens.bubbleAmber,
+            color: SalamatTokens.accentDeep,
+            bubbleColor: SalamatTokens.bubbleMint,
           ),
           const SizedBox(width: 12),
           Expanded(

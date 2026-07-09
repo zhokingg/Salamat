@@ -515,13 +515,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get snackIdeaTitle => 'Snack idea';
 
   @override
-  String get snackIdeaHearty => 'You’ve got room for a proper snack — nuts, ayran with flatbread, or cottage cheese with fruit.';
+  String get dashboardWeightFirstLog => 'Log your first weigh-in';
 
   @override
-  String get snackIdeaLight => 'A light bite fits nicely — an apple, a yogurt, or a small handful of nuts.';
+  String get snackIdeaHearty => 'There’s room for a proper snack — yogurt with fruit or a sandwich fits.';
 
   @override
-  String get snackIdeaTiny => 'Almost there for today — tea, a few berries or a cucumber if you feel peckish.';
+  String get snackIdeaLight => 'You have room for 120–240 kcal — a handful of almonds or an apple fits nicely.';
+
+  @override
+  String get snackIdeaTiny => 'Day’s almost complete — water or tea closes it gently.';
 
   @override
   String mealsEstimatedMacros(int p, int f, int c) {
