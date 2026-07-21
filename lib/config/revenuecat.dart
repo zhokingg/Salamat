@@ -11,7 +11,7 @@
 class RevenueCatConfig {
   RevenueCatConfig._();
 
-  static const String _default = ''; // TODO: paste goog_... public key here
+  static const String _default = 'goog_MjXDCzsmgjILoXATHgzTkXLsCmX';
 
   static const String androidKey = String.fromEnvironment(
     'REVENUECAT_ANDROID_KEY',
