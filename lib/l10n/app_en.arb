@@ -146,16 +146,12 @@
   "yesCaptionBefore": "Now",
   "yesCaptionAfter": "With Salamat",
 
-  "comparisonTitle": "Lose weight 2× faster\nwith Salamat than\non your own",
-  "comparisonWithout": "Without Salamat",
-  "comparisonWith": "With Salamat",
-  "comparisonStat": "78% of users reach lasting results\nwith Salamat",
+  "comparisonTitle": "What you get\nwith Salamat",
+  "comparisonFeaturePhoto": "Log your meals from a photo in seconds",
+  "comparisonFeatureNumbers": "See your habits in clear numbers",
+  "comparisonFeatureOneScreen": "Everything on one screen \u2014 no manual database search",
 
   "socialTitle": "Salamat is built\nfor people\nlike you!",
-  "socialUsersCount": "1,000,000",
-  "socialUsersLabel": "Salamat users",
-  "socialStatPercent": "83%",
-  "socialStatText": "of users say our plan\nis easy to follow",
 
   "buildingTitle": "Building your\nprogram...",
   "buildingStep1": "Profile analysis",

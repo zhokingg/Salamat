@@ -377,31 +377,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get yesCaptionAfter => 'С Salamat';
 
   @override
-  String get comparisonTitle => 'Худейте в 2×\nбыстрее с Salamat';
+  String get comparisonTitle => 'Что даёт вам\nSalamat';
 
   @override
-  String get comparisonWithout => 'Без Salamat';
+  String get comparisonFeaturePhoto => 'Логируйте еду по фото за секунды';
 
   @override
-  String get comparisonWith => 'С Salamat';
+  String get comparisonFeatureNumbers => 'Ваши привычки — в наглядных цифрах';
 
   @override
-  String get comparisonStat => '78% пользователей достигают долгосрочного\nрезультата с Salamat';
+  String get comparisonFeatureOneScreen => 'Всё на одном экране — без ручного поиска по базам';
 
   @override
   String get socialTitle => 'Salamat создан\nдля таких людей,\nкак вы!';
-
-  @override
-  String get socialUsersCount => '1 000 000';
-
-  @override
-  String get socialUsersLabel => 'пользователей Salamat';
-
-  @override
-  String get socialStatPercent => '83%';
-
-  @override
-  String get socialStatText => 'пользователей говорят, что наш план\nлегко соблюдать';
 
   @override
   String get buildingTitle => 'Создаём вашу\nпрограмму...';

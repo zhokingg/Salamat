@@ -134,16 +134,12 @@
   "yesCaptionBefore": "Сейчас",
   "yesCaptionAfter": "С Salamat",
 
-  "comparisonTitle": "Худейте в 2×\nбыстрее с Salamat",
-  "comparisonWithout": "Без Salamat",
-  "comparisonWith": "С Salamat",
-  "comparisonStat": "78% пользователей достигают долгосрочного\nрезультата с Salamat",
+  "comparisonTitle": "Что даёт вам\nSalamat",
+  "comparisonFeaturePhoto": "Логируйте еду по фото за секунды",
+  "comparisonFeatureNumbers": "Ваши привычки \u2014 в наглядных цифрах",
+  "comparisonFeatureOneScreen": "Всё на одном экране \u2014 без ручного поиска по базам",
 
   "socialTitle": "Salamat создан\nдля таких людей,\nкак вы!",
-  "socialUsersCount": "1 000 000",
-  "socialUsersLabel": "пользователей Salamat",
-  "socialStatPercent": "83%",
-  "socialStatText": "пользователей говорят, что наш план\nлегко соблюдать",
 
   "buildingTitle": "Создаём вашу\nпрограмму...",
   "buildingStep1": "Анализ профиля",

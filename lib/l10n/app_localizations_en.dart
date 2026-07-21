@@ -377,31 +377,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yesCaptionAfter => 'With Salamat';
 
   @override
-  String get comparisonTitle => 'Lose weight 2× faster\nwith Salamat than\non your own';
+  String get comparisonTitle => 'What you get\nwith Salamat';
 
   @override
-  String get comparisonWithout => 'Without Salamat';
+  String get comparisonFeaturePhoto => 'Log your meals from a photo in seconds';
 
   @override
-  String get comparisonWith => 'With Salamat';
+  String get comparisonFeatureNumbers => 'See your habits in clear numbers';
 
   @override
-  String get comparisonStat => '78% of users reach lasting results\nwith Salamat';
+  String get comparisonFeatureOneScreen => 'Everything on one screen — no manual database search';
 
   @override
   String get socialTitle => 'Salamat is built\nfor people\nlike you!';
-
-  @override
-  String get socialUsersCount => '1,000,000';
-
-  @override
-  String get socialUsersLabel => 'Salamat users';
-
-  @override
-  String get socialStatPercent => '83%';
-
-  @override
-  String get socialStatText => 'of users say our plan\nis easy to follow';
 
   @override
   String get buildingTitle => 'Building your\nprogram...';

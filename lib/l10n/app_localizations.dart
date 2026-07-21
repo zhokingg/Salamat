@@ -794,56 +794,32 @@ abstract class AppLocalizations {
   /// No description provided for @comparisonTitle.
   ///
   /// In en, this message translates to:
-  /// **'Lose weight 2× faster\nwith Salamat than\non your own'**
+  /// **'What you get\nwith Salamat'**
   String get comparisonTitle;
 
-  /// No description provided for @comparisonWithout.
+  /// No description provided for @comparisonFeaturePhoto.
   ///
   /// In en, this message translates to:
-  /// **'Without Salamat'**
-  String get comparisonWithout;
+  /// **'Log your meals from a photo in seconds'**
+  String get comparisonFeaturePhoto;
 
-  /// No description provided for @comparisonWith.
+  /// No description provided for @comparisonFeatureNumbers.
   ///
   /// In en, this message translates to:
-  /// **'With Salamat'**
-  String get comparisonWith;
+  /// **'See your habits in clear numbers'**
+  String get comparisonFeatureNumbers;
 
-  /// No description provided for @comparisonStat.
+  /// No description provided for @comparisonFeatureOneScreen.
   ///
   /// In en, this message translates to:
-  /// **'78% of users reach lasting results\nwith Salamat'**
-  String get comparisonStat;
+  /// **'Everything on one screen — no manual database search'**
+  String get comparisonFeatureOneScreen;
 
   /// No description provided for @socialTitle.
   ///
   /// In en, this message translates to:
   /// **'Salamat is built\nfor people\nlike you!'**
   String get socialTitle;
-
-  /// No description provided for @socialUsersCount.
-  ///
-  /// In en, this message translates to:
-  /// **'1,000,000'**
-  String get socialUsersCount;
-
-  /// No description provided for @socialUsersLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Salamat users'**
-  String get socialUsersLabel;
-
-  /// No description provided for @socialStatPercent.
-  ///
-  /// In en, this message translates to:
-  /// **'83%'**
-  String get socialStatPercent;
-
-  /// No description provided for @socialStatText.
-  ///
-  /// In en, this message translates to:
-  /// **'of users say our plan\nis easy to follow'**
-  String get socialStatText;
 
   /// No description provided for @buildingTitle.
   ///

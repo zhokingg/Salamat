@@ -3,7 +3,6 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/dimensions.dart';
 import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
@@ -58,58 +57,6 @@ class SocialProofScreen extends StatelessWidget {
                   fg: SalamatTokens.onAccent,
                   bg: SalamatTokens.accentDeep,
                   big: true,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 28),
-          Text(
-            loc.socialUsersCount,
-            style: GoogleFonts.manrope(
-              fontSize: 44,
-              fontWeight: FontWeight.w800,
-              color: SalamatTokens.accentDeep,
-              letterSpacing: -1.5,
-              height: 1.0,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            loc.socialUsersLabel,
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: SalamatTokens.textMuted,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: SalamatTokens.pillBg,
-              borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  loc.socialStatPercent,
-                  style: GoogleFonts.manrope(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                    color: SalamatTokens.accentDeep,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  loc.socialStatText,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: SalamatTokens.textPrimary,
-                    height: 1.4,
-                  ),
                 ),
               ],
             ),
