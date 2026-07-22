@@ -45,6 +45,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (!mounted) return;
       _onboardedLocally = v;
       _tryNavigate();
+    }).catchError((_) {
+      // Prefs threw (e.g. MissingPluginException on a broken plugin
+      // registration) — treat as not-onboarded rather than trapping the
+      // splash forever with a null flag.
+      if (!mounted) return;
+      _onboardedLocally = false;
+      _tryNavigate();
     });
 
     // Hold the brand for a minimum, then proceed as soon as we can decide.
@@ -57,9 +64,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // before the prefs read resolves, and deciding with a null flag would
     // bounce a returning user into onboarding.
     _maxTimer = Timer(const Duration(seconds: 8), () async {
-      _onboardedLocally ??= await OnboardingFlag.isCompleted()
-          .timeout(const Duration(seconds: 2), onTimeout: () => false);
-      _goNext();
+      // Escape hatch must survive ANYTHING: .timeout covers a hang, the
+      // try/catch covers a throw (a thrown exception sails straight through
+      // .timeout), and finally guarantees we always leave the splash.
+      try {
+        _onboardedLocally ??= await OnboardingFlag.isCompleted()
+            .timeout(const Duration(seconds: 2), onTimeout: () => false);
+      } catch (_) {
+        _onboardedLocally ??= false;
+      } finally {
+        _goNext();
+      }
     });
   }
 

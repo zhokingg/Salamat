@@ -32,7 +32,7 @@ class SupabaseService {
         authFlowType: AuthFlowType.pkce,
       ),
       debug: kDebugMode,
-    );
+    ).timeout(const Duration(seconds: 10));
 
     // Guarantee every user has a session. Anonymous sign-in gives a stable
     // auth.uid() so RLS-scoped rows (meals, weight, photo usage) and the
@@ -41,7 +41,9 @@ class SupabaseService {
     // in when there is genuinely no user yet.
     if (Supabase.instance.client.auth.currentUser == null) {
       try {
-        await Supabase.instance.client.auth.signInAnonymously();
+        await Supabase.instance.client.auth
+            .signInAnonymously()
+            .timeout(const Duration(seconds: 10));
       } catch (e) {
         if (kDebugMode) debugPrint('[SupabaseService] signInAnonymously: $e');
       }
