@@ -3,12 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/dimensions.dart';
-import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class LongTermScreen extends StatelessWidget {
   const LongTermScreen({super.key});
@@ -27,9 +25,9 @@ class LongTermScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: SalamatTokens.surfaceAlt,
-              borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-              border: Border.all(color: SalamatTokens.ringTrack),
+              color: sc.surface2,
+              borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+              border: Border.all(color: sc.surface3),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,12 +41,12 @@ class LongTermScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _LegendRow(
-                  color: SalamatTokens.accentDeep,
+                  color: sc.primary,
                   label: loc.longTermLegendSalamat,
                 ),
                 const SizedBox(height: 6),
                 _LegendRow(
-                  color: SalamatTokens.amber,
+                  color: sc.warn,
                   label: loc.longTermLegendOthers,
                 ),
               ],
@@ -58,7 +56,7 @@ class LongTermScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: SalamatTokens.pillBg,
+              color: sc.primarySoft,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -66,16 +64,16 @@ class LongTermScreen extends StatelessWidget {
                 SalamatIcon(
                   PhosphorIcons.chartBar(PhosphorIconsStyle.duotone),
                   size: 22,
-                  color: SalamatTokens.accentDeep,
+                  color: sc.primary,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     loc.longTermStat,
-                    style: GoogleFonts.manrope(
+                    style: SalamatDarkType.style(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: SalamatTokens.accentDeep,
+                      color: sc.primary,
                       height: 1.35,
                     ),
                   ),
@@ -87,7 +85,7 @@ class LongTermScreen extends StatelessWidget {
         ],
       ),
       buttonLabel: loc.buttonContinue,
-      onContinue: () => context.go('/onboarding/familiarity'),
+      onContinue: () => context.push('/onboarding/familiarity'),
     );
   }
 }
@@ -111,10 +109,10 @@ class _LegendRow extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           label,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: SalamatTokens.textMuted,
+            color: sc.text2,
           ),
         ),
       ],
@@ -128,12 +126,12 @@ class _ChartPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
     final axis = Paint()
-      ..color = SalamatTokens.ringTrack
+      ..color = sc.surface3
       ..strokeWidth = 1;
     canvas.drawLine(Offset(0, h - 1), Offset(w, h - 1), axis);
 
     final salamat = Paint()
-      ..color = SalamatTokens.accentDeep
+      ..color = sc.primary
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -153,7 +151,7 @@ class _ChartPainter extends CustomPainter {
     canvas.drawPath(pathS, salamat);
 
     final other = Paint()
-      ..color = SalamatTokens.amber
+      ..color = sc.warn
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round

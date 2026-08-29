@@ -1,9 +1,9 @@
 {
   "@@locale": "en",
-
   "appName": "Salamat",
-  "@appName": {"description": "App name shown on splash and in stores."},
-
+  "@appName": {
+    "description": "App name shown on splash and in stores."
+  },
   "buttonContinue": "Continue",
   "buttonNext": "Next",
   "buttonStart": "Start",
@@ -12,32 +12,43 @@
   "buttonCancel": "Cancel",
   "buttonSave": "Save",
   "valueDash": "—",
-  "@valueDash": {"description": "Placeholder for unset values."},
-
+  "@valueDash": {
+    "description": "Placeholder for unset values."
+  },
   "manualTitle": "Add meal manually",
   "manualNameLabel": "Dish name",
   "manualKcalLabel": "Calories (kcal)",
-  "manualKcalError": "Enter 1\u20135000 kcal",
+  "manualKcalError": "Enter 1–5000 kcal",
   "manualAddDetails": "Add details",
   "manualProtein": "Protein, g",
   "manualFat": "Fat, g",
   "manualCarbs": "Carbs, g",
   "manualPortion": "Portion, g",
   "manualAddToMeal": "Add to {meal}",
-  "@manualAddToMeal": {"placeholders": {"meal": {"type": "String"}}},
-  "manualAddedSnack": "Added to {meal} \u2713",
-  "@manualAddedSnack": {"placeholders": {"meal": {"type": "String"}}},
+  "@manualAddToMeal": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "manualAddedSnack": "Added to {meal} ✓",
+  "@manualAddedSnack": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
   "manualAddButton": "Add manually",
   "limitTitle": "Your free scan for today is used",
   "limitGoPro": "Go Pro",
-  "welcomeFreeLine": "Free \u00b7 1 photo scan a day \u00b7 unlimited manual logging",
+  "welcomeFreeLine": "Free · 1 photo scan a day · unlimited manual logging",
   "welcomeHeadline": "Your weight WILL be reached\nin our app",
   "welcomeSubtitle": "Let's start with a few questions\nfor your personal plan",
-
   "nameTitle": "What's your name?",
   "nameSubtitle": "So we can greet you",
   "nameFieldHint": "Your name",
-
   "countryTitle": "Where are you from?",
   "countrySubtitle": "To show prices in your currency",
   "countryKZ": "Kazakhstan",
@@ -47,7 +58,6 @@
   "countryTM": "Turkmenistan",
   "countryRU": "Russia",
   "countryOther": "Other",
-
   "goalTitle": "What is your\nmain goal?",
   "goalSubtitle": "Pick one — we'll tailor your plan to it",
   "goalLose": "Lose weight",
@@ -58,60 +68,100 @@
   "goalMaintainSub": "Keep your current weight",
   "goalHealthy": "Healthy eating",
   "goalHealthySub": "Macro control, mindful eating",
-
   "genderTitle": "Your sex?",
   "genderSubtitle": "Needed for accurate calorie targets",
   "genderFemale": "Female",
   "genderMale": "Male",
-
   "yearTitle": "What year were\nyou born?",
   "yearSubtitle": "Age affects your calorie target",
   "yearAgeLabel": "You are {age}",
-  "@yearAgeLabel": {"placeholders": {"age": {"type": "int"}}},
+  "@yearAgeLabel": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
   "yearMinAgeWarning": "Salamat is available from age {min}",
-  "@yearMinAgeWarning": {"placeholders": {"min": {"type": "int"}}},
-
+  "@yearMinAgeWarning": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
   "weightTitle": "Your height and\ncurrent weight?",
   "weightSubtitle": "These drive plan accuracy",
   "weightHeightLabel": "Height",
   "weightWeightLabel": "Weight",
   "weightHeightValue": "{cm} cm",
-  "@weightHeightValue": {"placeholders": {"cm": {"type": "int"}}},
+  "@weightHeightValue": {
+    "placeholders": {
+      "cm": {
+        "type": "int"
+      }
+    }
+  },
   "weightWeightValue": "{kg} kg",
-  "@weightWeightValue": {"placeholders": {"kg": {"type": "int"}}},
-
+  "@weightWeightValue": {
+    "placeholders": {
+      "kg": {
+        "type": "int"
+      }
+    }
+  },
   "bmiLabel": "BMI",
   "bmiBandUnder": "Slightly below normal",
   "bmiBandNormal": "Normal",
   "bmiBandOver": "Slightly above normal",
   "bmiBandObese": "Obese",
-
   "targetTitle": "What is your\ntarget weight?",
   "targetSubtitle": "A realistic goal is the #1 success factor",
   "targetDeltaLose": "Lose {kg} kg",
-  "@targetDeltaLose": {"placeholders": {"kg": {"type": "int"}}},
+  "@targetDeltaLose": {
+    "placeholders": {
+      "kg": {
+        "type": "int"
+      }
+    }
+  },
   "targetDeltaGain": "Gain {kg} kg",
-  "@targetDeltaGain": {"placeholders": {"kg": {"type": "int"}}},
+  "@targetDeltaGain": {
+    "placeholders": {
+      "kg": {
+        "type": "int"
+      }
+    }
+  },
   "targetDeltaMaintain": "Maintain weight",
   "underweightWarningTitle": "Weight loss may be unsafe",
   "underweightWarningBody": "Your body mass index is below normal. Losing weight at this level can harm your health. We recommend consulting a doctor before starting.",
   "underweightWarningChangeGoal": "Choose another goal",
   "underweightWarningProceed": "I understand, continue",
-
   "celebrationLose": "Losing {kg} kg is a realistic goal.\nNot that hard at all!",
-  "@celebrationLose": {"placeholders": {"kg": {"type": "int"}}},
+  "@celebrationLose": {
+    "placeholders": {
+      "kg": {
+        "type": "int"
+      }
+    }
+  },
   "celebrationGain": "Gaining {kg} kg is a realistic goal.\nNot that hard at all!",
-  "@celebrationGain": {"placeholders": {"kg": {"type": "int"}}},
+  "@celebrationGain": {
+    "placeholders": {
+      "kg": {
+        "type": "int"
+      }
+    }
+  },
   "celebrationMaintain": "Great choice —\nholding a healthy weight",
   "celebrationStatLose": "Losing just 5% of your weight\nalready improves health",
-  "celebrationStatGain": "Gaining 0.25\u20130.5 kg a week\nbuilds muscle, not fat",
+  "celebrationStatGain": "Gaining 0.25–0.5 kg a week\nbuilds muscle, not fat",
   "celebrationStatMaintain": "A stable weight lowers heart\nand metabolic risks",
-
   "longTermTitle": "Salamat builds\nlong-term results",
   "longTermLegendSalamat": "Salamat plan",
   "longTermLegendOthers": "Typical diets",
   "longTermStat": "76% of Salamat users keep their weight\noff for 6+ months",
-
   "familiarityTitle": "How familiar are you\nwith weight loss?",
   "familiarityHint": "75% answered the same way.\nSalamat will guide you through it.",
   "familiarityNovice": "Beginner",
@@ -120,7 +170,6 @@
   "familiarityIntermediateSub": "Know a bit and have tried things",
   "familiarityExpert": "Expert",
   "familiarityExpertSub": "Well-versed in the topic",
-
   "activityTitle": "What is your\nactivity level?",
   "activitySubtitle": "More activity, more food you can eat",
   "activitySedentary": "Sedentary",
@@ -131,13 +180,11 @@
   "activityModerateSub": "3–5 workouts per week",
   "activityVery": "Very active",
   "activityVerySub": "6–7 workouts per week",
-
   "summaryTitle": "Personal plan\nbased on your answers",
   "summaryStatBmi": "BMI",
   "summaryStatTarget": "Target weight",
   "summaryStatLevel": "Level",
   "summaryStatActivity": "Activity",
-
   "yesLoseQuestion": "Want to lose weight?",
   "yesGainQuestion": "Want to gain weight\nthe healthy way?",
   "yesMaintainQuestion": "Want to hold\na comfortable weight?",
@@ -145,62 +192,126 @@
   "yesHealthQuestion": "Want to say goodbye\nto health problems?",
   "yesCaptionBefore": "Now",
   "yesCaptionAfter": "With Salamat",
-
   "comparisonTitle": "What you get\nwith Salamat",
   "comparisonFeaturePhoto": "Log your meals from a photo in seconds",
   "comparisonFeatureNumbers": "See your habits in clear numbers",
-  "comparisonFeatureOneScreen": "Everything on one screen \u2014 no manual database search",
-
+  "comparisonFeatureOneScreen": "Everything on one screen — no manual database search",
   "socialTitle": "Salamat is built\nfor people\nlike you!",
-
   "buildingTitle": "Building your\nprogram...",
   "buildingStep1": "Profile analysis",
   "buildingStep2": "Metabolism calculation",
   "buildingStep3": "Meal plan creation",
-
   "planTitle": "Your personal\nplan is ready",
   "planNow": "Now",
   "planTarget": "Goal",
   "planWeeksToTarget": "About {weeks} weeks to goal",
-  "@planWeeksToTarget": {"placeholders": {"weeks": {"type": "int"}}},
+  "@planWeeksToTarget": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
   "planMaintain": "Maintain weight",
   "planCaloriesLabel": "Your calorie target",
   "planCaloriesValue": "{kcal} kcal / day",
-  "@planCaloriesValue": {"placeholders": {"kcal": {"type": "int"}}},
-  "planReachLine": "You\u2019ll reach {kg} kg around {month}",
-  "@planReachLine": {"placeholders": {"kg": {"type": "int"}, "month": {"type": "String"}}},
+  "@planCaloriesValue": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "planReachLine": "You’ll reach {kg} kg around {month}",
+  "@planReachLine": {
+    "placeholders": {
+      "kg": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
   "planStartTracking": "Start tracking",
-
   "dashboardGreeting": "Hi, {name}",
   "dashboardGreetingNoName": "Hi!",
-  "@dashboardGreeting": {"placeholders": {"name": {"type": "String"}}},
+  "@dashboardGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "dashboardGuestName": "friend",
   "dashboardCaloriesLabel": "CALORIES",
   "dashboardConsumedOfNorm": "of {norm} kcal",
-  "@dashboardConsumedOfNorm": {"placeholders": {"norm": {"type": "int"}}},
+  "@dashboardConsumedOfNorm": {
+    "placeholders": {
+      "norm": {
+        "type": "int"
+      }
+    }
+  },
   "dashboardLeft": "{left} left",
-  "@dashboardLeft": {"placeholders": {"left": {"type": "int"}}},
+  "@dashboardLeft": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      }
+    }
+  },
   "dashboardOverflow": "over by {over}",
-  "@dashboardOverflow": {"placeholders": {"over": {"type": "int"}}},
+  "@dashboardOverflow": {
+    "placeholders": {
+      "over": {
+        "type": "int"
+      }
+    }
+  },
   "dashboardLeftLabel": "left",
   "dashboardOverflowLabel": "over",
   "dashboardLastMeal": "LAST MEAL",
   "dashboardCaloriesBudget": "Calories budget",
   "dashboardWater": "Water",
   "dashboardWaterLiters": "{n} L",
-  "@dashboardWaterLiters": {"placeholders": {"n": {"type": "String"}}},
+  "@dashboardWaterLiters": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
   "dashboardSnapFirstMeal": "Snap your first meal",
   "mealsNothingYet": "Nothing yet",
   "dashboardWeightTitle": "WEIGHT",
   "dashboardWeightSinceStart": "{delta} kg since start",
-  "@dashboardWeightSinceStart": {"placeholders": {"delta": {"type": "String"}}},
+  "@dashboardWeightSinceStart": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
   "snackIdeaTitle": "Snack idea",
   "dashboardWeightFirstLog": "Log your first weigh-in",
-  "snackIdeaHearty": "There\u2019s room for a proper snack \u2014 yogurt with fruit or a sandwich fits.",
-  "snackIdeaLight": "You have room for 120\u2013240 kcal \u2014 a handful of almonds or an apple fits nicely.",
-  "snackIdeaTiny": "Day\u2019s almost complete \u2014 water or tea closes it gently.",
+  "snackIdeaHearty": "There’s room for a proper snack — yogurt with fruit or a sandwich fits.",
+  "snackIdeaLight": "You have room for 120–240 kcal — a handful of almonds or an apple fits nicely.",
+  "snackIdeaTiny": "Day’s almost complete — water or tea closes it gently.",
   "mealsEstimatedMacros": "~P{p} F{f} C{c}",
-  "@mealsEstimatedMacros": {"placeholders": {"p": {"type": "int"}, "f": {"type": "int"}, "c": {"type": "int"}}},
+  "@mealsEstimatedMacros": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      },
+      "f": {
+        "type": "int"
+      },
+      "c": {
+        "type": "int"
+      }
+    }
+  },
   "dashboardOffline": "Offline — showing local data",
   "retryButton": "Retry",
   "dashboardMacroProtein": "PROTEIN",
@@ -209,23 +320,48 @@
   "dashboardMeals": "Meals",
   "dashboardKcalUnit": "kcal",
   "dashboardKcalWithValue": "{kcal} kcal",
-  "@dashboardKcalWithValue": {"placeholders": {"kcal": {"type": "int"}}},
+  "@dashboardKcalWithValue": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
   "dashboardEmptyMeal": "Tap + to add",
   "dashboardStreakDays": "days",
   "dashboardStreakLine": "{count, plural, one{1 day} other{{count} days}}",
-  "@dashboardStreakLine": {"placeholders": {"count": {"type": "int"}}},
+  "@dashboardStreakLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "navHome": "Home",
   "navMeals": "Meals",
   "navCameraAction": "Scan a meal",
   "navProgress": "Progress",
   "navProfile": "Profile",
   "dashboardStreakValue": "{n}",
-  "@dashboardStreakValue": {"placeholders": {"n": {"type": "int"}}},
+  "@dashboardStreakValue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "gramsSuffix": "{g} g",
-  "@gramsSuffix": {"placeholders": {"g": {"type": "int"}}},
+  "@gramsSuffix": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
   "gramsUnit": "g",
-  "@gramsUnit": {"description": "Bare grams unit suffix (no number). Used in macro stats."},
-
+  "@gramsUnit": {
+    "description": "Bare grams unit suffix (no number). Used in macro stats."
+  },
   "mealBreakfast": "Breakfast",
   "mealLunch": "Lunch",
   "mealDinner": "Dinner",
@@ -234,7 +370,6 @@
   "mealLunchLower": "lunch",
   "mealDinnerLower": "dinner",
   "mealSnackLower": "snack",
-
   "cameraPermissionTitle": "Camera access needed",
   "cameraPermissionBody": "Allow camera access in Settings to recognise dishes from photos.",
   "cameraOpenSettings": "Open Settings",
@@ -247,21 +382,41 @@
   "cameraErrorNoNetwork": "No internet connection",
   "cameraErrorServer": "Service is temporarily unavailable",
   "cameraConfidence": "{percent}% match",
-  "@cameraConfidence": {"placeholders": {"percent": {"type": "int"}}},
+  "@cameraConfidence": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "cameraKcalPerPortion": "kcal per {g} g",
-  "@cameraKcalPerPortion": {"placeholders": {"g": {"type": "int"}}},
+  "@cameraKcalPerPortion": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
   "cameraMacroProtein": "Protein",
   "cameraMacroFat": "Fat",
   "cameraMacroCarbs": "Carbs",
-  "cameraAddButton": "✓ Add to diary",
-  "cameraRetake": "↺ Retake",
+  "cameraAddButton": "Add to diary",
+  "cameraRetake": "Retake",
   "cameraOutOfPhotos": "Your free scan for today is used",
   "cameraTryPro": "Try Pro",
   "cameraAddedSnack": "Added ✓",
   "cameraCounter": "{used} of {limit}",
-  "@cameraCounter": {"placeholders": {"used": {"type": "int"}, "limit": {"type": "int"}}},
+  "@cameraCounter": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
   "cameraDialogCancel": "Cancel",
-
   "paywallTitleLine1": "Eat smarter",
   "paywallTitleLine2": "with Salamat Pro",
   "paywallSubtitle": "1 free scan a day.\nWith Pro — 10 scans a day + forecast + analysis.",
@@ -273,33 +428,57 @@
   "paywallFeature3Title": "Full history & trends",
   "paywallFeature3Sub": "Your whole food diary",
   "paywallPopular": "Best value",
-  "paywallTrialButton": "Try free — 7 days",
   "paywallCancelAnytime": "Cancel anytime",
   "paywallRestore": "Restore",
   "paywallWelcomePro": "Welcome to Pro",
-  "paywallPurchaseError": "Purchase failed \u2014 please try again",
+  "paywallPurchaseError": "Purchase failed — please try again",
   "paywallRestoreFound": "Pro restored",
   "paywallRestoreNotFound": "No purchases found",
-  "paywallOfferingsError": "Couldn\u2019t load prices from Google Play.\nCheck your connection and retry.",
+  "paywallOfferingsError": "Couldn’t load prices from Google Play.\nCheck your connection and retry.",
   "paywallHeroHeadlineLose": "Get full access to\nyour weight-loss plan",
   "paywallHeroHeadlineGain": "Get full access to\nyour weight-gain plan",
   "paywallHeroHeadlineMaintain": "Get full access to\nyour balance plan",
   "paywallUrgencyLine": "Reach {weight} kg by {date}",
-  "@paywallUrgencyLine": {"placeholders": {"weight": {"type": "int"}, "date": {"type": "String"}}},
+  "@paywallUrgencyLine": {
+    "placeholders": {
+      "weight": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "paywallScanEyebrow": "Recognized",
   "paywallScanMeal": "Pilaf",
   "paywallScanKcal": "{kcal} kcal",
-  "@paywallScanKcal": {"placeholders": {"kcal": {"type": "int"}}},
+  "@paywallScanKcal": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
   "paywallTier1mo": "1 MONTH",
   "paywallTier12mo": "12 MONTHS",
   "paywallPerMonthUnit": "/mo",
   "paywallPerMonthValue": "{price}/mo",
-  "@paywallPerMonthValue": {"placeholders": {"price": {"type": "String"}}},
+  "@paywallPerMonthValue": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "paywallSaveBadge": "−{percent}%",
-  "@paywallSaveBadge": {"placeholders": {"percent": {"type": "int"}}},
-  "paywallNoPaymentNow": "No payment now",
+  "@paywallSaveBadge": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "paywallFinePrint": "Subscription renews automatically at the end of each period. Cancel anytime in your store account. Terms and Privacy apply.",
-
   "profileTitle": "Profile",
   "profileGuest": "Guest",
   "profileBadgePro": "Pro",
@@ -310,7 +489,13 @@
   "profileDataTitle": "My data",
   "profileDataAge": "Age",
   "profileDataAgeValue": "{age} y",
-  "@profileDataAgeValue": {"placeholders": {"age": {"type": "int"}}},
+  "@profileDataAgeValue": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
   "profileDataHeight": "Height",
   "profileDataWeight": "Weight",
   "profileDataGoal": "Goal",
@@ -323,7 +508,9 @@
   "profileReferralCopy": "Copy link",
   "profileReferralCopied": "Link copied!",
   "profileSettingNotifications": "Notifications",
-  "@profileSettingNotifications": {"description": "UNUSED in v1.0 \u2014 reminders row removed until the feature ships in v1.1"},
+  "@profileSettingNotifications": {
+    "description": "UNUSED in v1.0 — reminders row removed until the feature ships in v1.1"
+  },
   "profileSettingMyGoal": "My goal",
   "profileSettingUpdateWeight": "Update weight",
   "profileSettingPro": "Salamat Pro",
@@ -339,16 +526,36 @@
   "paywallFinePrintTerms": "Terms",
   "profileSettingLanguage": "Language",
   "profileSoonSuffix": "{label} — soon",
-  "@profileSoonSuffix": {"placeholders": {"label": {"type": "String"}}},
+  "@profileSoonSuffix": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "profileUpdateWeightDialog": "Update weight",
   "profileWeightHint": "Weight (kg)",
   "profileWeightRangeError": "Enter a weight between {min} and {max} kg",
-  "@profileWeightRangeError": {"placeholders": {"min": {"type": "int"}, "max": {"type": "int"}}},
+  "@profileWeightRangeError": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "profileKgShort": "kg",
-
   "progressTitle": "Progress",
   "progressStreak": "{count, plural, one{1 day in a row} other{{count} days in a row}}",
-  "@progressStreak": {"placeholders": {"count": {"type": "int"}}},
+  "@progressStreak": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "progressNextGoal": "Keep going — next goal is 7 days",
   "progressStreakStart": "Start today",
   "progressStreakStartHint": "Log your first meal to start a streak",
@@ -356,7 +563,13 @@
   "progressToday": "Today",
   "progressHistory": "History",
   "progressOfNormKcal": "of {norm} kcal",
-  "@progressOfNormKcal": {"placeholders": {"norm": {"type": "int"}}},
+  "@progressOfNormKcal": {
+    "placeholders": {
+      "norm": {
+        "type": "int"
+      }
+    }
+  },
   "progressMacroProtein": "g protein",
   "progressMacroFat": "g fat",
   "progressMacroCarbs": "g carbs",
@@ -367,8 +580,500 @@
   "progressDayFri": "Fri",
   "progressDaySat": "Sat",
   "progressDayToday": "Today",
-
   "languageRu": "Русский",
   "languageEn": "English",
-  "languageSelectTitle": "Language"
+  "languageSelectTitle": "Language",
+  "splashTagline": "AI nutrition coach",
+  "welcomeChipSnap": "Snap",
+  "welcomeChipConfirm": "Confirm",
+  "welcomeChipDone": "Done",
+  "dashboardTodaysMeals": "Today's meals",
+  "dashboardScanAction": "Scan",
+  "@splashTagline": {
+    "description": "Splash tagline under the wordmark, rendered uppercase."
+  },
+  "@welcomeChipSnap": {
+    "description": "First chip in the welcome hero block (Snap - Confirm - Done)."
+  },
+  "@welcomeChipConfirm": {
+    "description": "Second chip in the welcome hero block."
+  },
+  "@welcomeChipDone": {
+    "description": "Third chip in the welcome hero block."
+  },
+  "@dashboardTodaysMeals": {
+    "description": "Section header above the meal list."
+  },
+  "@dashboardScanAction": {
+    "description": "Text action next to the meals header; opens the camera."
+  },
+  "cameraConfirmTitle": "Confirm your plate",
+  "@cameraConfirmTitle": {
+    "description": "Title of the recognition confirmation sheet. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "cameraLogKcal": "Log {kcal} kcal",
+  "@cameraLogKcal": {
+    "description": "Primary action on the confirmation sheet. From the prototype. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "cameraDetectedOne": "1 item detected",
+  "@cameraDetectedOne": {
+    "description": "Eyebrow above the confirmation title when a single dish was recognised. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "cameraMealSlotHint": "Add to",
+  "@cameraMealSlotHint": {
+    "description": "Label above the breakfast/lunch/dinner/snack chips on the confirmation sheet. NEEDS RU TRANSLATION."
+  },
+  "cameraDetectedBoxLabel": "{name} {percent}%",
+  "@cameraDetectedBoxLabel": {
+    "description": "Label on a detection box drawn over the viewfinder. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "progressRangeDay": "Day",
+  "@progressRangeDay": {
+    "description": "Progress range tab. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressRangeWeek": "Week",
+  "@progressRangeWeek": {
+    "description": "Progress range tab. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressRangeMonth": "Month",
+  "@progressRangeMonth": {
+    "description": "Progress range tab. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressRangeYear": "Year",
+  "@progressRangeYear": {
+    "description": "Progress range tab. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressCalorieTrend": "Calorie trend",
+  "@progressCalorieTrend": {
+    "description": "Title of the bar chart card. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressDailyAvg": "daily avg {kcal}",
+  "@progressDailyAvg": {
+    "description": "Chart meta line, mean over logged days. From the prototype. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "progressGoalLine": "{kcal} goal",
+  "@progressGoalLine": {
+    "description": "Label on the chart's goal reference line. From the prototype. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "progressProteinScore": "Protein score",
+  "@progressProteinScore": {
+    "description": "Score card label. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressProteinScoreSub": "{hit} of {total} days on target",
+  "@progressProteinScoreSub": {
+    "description": "Score card sub-line. From the prototype. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "hit": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "progressConsistencyLabel": "Consistency",
+  "@progressConsistencyLabel": {
+    "description": "Score card label and heat-map header. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressConsistencySub": "days logged in a row",
+  "@progressConsistencySub": {
+    "description": "Score card sub-line. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressNoRangeData": "Nothing logged in this period yet",
+  "@progressNoRangeData": {
+    "description": "Empty state inside the trend card. NEEDS RU TRANSLATION."
+  },
+  "progressWeeklyMilestones": "Weekly milestones",
+  "@progressWeeklyMilestones": {
+    "description": "Header above the projected weekly weights. From the prototype. NEEDS RU TRANSLATION."
+  },
+  "progressMilestoneWeek": "W{n}",
+  "@progressMilestoneWeek": {
+    "description": "Short week label on a milestone tile. From the prototype. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "cookTitle": "What to cook",
+  "@cookTitle": {
+    "description": "Title of the meal-suggestion screen. NEEDS RU TRANSLATION."
+  },
+  "cookSubtitle": "From what you have, within what's left of today",
+  "@cookSubtitle": {
+    "description": "Line under the title explaining the feature. NEEDS RU TRANSLATION."
+  },
+  "cookPantryHeader": "Your ingredients",
+  "@cookPantryHeader": {
+    "description": "Header above the ingredient list. NEEDS RU TRANSLATION."
+  },
+  "cookAddHint": "Add an ingredient",
+  "@cookAddHint": {
+    "description": "Hint in the ingredient input. NEEDS RU TRANSLATION."
+  },
+  "cookAddButton": "Add",
+  "@cookAddButton": {
+    "description": "Button that appends the typed ingredient. NEEDS RU TRANSLATION."
+  },
+  "cookClearAll": "Clear all",
+  "@cookClearAll": {
+    "description": "Removes every ingredient from the list. NEEDS RU TRANSLATION."
+  },
+  "cookRemoveItem": "Remove {item}",
+  "@cookRemoveItem": {
+    "description": "Accessibility label for the delete chip. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "cookPantryFull": "Up to {max} ingredients",
+  "@cookPantryFull": {
+    "description": "Shown once the list hits its ceiling. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "cookSuggestButton": "Suggest 3 dishes",
+  "@cookSuggestButton": {
+    "description": "Primary action that calls the model. NEEDS RU TRANSLATION."
+  },
+  "cookRemainingLabel": "Left today",
+  "@cookRemainingLabel": {
+    "description": "Eyebrow above the remaining-budget readout. NEEDS RU TRANSLATION."
+  },
+  "cookEmptyPantryTitle": "Add what you have",
+  "@cookEmptyPantryTitle": {
+    "description": "Empty state when the ingredient list is empty. NEEDS RU TRANSLATION."
+  },
+  "cookEmptyPantryBody": "List the products in your fridge and Salamat will pick three dishes that fit the rest of your day.",
+  "@cookEmptyPantryBody": {
+    "description": "Body of the empty-pantry state. NEEDS RU TRANSLATION."
+  },
+  "cookNoBudgetTitle": "Today's target is used up",
+  "@cookNoBudgetTitle": {
+    "description": "Empty state when no calories remain. NEEDS RU TRANSLATION."
+  },
+  "cookNoBudgetBody": "Nothing fits the remainder right now. Come back tomorrow, or adjust your goal.",
+  "@cookNoBudgetBody": {
+    "description": "Body of the no-budget state. NEEDS RU TRANSLATION."
+  },
+  "cookFailedTitle": "Couldn't pick a dish",
+  "@cookFailedTitle": {
+    "description": "Error state when the model did not answer. NEEDS RU TRANSLATION."
+  },
+  "cookFailedBody": "The service didn't respond. Check your connection and try again.",
+  "@cookFailedBody": {
+    "description": "Body of the failure state. NEEDS RU TRANSLATION."
+  },
+  "cookLoading": "Picking dishes…",
+  "@cookLoading": {
+    "description": "Shown while the request is in flight. NEEDS RU TRANSLATION."
+  },
+  "cookRangeKcal": "{min}–{max} kcal",
+  "@cookRangeKcal": {
+    "description": "Calorie band on a suggestion card. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "cookRangeG": "{min}–{max} g",
+  "@cookRangeG": {
+    "description": "Macro band on a suggestion card. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "cookTimeMinutes": "{n} min",
+  "@cookTimeMinutes": {
+    "description": "Cooking time on a suggestion card. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "cookFits": "Fits",
+  "@cookFits": {
+    "description": "Badge: the whole band is inside the remainder. NEEDS RU TRANSLATION."
+  },
+  "cookBorderline": "Might not fit",
+  "@cookBorderline": {
+    "description": "Badge: the band straddles the remainder. NEEDS RU TRANSLATION."
+  },
+  "cookOver": "Over the remainder",
+  "@cookOver": {
+    "description": "Badge: even the low end exceeds the remainder. NEEDS RU TRANSLATION."
+  },
+  "cookWhyRange": "Estimate — the range widens when portion or cooking method is unclear",
+  "@cookWhyRange": {
+    "description": "Explains why a band is shown instead of a number. NEEDS RU TRANSLATION."
+  },
+  "cookIngredientsHeader": "Ingredients",
+  "@cookIngredientsHeader": {
+    "description": "Section header inside a suggestion card. NEEDS RU TRANSLATION."
+  },
+  "cookStepsHeader": "How to cook",
+  "@cookStepsHeader": {
+    "description": "Section header inside a suggestion card. NEEDS RU TRANSLATION."
+  },
+  "cookAddToDiary": "Add to diary",
+  "@cookAddToDiary": {
+    "description": "Action that logs the dish. NEEDS RU TRANSLATION."
+  },
+  "cookAddedToDiary": "{dish} added — {kcal} kcal",
+  "@cookAddedToDiary": {
+    "description": "Confirmation after logging; kcal is the band midpoint. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "dish": {
+        "type": "String"
+      },
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "cookMidpointNote": "Logged at the middle of the range",
+  "@cookMidpointNote": {
+    "description": "Note on the add button explaining which value is stored. NEEDS RU TRANSLATION."
+  },
+  "cookRetry": "Try again",
+  "@cookRetry": {
+    "description": "Retries the suggestion request. NEEDS RU TRANSLATION."
+  },
+  "paywallTrialCta": "Start {period} free",
+  "@paywallTrialCta": {
+    "description": "Primary CTA when the store product carries a free trial. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallTrialThen": "Then {price}, charged {date}",
+  "@paywallTrialThen": {
+    "description": "Explicit first-charge amount and date under the trial CTA. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallSubscribeCta": "Subscribe",
+  "@paywallSubscribeCta": {
+    "description": "Primary CTA when the product has no free trial. NEEDS RU TRANSLATION."
+  },
+  "paywallPeriodDays": "{n, plural, one{1 day} other{{n} days}}",
+  "@paywallPeriodDays": {
+    "description": "Trial length in days, used inside paywallTrialCta. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallPeriodWeeks": "{n, plural, one{1 week} other{{n} weeks}}",
+  "@paywallPeriodWeeks": {
+    "description": "Trial length in weeks. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallPeriodMonths": "{n, plural, one{1 month} other{{n} months}}",
+  "@paywallPeriodMonths": {
+    "description": "Trial length in months. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallPeriodYears": "{n, plural, one{1 year} other{{n} years}}",
+  "@paywallPeriodYears": {
+    "description": "Trial length in years. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallPerMonthShort": "{price} / mo",
+  "@paywallPerMonthShort": {
+    "description": "Per-month equivalent on the annual tier row. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title of the settings screen. NEEDS RU TRANSLATION."
+  },
+  "settingsSectionPlan": "Plan and goals",
+  "@settingsSectionPlan": {
+    "description": "Section header over goal/weight/Pro rows. NEEDS RU TRANSLATION."
+  },
+  "settingsSectionAbout": "About",
+  "@settingsSectionAbout": {
+    "description": "Section header over the legal links. NEEDS RU TRANSLATION."
+  },
+  "settingsAppearanceUnavailable": "Theme follows the app build",
+  "@settingsAppearanceUnavailable": {
+    "description": "Explains why there is no light/dark switch. NEEDS RU TRANSLATION."
+  },
+  "detailTitle": "Meal",
+  "@detailTitle": {
+    "description": "Fallback title for the meal detail screen. NEEDS RU TRANSLATION."
+  },
+  "detailLoggedAt": "Logged at {time}",
+  "@detailLoggedAt": {
+    "description": "Sub-line in the detail header. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "detailServing": "{grams} g serving",
+  "@detailServing": {
+    "description": "Serving line under the dish name. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "detailSourcePhoto": "Recognised from a photo",
+  "@detailSourcePhoto": {
+    "description": "Chip on the hero when the entry came from the camera. NEEDS RU TRANSLATION."
+  },
+  "detailSourceManual": "Entered by hand",
+  "@detailSourceManual": {
+    "description": "Chip on the hero for a manual entry. NEEDS RU TRANSLATION."
+  },
+  "detailSourceSuggested": "From a suggestion",
+  "@detailSourceSuggested": {
+    "description": "Chip on the hero for a suggested dish. NEEDS RU TRANSLATION."
+  },
+  "detailDuplicate": "Duplicate",
+  "@detailDuplicate": {
+    "description": "Logs the same dish again. NEEDS RU TRANSLATION."
+  },
+  "detailSave": "Save",
+  "@detailSave": {
+    "description": "Commits a changed portion. NEEDS RU TRANSLATION."
+  },
+  "detailDeleted": "{dish} removed",
+  "@detailDeleted": {
+    "description": "Confirmation after deleting an entry. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "dish": {
+        "type": "String"
+      }
+    }
+  },
+  "detailDuplicated": "{dish} logged again",
+  "@detailDuplicated": {
+    "description": "Confirmation after duplicating. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "dish": {
+        "type": "String"
+      }
+    }
+  },
+  "detailDeleteTitle": "Remove this meal?",
+  "@detailDeleteTitle": {
+    "description": "Confirm dialog title. NEEDS RU TRANSLATION."
+  },
+  "detailDeleteBody": "It will be taken out of today's diary.",
+  "@detailDeleteBody": {
+    "description": "Confirm dialog body. NEEDS RU TRANSLATION."
+  },
+  "detailShareOfDay": "{percent}% of target",
+  "@detailShareOfDay": {
+    "description": "How much of the daily calories this dish is. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "detailSharePercent": "{percent}%",
+  "@detailSharePercent": {
+    "description": "Share of the daily target in a narrow trailing column.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "waterAdd": "+{ml}",
+  "@waterAdd": {
+    "description": "Label on the water card's add button. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
+  "waterUndo": "Undo",
+  "@waterUndo": {
+    "description": "Takes back the last logged sip. NEEDS RU TRANSLATION."
+  },
+  "waterOfGoal": "of {liters} L",
+  "@waterOfGoal": {
+    "description": "Daily water goal under the current total. NEEDS RU TRANSLATION.",
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      }
+    }
+  },
+  "waterNotSynced": "Saved on this device only",
+  "@waterNotSynced": {
+    "description": "Shown while water_logs does not exist server-side. NEEDS RU TRANSLATION."
+  }
 }

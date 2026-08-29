@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/dimensions.dart';
-import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 enum YesQuestion { lose, order, health }
 
@@ -61,12 +59,12 @@ class YesQuestionScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             _headline(loc, goal),
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               height: 1.2,
               letterSpacing: -0.6,
-              color: SalamatTokens.textPrimary,
+              color: sc.text,
             ),
           ),
           const SizedBox(height: 32),
@@ -75,24 +73,24 @@ class YesQuestionScreen extends ConsumerWidget {
               Expanded(
                 child: _Illust(
                   icon: _beforeIcon,
-                  iconColor: SalamatTokens.textMuted,
+                  iconColor: sc.text2,
                   caption: loc.yesCaptionBefore,
-                  bg: SalamatTokens.ringTrack,
+                  bg: sc.surface3,
                 ),
               ),
-              const Padding(
+               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Icon(
                   Icons.arrow_forward_rounded,
-                  color: SalamatTokens.iconQuiet,
+                  color: sc.text3,
                 ),
               ),
               Expanded(
                 child: _Illust(
                   icon: _afterIcon,
-                  iconColor: SalamatTokens.accentDeep,
+                  iconColor: sc.primary,
                   caption: loc.yesCaptionAfter,
-                  bg: SalamatTokens.pillBg,
+                  bg: sc.primarySoft,
                 ),
               ),
             ],
@@ -101,9 +99,9 @@ class YesQuestionScreen extends ConsumerWidget {
         ],
       ),
       buttonLabel: loc.buttonYes,
-      onContinue: () => context.go(_next),
+      onContinue: () => context.push(_next),
       secondaryLabel: loc.buttonNo,
-      onSecondary: () => context.go(_next),
+      onSecondary: () => context.push(_next),
     );
   }
 }
@@ -130,18 +128,18 @@ class _Illust extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: bg,
-            borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
+            borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
           ),
           child: PhosphorIcon(icon, size: 64, color: iconColor),
         ),
         const SizedBox(height: 8),
         Text(
           caption,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
-            color: SalamatTokens.iconQuiet,
+            color: sc.text3,
           ),
         ),
       ],

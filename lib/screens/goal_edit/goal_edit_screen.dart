@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 
 import '../../providers/user_provider.dart';
 import '../../services/supabase_service.dart';
-import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
-import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_dark.dart';
 import '../onboarding/widgets.dart'
     show OnboardingSelectCard, OnboardingWheelPicker, calculateDailyCalories;
 
@@ -115,15 +113,15 @@ class _GoalEditScreenState extends ConsumerState<GoalEditScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: SalamatTokens.background,
+      backgroundColor: sc.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon:  Icon(
             Icons.arrow_back_rounded,
-            color: SalamatTokens.textPrimary,
+            color: sc.text,
           ),
           onPressed: () {
             if (_step == 1) {
@@ -135,10 +133,10 @@ class _GoalEditScreenState extends ConsumerState<GoalEditScreen> {
         ),
         title: Text(
           loc.profileSettingMyGoal,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: SalamatTokens.textPrimary,
+            color: sc.text,
           ),
         ),
         centerTitle: true,
@@ -147,7 +145,7 @@ class _GoalEditScreenState extends ConsumerState<GoalEditScreen> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
           child: _step == 0 ? _goalStep(loc) : _targetStep(loc),
         ),
@@ -160,7 +158,7 @@ class _GoalEditScreenState extends ConsumerState<GoalEditScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        Text(loc.goalSubtitle, style: SalamatType.caption),
+        Text(loc.goalSubtitle, style: SalamatDarkType.caption),
         const SizedBox(height: 16),
         for (final g in Goal.values) ...[
           OnboardingSelectCard(
@@ -169,8 +167,8 @@ class _GoalEditScreenState extends ConsumerState<GoalEditScreen> {
             leading: SalamatIcon(
               _icons[g] ?? PhosphorIcons.circle(),
               size: 22,
-              color: SalamatTokens.accentDeep,
-              bubbleColor: SalamatTokens.bubbleMint,
+              color: sc.primary,
+              bubbleColor: sc.accentSoft,
             ),
             selected: _goal == g,
             onTap: () => setState(() => _goal = g),
@@ -199,7 +197,7 @@ class _GoalEditScreenState extends ConsumerState<GoalEditScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        Text(loc.targetSubtitle, style: SalamatType.caption),
+        Text(loc.targetSubtitle, style: SalamatDarkType.caption),
         const SizedBox(height: 12),
         SizedBox(
           height: 280,
@@ -216,15 +214,15 @@ class _GoalEditScreenState extends ConsumerState<GoalEditScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: SalamatTokens.pillBg,
+              color: sc.primarySoft,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               deltaLabel,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: SalamatTokens.pillText,
+                color: sc.primaryInk,
               ),
             ),
           ),
@@ -256,22 +254,22 @@ class _Cta extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: SalamatDims.buttonHeight,
+      height: SalamatDarkDims.buttonHeight,
       child: ElevatedButton(
         onPressed: enabled ? onTap : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: SalamatTokens.accentDeep,
-          foregroundColor: SalamatTokens.onAccent,
-          disabledBackgroundColor: SalamatTokens.pillBg,
-          disabledForegroundColor: SalamatTokens.textMuted,
+          backgroundColor: sc.primary,
+          foregroundColor: sc.onPrimary,
+          disabledBackgroundColor: sc.primarySoft,
+          disabledForegroundColor: sc.text2,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(SalamatTokens.radiusCta),
+            borderRadius: BorderRadius.circular(SalamatDarkDims.rButton),
           ),
         ),
         child: Text(
           label,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),

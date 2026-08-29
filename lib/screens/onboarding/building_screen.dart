@@ -3,11 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
-import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_dark.dart';
 
 class BuildingScreen extends StatefulWidget {
   const BuildingScreen({super.key});
@@ -29,7 +27,9 @@ class _BuildingScreenState extends State<BuildingScreen>
       duration: const Duration(milliseconds: 3500),
     )..forward();
     _advance = Timer(const Duration(milliseconds: 4200), () {
-      if (mounted) context.go('/onboarding/plan');
+      // Replaces itself: this screen auto-advances on a timer, so leaving
+      // it in the back stack would strand anyone who pops back into it.
+      if (mounted) context.pushReplacement('/onboarding/plan');
     });
   }
 
@@ -45,11 +45,11 @@ class _BuildingScreenState extends State<BuildingScreen>
     final loc = AppLocalizations.of(context)!;
     final steps = [loc.buildingStep1, loc.buildingStep2, loc.buildingStep3];
     return Scaffold(
-      backgroundColor: SalamatTokens.background,
+      backgroundColor: sc.bg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -59,19 +59,19 @@ class _BuildingScreenState extends State<BuildingScreen>
                 child: SalamatIcon(
                   PhosphorIcons.gear(),
                   size: 64,
-                  color: SalamatTokens.iconQuiet,
+                  color: sc.text3,
                 ),
               ),
               const SizedBox(height: 24),
               Text(
                 loc.buildingTitle,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
                   height: 1.2,
                   letterSpacing: -0.4,
-                  color: SalamatTokens.textPrimary,
+                  color: sc.text,
                 ),
               ),
               const SizedBox(height: 40),
@@ -85,7 +85,7 @@ class _BuildingScreenState extends State<BuildingScreen>
                       Container(
                         height: 8,
                         decoration: BoxDecoration(
-                          color: SalamatTokens.ringTrack,
+                          color: sc.surface3,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: FractionallySizedBox(
@@ -93,7 +93,7 @@ class _BuildingScreenState extends State<BuildingScreen>
                           widthFactor: v,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: SalamatTokens.accentDeep,
+                              color: sc.primary,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -104,10 +104,10 @@ class _BuildingScreenState extends State<BuildingScreen>
                         alignment: Alignment.centerRight,
                         child: Text(
                           '${(v * 100).round()}%',
-                          style: GoogleFonts.manrope(
+                          style: SalamatDarkType.style(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: SalamatTokens.accentDeep,
+                            color: sc.primary,
                           ),
                         ),
                       ),
@@ -143,10 +143,10 @@ class _ChecklistRow extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: done ? SalamatTokens.pillBg : SalamatTokens.surfaceAlt,
+        color: done ? sc.primarySoft : sc.surface2,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: done ? SalamatTokens.pillBg : SalamatTokens.ringTrack,
+          color: done ? sc.primarySoft : sc.surface3,
         ),
       ),
       child: Row(
@@ -154,29 +154,29 @@ class _ChecklistRow extends StatelessWidget {
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: done
-                ? const Icon(
+                ?  Icon(
                     Icons.check_circle_rounded,
                     key: ValueKey('done'),
-                    color: SalamatTokens.accentDeep,
+                    color: sc.primary,
                     size: 22,
                   )
-                : const SizedBox(
+                :  SizedBox(
                     key: ValueKey('pending'),
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: SalamatTokens.accentDeep,
+                      color: sc.primary,
                     ),
                   ),
           ),
           const SizedBox(width: 12),
           Text(
             label,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 14,
               fontWeight: done ? FontWeight.w700 : FontWeight.w500,
-              color: SalamatTokens.textPrimary,
+              color: sc.text,
             ),
           ),
         ],

@@ -132,6 +132,36 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
     );
   }
 
+  /// Drops one entry, optimistically then on the server.
+  Future<void> remove(MealType type, String id) async {
+    final current = state.valueOrNull ?? const MealsState();
+    final next = Map<MealType, List<MealEntry>>.from(current.entries);
+    next[type] = (next[type] ?? const [])
+        .where((e) => e.id != id)
+        .toList(growable: false);
+    state = AsyncData(MealsState(entries: next));
+    await SupabaseService.deleteFoodLog(id);
+  }
+
+  /// Rescales one entry in place. Keeps the row id and `eaten_at`.
+  Future<void> updateEntry(MealType type, MealEntry entry) async {
+    final current = state.valueOrNull ?? const MealsState();
+    final next = Map<MealType, List<MealEntry>>.from(current.entries);
+    next[type] = [
+      for (final e in next[type] ?? const <MealEntry>[])
+        if (e.id == entry.id) entry else e,
+    ];
+    state = AsyncData(MealsState(entries: next));
+    await SupabaseService.updateFoodLog(
+      id: entry.id,
+      portionG: entry.grams,
+      calories: entry.kcal,
+      proteinG: entry.protein,
+      carbsG: entry.carbs,
+      fatG: entry.fat,
+    );
+  }
+
   /// Re-reads today's meals from Supabase (e.g. after returning to a screen).
   Future<void> reload() async {
     state = const AsyncLoading();

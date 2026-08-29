@@ -1298,13 +1298,13 @@ abstract class AppLocalizations {
   /// No description provided for @cameraAddButton.
   ///
   /// In en, this message translates to:
-  /// **'✓ Add to diary'**
+  /// **'Add to diary'**
   String get cameraAddButton;
 
   /// No description provided for @cameraRetake.
   ///
   /// In en, this message translates to:
-  /// **'↺ Retake'**
+  /// **'Retake'**
   String get cameraRetake;
 
   /// No description provided for @cameraOutOfPhotos.
@@ -1402,12 +1402,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Best value'**
   String get paywallPopular;
-
-  /// No description provided for @paywallTrialButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Try free — 7 days'**
-  String get paywallTrialButton;
 
   /// No description provided for @paywallCancelAnytime.
   ///
@@ -1522,12 +1516,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'−{percent}%'**
   String paywallSaveBadge(int percent);
-
-  /// No description provided for @paywallNoPaymentNow.
-  ///
-  /// In en, this message translates to:
-  /// **'No payment now'**
-  String get paywallNoPaymentNow;
 
   /// No description provided for @paywallFinePrint.
   ///
@@ -1912,6 +1900,516 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get languageSelectTitle;
+
+  /// Splash tagline under the wordmark, rendered uppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'AI nutrition coach'**
+  String get splashTagline;
+
+  /// First chip in the welcome hero block (Snap - Confirm - Done).
+  ///
+  /// In en, this message translates to:
+  /// **'Snap'**
+  String get welcomeChipSnap;
+
+  /// Second chip in the welcome hero block.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get welcomeChipConfirm;
+
+  /// Third chip in the welcome hero block.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get welcomeChipDone;
+
+  /// Section header above the meal list.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s meals'**
+  String get dashboardTodaysMeals;
+
+  /// Text action next to the meals header; opens the camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get dashboardScanAction;
+
+  /// Title of the recognition confirmation sheet. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your plate'**
+  String get cameraConfirmTitle;
+
+  /// Primary action on the confirmation sheet. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Log {kcal} kcal'**
+  String cameraLogKcal(int kcal);
+
+  /// Eyebrow above the confirmation title when a single dish was recognised. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'1 item detected'**
+  String get cameraDetectedOne;
+
+  /// Label above the breakfast/lunch/dinner/snack chips on the confirmation sheet. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to'**
+  String get cameraMealSlotHint;
+
+  /// Label on a detection box drawn over the viewfinder. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} {percent}%'**
+  String cameraDetectedBoxLabel(String name, int percent);
+
+  /// Progress range tab. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get progressRangeDay;
+
+  /// Progress range tab. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get progressRangeWeek;
+
+  /// Progress range tab. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get progressRangeMonth;
+
+  /// Progress range tab. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get progressRangeYear;
+
+  /// Title of the bar chart card. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie trend'**
+  String get progressCalorieTrend;
+
+  /// Chart meta line, mean over logged days. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'daily avg {kcal}'**
+  String progressDailyAvg(int kcal);
+
+  /// Label on the chart's goal reference line. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} goal'**
+  String progressGoalLine(int kcal);
+
+  /// Score card label. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein score'**
+  String get progressProteinScore;
+
+  /// Score card sub-line. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{hit} of {total} days on target'**
+  String progressProteinScoreSub(int hit, int total);
+
+  /// Score card label and heat-map header. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Consistency'**
+  String get progressConsistencyLabel;
+
+  /// Score card sub-line. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'days logged in a row'**
+  String get progressConsistencySub;
+
+  /// Empty state inside the trend card. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged in this period yet'**
+  String get progressNoRangeData;
+
+  /// Header above the projected weekly weights. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly milestones'**
+  String get progressWeeklyMilestones;
+
+  /// Short week label on a milestone tile. From the prototype. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'W{n}'**
+  String progressMilestoneWeek(int n);
+
+  /// Title of the meal-suggestion screen. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'What to cook'**
+  String get cookTitle;
+
+  /// Line under the title explaining the feature. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'From what you have, within what\'s left of today'**
+  String get cookSubtitle;
+
+  /// Header above the ingredient list. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Your ingredients'**
+  String get cookPantryHeader;
+
+  /// Hint in the ingredient input. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an ingredient'**
+  String get cookAddHint;
+
+  /// Button that appends the typed ingredient. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get cookAddButton;
+
+  /// Removes every ingredient from the list. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get cookClearAll;
+
+  /// Accessibility label for the delete chip. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {item}'**
+  String cookRemoveItem(String item);
+
+  /// Shown once the list hits its ceiling. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} ingredients'**
+  String cookPantryFull(int max);
+
+  /// Primary action that calls the model. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest 3 dishes'**
+  String get cookSuggestButton;
+
+  /// Eyebrow above the remaining-budget readout. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Left today'**
+  String get cookRemainingLabel;
+
+  /// Empty state when the ingredient list is empty. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Add what you have'**
+  String get cookEmptyPantryTitle;
+
+  /// Body of the empty-pantry state. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'List the products in your fridge and Salamat will pick three dishes that fit the rest of your day.'**
+  String get cookEmptyPantryBody;
+
+  /// Empty state when no calories remain. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s target is used up'**
+  String get cookNoBudgetTitle;
+
+  /// Body of the no-budget state. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing fits the remainder right now. Come back tomorrow, or adjust your goal.'**
+  String get cookNoBudgetBody;
+
+  /// Error state when the model did not answer. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t pick a dish'**
+  String get cookFailedTitle;
+
+  /// Body of the failure state. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'The service didn\'t respond. Check your connection and try again.'**
+  String get cookFailedBody;
+
+  /// Shown while the request is in flight. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Picking dishes…'**
+  String get cookLoading;
+
+  /// Calorie band on a suggestion card. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} kcal'**
+  String cookRangeKcal(int min, int max);
+
+  /// Macro band on a suggestion card. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} g'**
+  String cookRangeG(int min, int max);
+
+  /// Cooking time on a suggestion card. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min'**
+  String cookTimeMinutes(int n);
+
+  /// Badge: the whole band is inside the remainder. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits'**
+  String get cookFits;
+
+  /// Badge: the band straddles the remainder. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Might not fit'**
+  String get cookBorderline;
+
+  /// Badge: even the low end exceeds the remainder. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Over the remainder'**
+  String get cookOver;
+
+  /// Explains why a band is shown instead of a number. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate — the range widens when portion or cooking method is unclear'**
+  String get cookWhyRange;
+
+  /// Section header inside a suggestion card. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get cookIngredientsHeader;
+
+  /// Section header inside a suggestion card. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'How to cook'**
+  String get cookStepsHeader;
+
+  /// Action that logs the dish. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to diary'**
+  String get cookAddToDiary;
+
+  /// Confirmation after logging; kcal is the band midpoint. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{dish} added — {kcal} kcal'**
+  String cookAddedToDiary(String dish, int kcal);
+
+  /// Note on the add button explaining which value is stored. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged at the middle of the range'**
+  String get cookMidpointNote;
+
+  /// Retries the suggestion request. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get cookRetry;
+
+  /// Primary CTA when the store product carries a free trial. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {period} free'**
+  String paywallTrialCta(String period);
+
+  /// Explicit first-charge amount and date under the trial CTA. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Then {price}, charged {date}'**
+  String paywallTrialThen(String price, String date);
+
+  /// Primary CTA when the product has no free trial. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get paywallSubscribeCta;
+
+  /// Trial length in days, used inside paywallTrialCta. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one{1 day} other{{n} days}}'**
+  String paywallPeriodDays(int n);
+
+  /// Trial length in weeks. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one{1 week} other{{n} weeks}}'**
+  String paywallPeriodWeeks(int n);
+
+  /// Trial length in months. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one{1 month} other{{n} months}}'**
+  String paywallPeriodMonths(int n);
+
+  /// Trial length in years. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one{1 year} other{{n} years}}'**
+  String paywallPeriodYears(int n);
+
+  /// Per-month equivalent on the annual tier row. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / mo'**
+  String paywallPerMonthShort(String price);
+
+  /// Title of the settings screen. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Section header over goal/weight/Pro rows. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan and goals'**
+  String get settingsSectionPlan;
+
+  /// Section header over the legal links. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsSectionAbout;
+
+  /// Explains why there is no light/dark switch. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme follows the app build'**
+  String get settingsAppearanceUnavailable;
+
+  /// Fallback title for the meal detail screen. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal'**
+  String get detailTitle;
+
+  /// Sub-line in the detail header. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged at {time}'**
+  String detailLoggedAt(String time);
+
+  /// Serving line under the dish name. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{grams} g serving'**
+  String detailServing(int grams);
+
+  /// Chip on the hero when the entry came from the camera. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognised from a photo'**
+  String get detailSourcePhoto;
+
+  /// Chip on the hero for a manual entry. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered by hand'**
+  String get detailSourceManual;
+
+  /// Chip on the hero for a suggested dish. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'From a suggestion'**
+  String get detailSourceSuggested;
+
+  /// Logs the same dish again. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get detailDuplicate;
+
+  /// Commits a changed portion. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get detailSave;
+
+  /// Confirmation after deleting an entry. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{dish} removed'**
+  String detailDeleted(String dish);
+
+  /// Confirmation after duplicating. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{dish} logged again'**
+  String detailDuplicated(String dish);
+
+  /// Confirm dialog title. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this meal?'**
+  String get detailDeleteTitle;
+
+  /// Confirm dialog body. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be taken out of today\'s diary.'**
+  String get detailDeleteBody;
+
+  /// How much of the daily calories this dish is. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of target'**
+  String detailShareOfDay(int percent);
+
+  /// Share of the daily target in a narrow trailing column.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String detailSharePercent(int percent);
+
+  /// Label on the water card's add button. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'+{ml}'**
+  String waterAdd(int ml);
+
+  /// Takes back the last logged sip. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get waterUndo;
+
+  /// Daily water goal under the current total. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'of {liters} L'**
+  String waterOfGoal(String liters);
+
+  /// Shown while water_logs does not exist server-side. NEEDS RU TRANSLATION.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device only'**
+  String get waterNotSynced;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

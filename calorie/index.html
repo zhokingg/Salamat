@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FAF8F3">
+<title>what did you eat</title>
+<style>
+  :root{
+    --paper:#FAF8F3;
+    --ink:#1C1A17;
+    --mute:#928C82;
+    --faint:#BCB6AB;
+    --accent:#AE573B;
+    --line:rgba(28,26,23,.085);
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:15px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
+  }
+  button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+  input{font:inherit;color:inherit;background:none;border:0;outline:none}
+
+  #app{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto}
+
+  /* ---------- scroll area ---------- */
+  #scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+  .pad{padding:34px 22px 26px}
+
+  /* ---------- labels & day headers ---------- */
+  .label{
+    font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--mute);font-weight:500;
+  }
+  .day{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:16px;margin:0 0 4px;
+  }
+  .day + .day-note{margin:-2px 0 20px}
+  .day-note{font-size:12.5px;color:var(--mute);margin:0 0 20px}
+  .day-note .edit{transition:color .13s ease}
+  .day-note .edit:active{color:var(--accent)}
+  .day-note input{width:3.4em;text-align:left;font-size:12.5px;color:var(--accent);
+    border-bottom:1px solid var(--accent);padding-bottom:1px}
+  .day-total{
+    font-family:var(--sans);font-size:38px;font-weight:200;letter-spacing:-.02em;
+    line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .day-group{margin-bottom:44px}
+  .day-group:last-child{margin-bottom:0}
+
+  /* ---------- feed ---------- */
+  .entry{margin:0 0 34px}
+  .entry:last-child{margin-bottom:0}
+  .said{font-family:var(--serif);font-size:16.5px;line-height:1.45;margin:0}
+  .note{
+    font-size:13px;font-style:italic;color:var(--mute);
+    margin:5px 0 0;line-height:1.5;
+  }
+  .items{margin:13px 0 0}
+
+  .row{
+    display:flex;align-items:center;gap:13px;width:100%;text-align:left;
+    padding:6px 0;border-radius:9px;
+    transition:background-color .13s ease,transform .13s ease;
+  }
+  .row:active{background:rgba(28,26,23,.05);transform:scale(.988)}
+  .row .name{flex:1;font-family:var(--serif);font-size:15.5px;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row .cal{color:var(--faint);font-size:14px;font-variant-numeric:tabular-nums}
+  .sw{flex:none;border-radius:8px;overflow:hidden;display:block}
+
+  /* ---------- pending / error ---------- */
+  .skel{display:flex;align-items:center;gap:13px;padding:6px 0}
+  .skel .sq{width:34px;height:34px;border-radius:8px;flex:none}
+  .skel .bar{height:11px;border-radius:6px;width:47%}
+  .skel .sq,.skel .bar,.note.waiting{
+    background:rgba(28,26,23,.075);animation:breathe 1.5s ease-in-out infinite;
+  }
+  .note.waiting{height:11px;width:120px;border-radius:6px;margin-top:9px}
+  @keyframes breathe{0%,100%{opacity:.45}50%{opacity:1}}
+  .oops{font-size:13px;color:var(--mute);margin:7px 0 0}
+  .oops button{color:var(--accent);border-bottom:1px solid currentColor;line-height:1.2}
+
+  /* ---------- everything grid ---------- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 18px;margin-top:18px}
+  .tile{display:block;width:100%;text-align:left;transition:transform .13s ease,opacity .13s ease}
+  .tile:active{transform:scale(.975);opacity:.85}
+  .tile .sw{width:100%;height:auto;aspect-ratio:1;border-radius:13px}
+  .tile .name{font-family:var(--serif);font-size:13.5px;margin-top:9px;line-height:1.35}
+
+  /* ---------- empty ---------- */
+  .empty{padding:34vh 30px 0;text-align:center}
+  .empty h2{font-family:var(--serif);font-weight:400;font-size:19px;margin:0}
+  .empty p{color:var(--mute);font-size:13.5px;margin:8px 0 0}
+
+  /* ---------- composer + tabs ---------- */
+  #bottom{flex:none;background:var(--paper)}
+  #composer{display:flex;align-items:center;padding:14px 22px}
+  #composer input{flex:1;font-size:16px;font-family:var(--serif);caret-color:var(--accent)}
+  #composer input::placeholder{color:var(--faint);font-family:var(--sans);font-size:15px}
+  #send{
+    flex:none;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);opacity:0;transition:opacity .18s ease;pointer-events:none;
+  }
+  #send.on{opacity:1;pointer-events:auto}
+  #tabs{display:flex;gap:26px;padding:0 22px 6px;
+    padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+  #tabs button{
+    font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;
+    color:var(--faint);padding:8px 0 12px;transition:color .18s ease;
+  }
+  #tabs button.on{color:var(--ink)}
+
+  /* ---------- sheet ---------- */
+  #veil{
+    position:fixed;inset:0;background:rgba(24,21,17,.34);
+    opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:20;
+  }
+  #veil.on{opacity:1;pointer-events:auto}
+  #sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:21;
+    max-width:520px;margin:0 auto;background:var(--paper);
+    border-radius:20px 20px 0 0;padding:12px 24px 30px;
+    padding-bottom:calc(30px + env(safe-area-inset-bottom));
+    transform:translateY(101%);
+    transition:transform .46s cubic-bezier(.16,1,.3,1);
+  }
+  #sheet.on{transform:translateY(0)}
+  .grab{width:34px;height:4px;border-radius:3px;background:rgba(28,26,23,.13);margin:0 auto 20px}
+  .s-name{font-family:var(--serif);font-size:18px;margin:0}
+  .s-cal{
+    font-size:66px;font-weight:200;letter-spacing:-.035em;line-height:1.06;
+    margin:6px 0 0;font-variant-numeric:tabular-nums;
+  }
+  .s-src{margin:3px 0 0}
+  .s-block{margin-top:26px}
+  .s-block > .label{display:block;margin-bottom:11px}
+
+  .step{display:flex;align-items:center;gap:20px}
+  .step button{
+    width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+    font-size:17px;font-weight:300;line-height:1;color:var(--mute);
+    display:grid;place-items:center;transition:background-color .13s,color .13s,transform .13s;
+  }
+  .step button:active{background:rgba(28,26,23,.06);color:var(--ink);transform:scale(.93)}
+  .step .amt{font-family:var(--serif);font-size:17px;font-variant-numeric:tabular-nums}
+
+  .seg{display:grid;grid-template-columns:repeat(4,1fr)}
+  .seg button{
+    font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:500;
+    color:var(--faint);padding:0 0 9px;border-bottom:1px solid var(--line);
+    transition:color .18s ease,border-color .18s ease;
+  }
+  .seg button.on{color:var(--ink);border-bottom-color:var(--accent)}
+
+  .macros{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .macro .v{font-size:22px;font-weight:200;font-variant-numeric:tabular-nums;line-height:1.2}
+  .macro .label{display:block;margin-top:3px}
+
+  .s-del{margin-top:30px;font-size:13px;color:var(--mute)}
+  .s-del:active{color:var(--accent)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="scroll"><div class="pad" id="view"></div></div>
+  <div id="bottom">
+    <form id="composer" autocomplete="off">
+      <input id="field" placeholder="what did you eat?" enterkeyhint="send">
+      <button id="send" type="submit">Log</button>
+    </form>
+    <div id="tabs">
+      <button data-tab="log" class="on">Log</button>
+      <button data-tab="everything">Everything</button>
+    </div>
+  </div>
+</div>
+<div id="veil"></div>
+<div id="sheet"></div>
+
+<script>
+/* ------------------------------------------------------------------ state */
+let uid = 0
+const nid = () => `i${++uid}`
+
+function mkItem(o){
+  const amt = o.servingAmount > 0 ? o.servingAmount : 1
+  return {
+    id: nid(),
+    name: o.name,
+    servingAmount: amt,
+    servingUnit: o.servingUnit,
+    mealType: o.mealType,
+    source: o.source,
+    calories: o.calories, protein: o.protein, carbs: o.carbs, fat: o.fat,
+    // per one unit — everything rescales from here, so repeated edits never drift
+    per: {
+      calories: o.calories / amt, protein: o.protein / amt,
+      carbs: o.carbs / amt, fat: o.fat / amt,
+    },
+  }
+}
+
+function mkEntry(ts, rawText, note, items){
+  return { id: nid(), timestamp: ts, rawText, note, status:'done', items: items.map(mkItem) }
+}
+
+const DAY = 864e5
+function at(daysAgo, h, m){
+  const d = new Date()
+  d.setDate(d.getDate() - daysAgo); d.setHours(h, m, 0, 0)
+  return d.getTime()
+}
+// today's seeds are relative so they are always already in the past —
+// anything typed now sorts below them in the transcript
+const ago = mins => Date.now() - mins * 60000
+
+const state = {
+  tab: 'log',
+  goal: 2000,
+  proteinTarget: 140,
+  sheet: null,
+  entries: [
+    mkEntry(at(2,8,10), 'greek yogurt with honey and a handful of walnuts',
+      'Logged breakfast — I assumed a single-serve cup and about a tablespoon of honey.', [
+      {name:'Greek Yogurt',calories:146,protein:20,carbs:8,fat:4,servingAmount:1,servingUnit:'cup',mealType:'breakfast',source:'database'},
+      {name:'Honey',calories:64,protein:0,carbs:17,fat:0,servingAmount:1,servingUnit:'tbsp',mealType:'breakfast',source:'database'},
+      {name:'Walnuts',calories:131,protein:3,carbs:3,fat:13,servingAmount:1,servingUnit:'oz',mealType:'breakfast',source:'database'},
+    ]),
+    mkEntry(at(2,13,25), 'turkey sandwich from the place downstairs and a bag of chips',
+      'Estimated it as a standard deli sandwich, about 390. Say the word if it was a footlong and I’ll redo it.', [
+      {name:'Turkey Sandwich',calories:390,protein:28,carbs:44,fat:11,servingAmount:1,servingUnit:'sandwich',mealType:'lunch',source:'estimated'},
+      {name:'Potato Chips',calories:152,protein:2,carbs:15,fat:10,servingAmount:1,servingUnit:'bag',mealType:'lunch',source:'database'},
+    ]),
+    mkEntry(at(2,19,40), 'salmon, rice, roasted broccoli',
+      'Good dinner. 100g of protein on the day and you finished 531 under.', [
+      {name:'Salmon',calories:290,protein:39,carbs:0,fat:13,servingAmount:5,servingUnit:'oz',mealType:'dinner',source:'database'},
+      {name:'White Rice',calories:205,protein:4,carbs:45,fat:0,servingAmount:1,servingUnit:'cup',mealType:'dinner',source:'database'},
+      {name:'Roasted Broccoli',calories:91,protein:4,carbs:8,fat:6,servingAmount:1,servingUnit:'cup',mealType:'dinner',source:'estimated'},
+    ]),
+
+    mkEntry(at(1,7,50), 'oatmeal with blueberries and a latte',
+      'Logged breakfast — I assumed a cup of oats and whole milk in the latte.', [
+      {name:'Oatmeal',calories:158,protein:6,carbs:27,fat:3,servingAmount:1,servingUnit:'cup',mealType:'breakfast',source:'database'},
+      {name:'Blueberries',calories:42,protein:1,carbs:11,fat:0,servingAmount:0.5,servingUnit:'cup',mealType:'breakfast',source:'database'},
+      {name:'Latte',calories:190,protein:10,carbs:18,fat:9,servingAmount:12,servingUnit:'oz',mealType:'breakfast',source:'database'},
+    ]),
+    mkEntry(at(1,12,40), 'chicken burrito bowl, no guac',
+      'Logged.', [
+      {name:'Chicken Burrito Bowl',calories:625,protein:45,carbs:68,fat:19,servingAmount:1,servingUnit:'bowl',mealType:'lunch',source:'estimated'},
+    ]),
+    mkEntry(at(1,16,5), 'an apple and some peanut butter',
+      'I assumed a medium apple and two tablespoons. Say if it was more.', [
+      {name:'Apple',calories:95,protein:0,carbs:25,fat:0,servingAmount:1,servingUnit:'medium',mealType:'snack',source:'database'},
+      {name:'Peanut Butter',calories:188,protein:8,carbs:6,fat:16,servingAmount:2,servingUnit:'tbsp',mealType:'snack',source:'database'},
+    ]),
+    mkEntry(at(1,20,15), 'homemade pasta with meat sauce, two glasses of red wine',
+      'Estimated the pasta at a generous restaurant-size plate. 100g of protein on the day and you went 228 over.', [
+      {name:'Pasta With Meat Sauce',calories:680,protein:30,carbs:82,fat:24,servingAmount:1,servingUnit:'plate',mealType:'dinner',source:'estimated'},
+      {name:'Red Wine',calories:250,protein:0,carbs:8,fat:0,servingAmount:2,servingUnit:'glass',mealType:'dinner',source:'database'},
+    ]),
+
+    mkEntry(ago(200), 'two scrambled eggs, sourdough toast, black coffee',
+      'Logged breakfast — I assumed one slice of toast and a pat of butter on it.', [
+      {name:'Scrambled Eggs',calories:182,protein:12,carbs:2,fat:14,servingAmount:2,servingUnit:'eggs',mealType:'breakfast',source:'database'},
+      {name:'Sourdough Toast',calories:120,protein:4,carbs:23,fat:1,servingAmount:1,servingUnit:'slice',mealType:'breakfast',source:'database'},
+      {name:'Butter',calories:36,protein:0,carbs:0,fat:4,servingAmount:1,servingUnit:'tsp',mealType:'breakfast',source:'database'},
+      {name:'Black Coffee',calories:2,protein:0,carbs:0,fat:0,servingAmount:12,servingUnit:'oz',mealType:'breakfast',source:'database'},
+    ]),
+    mkEntry(ago(45), 'big salad with grilled chicken and a lemon vinaigrette',
+      'Estimated the dressing at two tablespoons, which is where most of the fat is.', [
+      {name:'Mixed Green Salad',calories:74,protein:4,carbs:11,fat:1,servingAmount:1,servingUnit:'bowl',mealType:'lunch',source:'estimated'},
+      {name:'Grilled Chicken Breast',calories:187,protein:35,carbs:0,fat:4,servingAmount:5,servingUnit:'oz',mealType:'lunch',source:'database'},
+      {name:'Lemon Vinaigrette',calories:145,protein:0,carbs:2,fat:15,servingAmount:2,servingUnit:'tbsp',mealType:'lunch',source:'estimated'},
+    ]),
+  ],
+}
+
+/* ------------------------------------------------------------------ util */
+const fmt = n => Math.round(n).toLocaleString('en-US')
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+const trim = n => String(Math.round(n * 100) / 100)
+
+function hash(s){
+  let h = 2166136261
+  for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) }
+  return Math.abs(h)
+}
+
+/* deterministic soft duotone swatch from the food name */
+function swatch(name, px){
+  const h = hash(name.toLowerCase())
+  const hue = h % 360
+  const bg = `hsl(${hue} 23% 92%)`
+  const fg = `hsl(${(hue + 28) % 360} 26% 81%)`
+  const a = h % 9, b = (h >> 5) % 7, c = (h >> 11) % 5
+  const shapes = [
+    `<circle cx="${19 + c}" cy="${10 + b}" r="${13 + a % 4}"/>`,
+    `<path d="M0 ${16 + a} Q16 ${5 + b} 32 ${18 + c} L32 32 L0 32 Z"/>`,
+    `<circle cx="${9 + c}" cy="${13 + a % 5}" r="9"/><circle cx="${21 + b % 4}" cy="${23 + c}" r="11"/>`,
+    `<rect x="-6" y="${11 + b}" width="44" height="${9 + a % 5}" rx="5" transform="rotate(${a * 3 - 14} 16 16)"/>`,
+    `<path d="M32 ${3 + b} L32 32 L${3 + a} 32 Z"/>`,
+    `<ellipse cx="${12 + b}" cy="${27 + c}" rx="${15 + a % 4}" ry="${11 + c}"/>`,
+  ]
+  const size = px ? `width="${px}" height="${px}"` : ''
+  return `<svg class="sw" ${size} viewBox="0 0 32 32" aria-hidden="true">`
+    + `<rect width="32" height="32" fill="${bg}"/>`
+    + `<g fill="${fg}">${shapes[(h >> 3) % 6]}</g></svg>`
+}
+
+const dayKey = ts => { const d = new Date(ts); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` }
+const todayKey = () => dayKey(Date.now())
+
+function dayLabel(ts){
+  if (dayKey(ts) === todayKey()) return 'Today'
+  if (dayKey(ts) === dayKey(Date.now() - DAY)) return 'Yesterday'
+  return new Date(ts).toLocaleDateString('en-US', { weekday: 'long' })
+}
+
+function groups(){
+  const map = new Map()
+  for (const e of [...state.entries].sort((x, y) => x.timestamp - y.timestamp)){
+    const k = dayKey(e.timestamp)
+    if (!map.has(k)) map.set(k, { key: k, ts: e.timestamp, entries: [] })
+    map.get(k).entries.push(e)
+  }
+  return [...map.values()]
+}
+
+const sum = (entries, f) =>
+  entries.reduce((t, e) => t + e.items.reduce((s, i) => s + i[f], 0), 0)
+
+const dayEntries = key => state.entries.filter(e => dayKey(e.timestamp) === key)
+
+function findItem(id){
+  for (const e of state.entries){
+    const it = e.items.find(i => i.id === id)
+    if (it) return { entry: e, item: it }
+  }
+  return null
+}
+
+/* number tween — used by the day totals and the sheet */
+const shown = new Map()
+function count(el, to, key){
+  const from = shown.has(key) ? shown.get(key) : to
+  shown.set(key, to)
+  if (from === to){ el.textContent = fmt(to); return }
+  const t0 = performance.now(), dur = 420
+  const tick = now => {
+    const p = Math.min(1, (now - t0) / dur)
+    const e = 1 - Math.pow(1 - p, 3)
+    el.textContent = fmt(from + (to - from) * e)
+    if (p < 1) requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+}
+
+/* ------------------------------------------------------------------ log tab */
+function itemRow(it){
+  return `<button class="row" data-item="${it.id}">`
+    + swatch(it.name, 34)
+    + `<span class="name">${esc(it.name)}</span>`
+    + `<span class="cal">${fmt(it.calories)}</span></button>`
+}
+
+function entryHTML(e){
+  let body
+  if (e.status === 'pending'){
+    body = `<div class="note waiting"></div><div class="items">`
+      + `<div class="skel"><div class="sq"></div><div class="bar"></div></div></div>`
+  } else if (e.status === 'error'){
+    body = `<p class="oops">${esc(e.error || 'Couldn’t read that one.')} `
+      + `<button data-retry="${e.id}">Try again</button></p>`
+  } else {
+    body = `<p class="note">${esc(e.note)}</p>`
+      + `<div class="items">${e.items.map(itemRow).join('')}</div>`
+  }
+  return `<div class="entry" data-entry="${e.id}"><p class="said">${esc(e.rawText)}</p>${body}</div>`
+}
+
+function goalNote(key){
+  const cal = sum(dayEntries(key), 'calories')
+  const pro = sum(dayEntries(key), 'protein')
+  const diff = state.goal - cal
+  const where = diff >= 0
+    ? `${fmt(diff)} under ${fmt(state.goal)}`
+    : `${fmt(-diff)} over ${fmt(state.goal)}`
+  return `<p class="day-note">`
+    + `<span class="edit" data-edit="goal">${where}</span>`
+    + ` &middot; <span class="edit" data-edit="protein">${fmt(pro)}g of ${fmt(state.proteinTarget)}g protein</span></p>`
+}
+
+function renderLog(){
+  const gs = groups()
+  if (!gs.length) return emptyHTML()
+  return gs.map(g => {
+    const total = sum(g.entries, 'calories')
+    return `<div class="day-group">`
+      + `<div class="day"><span class="label">${dayLabel(g.ts)}</span>`
+      + `<span class="day-total" data-total="${g.key}">${fmt(total)}</span></div>`
+      + (g.key === todayKey() ? goalNote(g.key) : `<div style="height:20px"></div>`)
+      + g.entries.map(entryHTML).join('')
+      + `</div>`
+  }).join('')
+}
+
+/* ------------------------------------------------------------------ everything tab */
+function renderEverything(){
+  const gs = groups().reverse()
+  if (!gs.length) return emptyHTML()
+  return gs.map(g => {
+    const items = g.entries.flatMap(e => e.items)
+    return `<div class="day-group"><div class="day"><span class="label">${dayLabel(g.ts)}</span></div>`
+      + `<div class="grid">` + items.map(it =>
+        `<button class="tile" data-item="${it.id}">${swatch(it.name)}`
+        + `<span class="name">${esc(it.name)}</span></button>`).join('')
+      + `</div></div>`
+  }).join('')
+}
+
+function emptyHTML(){
+  return `<div class="empty"><h2>Nothing logged yet.</h2>`
+    + `<p>Type what you ate. A sentence is enough &mdash; &ldquo;oatmeal with blueberries and a latte.&rdquo;</p></div>`
+}
+
+/* ------------------------------------------------------------------ render */
+const view = document.getElementById('view')
+const scroll = document.getElementById('scroll')
+
+const nearBottom = () =>
+  scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 90
+
+/* replacing innerHTML resets scrollTop, so carry it across the rebuild —
+   otherwise every update yanks the feed to the top */
+function render(keepScroll = true){
+  const prev = scroll.scrollTop
+  view.innerHTML = state.tab === 'log' ? renderLog() : renderEverything()
+  if (keepScroll) scroll.scrollTop = prev
+  for (const el of view.querySelectorAll('[data-total]')){
+    const key = el.dataset.total
+    count(el, sum(dayEntries(key), 'calories'), key)
+  }
+  if (state.sheet) paintSheet()
+}
+
+function toBottom(smooth){
+  scroll.scrollTo({ top: scroll.scrollHeight, behavior: smooth ? 'smooth' : 'auto' })
+}
+
+/* ------------------------------------------------------------------ sheet */
+const veil = document.getElementById('veil')
+const sheet = document.getElementById('sheet')
+
+const STEP = u => /^(g|ml|grams?)$/i.test(u) ? 10 : /^(cup|tbsp|tsp)s?$/i.test(u) ? 0.25 : 1
+
+function openSheet(id){
+  state.sheet = id
+  sheet.innerHTML = sheetHTML(findItem(id).item)
+  paintSheet(true)
+  requestAnimationFrame(() => { veil.classList.add('on'); sheet.classList.add('on') })
+}
+
+function closeSheet(){
+  state.sheet = null
+  veil.classList.remove('on'); sheet.classList.remove('on')
+}
+
+function sheetHTML(it){
+  const meals = ['breakfast','lunch','dinner','snack']
+  return `<div class="grab"></div>`
+    + `<p class="s-name">${esc(it.name)}</p>`
+    + `<p class="s-cal" data-s="calories">${fmt(it.calories)}</p>`
+    + `<p class="s-src label">${it.source === 'database' ? 'From database' : 'Estimated'}</p>`
+    + `<div class="s-block"><span class="label">Serving</span><div class="step">`
+    + `<button data-step="-1" aria-label="less">&minus;</button>`
+    + `<span class="amt"><span data-s="amount">${trim(it.servingAmount)}</span> ${esc(it.servingUnit)}</span>`
+    + `<button data-step="1" aria-label="more">+</button></div></div>`
+    + `<div class="s-block"><div class="seg">`
+    + meals.map(m => `<button data-meal="${m}" class="${it.mealType === m ? 'on' : ''}">${m}</button>`).join('')
+    + `</div></div>`
+    + `<div class="s-block"><div class="macros">`
+    + ['protein','carbs','fat'].map(k =>
+        `<div class="macro"><div class="v" data-s="${k}">${fmt(it[k])}g</div>`
+        + `<span class="label">${k}</span></div>`).join('')
+    + `</div></div>`
+    + `<button class="s-del" data-del="1">Delete this item</button>`
+}
+
+function paintSheet(fresh){
+  const found = state.sheet && findItem(state.sheet)
+  if (!found) return closeSheet()
+  const it = found.item
+  const q = s => sheet.querySelector(s)
+  const cal = q('[data-s="calories"]')
+  if (fresh){ shown.delete('sheet-calories'); cal.textContent = fmt(it.calories) }
+  count(cal, it.calories, 'sheet-calories')
+  q('[data-s="amount"]').textContent = trim(it.servingAmount)
+  for (const k of ['protein','carbs','fat']){
+    const el = q(`[data-s="${k}"]`)
+    if (fresh) shown.delete('sheet-' + k)
+    const key = 'sheet-' + k
+    const from = shown.has(key) ? shown.get(key) : it[k]
+    shown.set(key, it[k])
+    if (from === it[k]){ el.textContent = fmt(it[k]) + 'g' }
+    else {
+      const t0 = performance.now()
+      const tick = now => {
+        const p = Math.min(1, (now - t0) / 420)
+        const e = 1 - Math.pow(1 - p, 3)
+        el.textContent = fmt(from + (it[k] - from) * e) + 'g'
+        if (p < 1) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }
+  }
+  for (const b of sheet.querySelectorAll('[data-meal]'))
+    b.classList.toggle('on', b.dataset.meal === it.mealType)
+}
+
+function rescale(it, amount){
+  it.servingAmount = Math.round(amount * 100) / 100
+  for (const k of ['calories','protein','carbs','fat'])
+    it[k] = Math.round(it.per[k] * it.servingAmount)
+}
+
+/* ------------------------------------------------------------------ events */
+document.addEventListener('click', ev => {
+  const t = ev.target
+
+  const tab = t.closest('#tabs button')
+  if (tab){
+    state.tab = tab.dataset.tab
+    for (const b of document.querySelectorAll('#tabs button'))
+      b.classList.toggle('on', b === tab)
+    render(false)
+    if (state.tab === 'log') toBottom(false); else scroll.scrollTop = 0
+    return
+  }
+
+  const row = t.closest('[data-item]')
+  if (row){ openSheet(row.dataset.item); return }
+
+  const retry = t.closest('[data-retry]')
+  if (retry){ send(retry.dataset.retry); return }
+
+  const edit = t.closest('[data-edit]')
+  if (edit){ inlineEdit(edit); return }
+
+  if (t === veil){ closeSheet(); return }
+
+  if (sheet.contains(t)){
+    const found = state.sheet && findItem(state.sheet)
+    if (!found) return
+    const { entry, item } = found
+
+    const step = t.closest('[data-step]')
+    if (step){
+      const s = STEP(item.servingUnit)
+      const next = item.servingAmount + s * Number(step.dataset.step)
+      if (next >= s - 1e-9){ rescale(item, next); paintSheet(); render() }
+      return
+    }
+    const meal = t.closest('[data-meal]')
+    if (meal){ item.mealType = meal.dataset.meal; paintSheet(); return }
+
+    if (t.closest('[data-del]')){
+      entry.items = entry.items.filter(i => i.id !== item.id)
+      if (!entry.items.length) state.entries = state.entries.filter(e => e !== entry)
+      closeSheet(); render()
+    }
+  }
+})
+
+function inlineEdit(span){
+  const isGoal = span.dataset.edit === 'goal'
+  const cur = isGoal ? state.goal : state.proteinTarget
+  const input = document.createElement('input')
+  input.type = 'text'; input.inputMode = 'numeric'; input.value = String(cur)
+  span.replaceWith(input)
+  input.focus(); input.select()
+  let done = false
+  const commit = () => {
+    if (done) return
+    done = true
+    const n = parseInt(input.value.replace(/[^\d]/g, ''), 10)
+    if (Number.isFinite(n) && n > 0){ if (isGoal) state.goal = n; else state.proteinTarget = n }
+    render()
+  }
+  input.addEventListener('blur', commit)
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ e.preventDefault(); commit() }
+    if (e.key === 'Escape'){ done = true; render() }
+  })
+}
+
+/* ------------------------------------------------------------------ parsing */
+const form = document.getElementById('composer')
+const field = document.getElementById('field')
+const sendBtn = document.getElementById('send')
+
+field.addEventListener('input', () => sendBtn.classList.toggle('on', !!field.value.trim()))
+field.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter'){ ev.preventDefault(); form.requestSubmit() }
+})
+
+form.addEventListener('submit', ev => {
+  ev.preventDefault()
+  const text = field.value.trim()
+  if (!text) return
+  field.value = ''
+  sendBtn.classList.remove('on')
+  const entry = { id: nid(), timestamp: Date.now(), rawText: text, note: '', status: 'pending', items: [] }
+  state.entries.push(entry)
+  let switched = false
+  if (state.tab !== 'log'){
+    state.tab = 'log'
+    switched = true
+    for (const b of document.querySelectorAll('#tabs button'))
+      b.classList.toggle('on', b.dataset.tab === 'log')
+  }
+  render(!switched)
+  // coming from the other tab there is nothing to glide from — land at the bottom
+  toBottom(!switched)
+  send(entry.id, true)
+})
+
+/* pin: was the reader at the bottom when this was kicked off? Decided once, up
+   front — re-measuring later would read a half-finished smooth scroll. */
+async function send(entryId, pin){
+  const entry = state.entries.find(e => e.id === entryId)
+  if (!entry) return
+  if (pin === undefined) pin = nearBottom()
+  if (entry.status !== 'pending'){   // retry — the submit path already drew this
+    entry.status = 'pending'
+    render()
+    if (pin) toBottom(false)
+  }
+
+  const key = dayKey(entry.timestamp)
+  const others = dayEntries(key).filter(e => e !== entry)
+  const payload = {
+    text: entry.rawText,
+    localTime: new Date(entry.timestamp).toLocaleString('en-US',
+      { weekday:'long', hour:'numeric', minute:'2-digit' }),
+    caloriesSoFar: sum(others, 'calories'),
+    proteinSoFar: sum(others, 'protein'),
+    goal: state.goal,
+    proteinTarget: state.proteinTarget,
+  }
+
+  try {
+    const res = await fetch('/api/parse', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(data.error || `Server said ${res.status}.`)
+    entry.note = data.note
+    entry.items = data.items.map(mkItem)
+    entry.status = 'done'
+  } catch (err) {
+    entry.status = 'error'
+    entry.error = err.message
+  }
+  // items landing must not shove the transcript around: hold the bottom if we
+  // were already there, otherwise leave the reader where they are
+  render()
+  if (pin) toBottom(false)
+}
+
+/* ------------------------------------------------------------------ boot */
+render()
+toBottom(false)
+</script>
+</body>
+</html>

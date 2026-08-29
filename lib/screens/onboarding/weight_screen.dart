@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/dimensions.dart';
-import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class WeightScreen extends ConsumerStatefulWidget {
   const WeightScreen({super.key});
@@ -66,8 +64,8 @@ class _WeightScreenState extends ConsumerState<WeightScreen> {
 
   Color get _bmiColor {
     final b = _bmi;
-    if (b < 18.5 || b >= 25.0) return SalamatTokens.amber;
-    return SalamatTokens.accent;
+    if (b < 18.5 || b >= 25.0) return sc.warn;
+    return sc.primary;
   }
 
   void _next() {
@@ -75,7 +73,7 @@ class _WeightScreenState extends ConsumerState<WeightScreen> {
           height: _height.toDouble(),
           weight: _weight.toDouble(),
         );
-    context.go('/onboarding/target');
+    context.push('/onboarding/target');
   }
 
   @override
@@ -105,7 +103,7 @@ class _WeightScreenState extends ConsumerState<WeightScreen> {
                     onChanged: (i) => setState(() => _hIdx = i),
                   ),
                 ),
-                Container(width: 1, color: SalamatTokens.ringTrack),
+                Container(width: 1, color: sc.surface3),
                 Expanded(
                   child: _WheelColumn(
                     label: loc.weightWeightLabel,
@@ -161,10 +159,10 @@ class _WheelColumn extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: SalamatTokens.iconQuiet,
+            color: sc.text3,
             letterSpacing: 1.0,
           ),
         ),
@@ -184,15 +182,15 @@ class _WheelColumn extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: SalamatTokens.pillBg,
-            borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+            color: sc.primarySoft,
+            borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
           ),
           child: Text(
             valueLabel,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: SalamatTokens.pillText,
+              color: sc.primaryInk,
               height: 1.0,
             ),
           ),
@@ -220,26 +218,26 @@ class _BmiHint extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: SalamatTokens.surfaceAlt,
-        borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-        border: Border.all(color: SalamatTokens.ringTrack),
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+        border: Border.all(color: sc.surface3),
       ),
       child: Row(
         children: [
           Text(
             '$label  ',
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: SalamatTokens.textMuted,
+              color: sc.text2,
             ),
           ),
           Text(
             bmi.toStringAsFixed(1),
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: SalamatTokens.textPrimary,
+              color: sc.text,
             ),
           ),
           const SizedBox(width: 8),
@@ -251,7 +249,7 @@ class _BmiHint extends StatelessWidget {
             ),
             child: Text(
               band,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 color: color,

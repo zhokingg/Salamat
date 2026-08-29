@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 /// S2 — name entry. The dashboard greeting reads this value back.
 class NameScreen extends ConsumerStatefulWidget {
@@ -45,7 +44,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     final name = _ctl.text.trim();
     if (name.isEmpty) return;
     ref.read(userProvider.notifier).setName(name: name, lastName: '');
-    context.go('/onboarding/goal');
+    context.push('/onboarding/goal');
   }
 
   @override
@@ -89,9 +88,9 @@ class _PremiumTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: SalamatTokens.surfaceAlt,
+        color: sc.surface2,
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: SalamatTokens.ringTrack),
+        border: Border.all(color: sc.surface3),
       ),
       child: TextField(
         controller: controller,
@@ -99,19 +98,19 @@ class _PremiumTextField extends StatelessWidget {
         textCapitalization: TextCapitalization.words,
         textInputAction: TextInputAction.done,
         onSubmitted: onSubmitted,
-        cursorColor: SalamatTokens.accentDeep,
-        style: GoogleFonts.manrope(
+        cursorColor: sc.primary,
+        style: SalamatDarkType.style(
           fontSize: 17,
           fontWeight: FontWeight.w700,
-          color: SalamatTokens.textPrimary,
+          color: sc.text,
           letterSpacing: -0.1,
         ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: GoogleFonts.manrope(
+          hintStyle: SalamatDarkType.style(
             fontSize: 17,
             fontWeight: FontWeight.w500,
-            color: SalamatTokens.iconQuiet,
+            color: sc.text3,
           ),
           filled: false,
           border: InputBorder.none,

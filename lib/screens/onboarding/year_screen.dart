@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class YearScreen extends ConsumerStatefulWidget {
   const YearScreen({super.key});
@@ -68,7 +67,7 @@ class _YearScreenState extends ConsumerState<YearScreen> {
       return;
     }
     ref.read(userProvider.notifier).setAge(_age);
-    context.go('/onboarding/weight');
+    context.push('/onboarding/weight');
   }
 
   @override
@@ -95,10 +94,10 @@ class _YearScreenState extends ConsumerState<YearScreen> {
           Center(
             child: Text(
               loc.yearAgeLabel(_age),
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: SalamatTokens.accentDeep,
+                color: sc.primary,
                 letterSpacing: -0.1,
               ),
             ),

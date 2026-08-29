@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/dimensions.dart';
-import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class SummaryScreen extends ConsumerWidget {
   const SummaryScreen({super.key});
@@ -65,8 +63,8 @@ class SummaryScreen extends ConsumerWidget {
                 height: 200,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: SalamatTokens.pillBg,
-                  borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
+                  color: sc.primarySoft,
+                  borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
                 ),
                 child: SalamatIcon(
                   u.gender == Gender.female
@@ -74,7 +72,7 @@ class SummaryScreen extends ConsumerWidget {
                           PhosphorIconsStyle.duotone)
                       : PhosphorIcons.personSimple(PhosphorIconsStyle.duotone),
                   size: 72,
-                  color: SalamatTokens.accentDeep,
+                  color: sc.primary,
                 ),
               ),
             ],
@@ -83,7 +81,7 @@ class SummaryScreen extends ConsumerWidget {
         ],
       ),
       buttonLabel: loc.buttonContinue,
-      onContinue: () => context.go('/onboarding/yes/lose'),
+      onContinue: () => context.push('/onboarding/yes/lose'),
     );
   }
 }
@@ -100,20 +98,20 @@ class _StatTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: SalamatTokens.surfaceAlt,
+        color: sc.surface2,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: SalamatTokens.ringTrack),
+        border: Border.all(color: sc.surface3),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.0,
-              color: SalamatTokens.iconQuiet,
+              color: sc.text3,
             ),
           ),
           const SizedBox(height: 4),
@@ -124,10 +122,10 @@ class _StatTile extends StatelessWidget {
               Flexible(
                 child: Text(
                   value,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: SalamatTokens.textPrimary,
+                    color: sc.text,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -136,10 +134,10 @@ class _StatTile extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   hint!,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: SalamatTokens.accentDeep,
+                    color: sc.primary,
                   ),
                 ),
               ],

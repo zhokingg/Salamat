@@ -26,7 +26,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
   void _next() {
     if (_selected == null) return;
     ref.read(userProvider.notifier).setActivityLevel(_selected!);
-    context.go('/onboarding/summary');
+    context.push('/onboarding/summary');
   }
 
   static final _icons = {

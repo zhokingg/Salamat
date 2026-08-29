@@ -62,33 +62,83 @@ class SubscriptionState {
 class SubscriptionNotifier extends Notifier<SubscriptionState> {
   void Function(CustomerInfo)? _listener;
 
+  /// False until [build] has returned, so nothing may touch `state` yet.
+  ///
+  /// `Purchases.addCustomerInfoUpdateListener` can invoke the callback
+  /// *synchronously* while it is being registered (it replays cached customer
+  /// info). Doing that from inside [build] meant reading `state` before the
+  /// notifier was initialised, which throws
+  /// `Bad state: Tried to read the state of an uninitialized provider` — and
+  /// whether it threw depended on how fast RevenueCat answered. Any screen
+  /// that watched this provider (profile, camera, paywall) died with it.
+  bool _ready = false;
+
+  /// Entitlement seen before [build] finished, applied once it has.
+  bool? _pendingPro;
+
+  /// Set by `ref.onDispose`; blocks late SDK callbacks from touching a
+  /// notifier that Riverpod has already torn down.
+  bool _disposed = false;
+
   @override
   SubscriptionState build() {
     // Live entitlement updates (purchase, restore, renewal, expiry) flow in
     // through the SDK listener; the initial fetch covers app start.
     if (PurchasesService.isReady) {
-      _listener = _onCustomerInfo;
-      Purchases.addCustomerInfoUpdateListener(_listener!);
       ref.onDispose(() {
+        _disposed = true;
+        _ready = false;
         if (_listener != null) {
           Purchases.removeCustomerInfoUpdateListener(_listener!);
+          _listener = null;
         }
       });
-      Purchases.getCustomerInfo().then(_onCustomerInfo).catchError((e) {
-        if (kDebugMode) debugPrint('getCustomerInfo error: $e');
+      // Both steps run after this build has returned, in this order, so
+      // neither can re-enter the notifier mid-initialisation.
+      Future.microtask(() {
+        _markReady();
+        if (_disposed) return;
+        _listener = _onCustomerInfo;
+        Purchases.addCustomerInfoUpdateListener(_listener!);
+        Purchases.getCustomerInfo().then(_onCustomerInfo).catchError((e) {
+          if (kDebugMode) debugPrint('getCustomerInfo error: $e');
+        });
       });
+    } else {
+      // No store SDK: nothing will ever call in, but keep the flag honest so
+      // `usePhoto`/`resetDaily` behave identically either way.
+      Future.microtask(_markReady);
     }
     return const SubscriptionState();
   }
 
+  void _markReady() {
+    if (_disposed) return;
+    _ready = true;
+    final pending = _pendingPro;
+    _pendingPro = null;
+    if (pending != null) _applyPro(pending);
+  }
+
   void _onCustomerInfo(CustomerInfo info) {
-    final pro = PurchasesService.hasPro(info);
+    _applyPro(PurchasesService.hasPro(info));
+  }
+
+  void _applyPro(bool pro) {
+    // Before initialisation, or after dispose, stash instead of writing.
+    if (!_ready) {
+      _pendingPro = pro;
+      return;
+    }
     if (pro != state.isPro) {
       state = state.copyWith(isPro: pro);
     }
   }
 
   void usePhoto() {
+    // Only reachable from a user-driven scan, i.e. long after [_markReady];
+    // the guard exists so a pre-init call can never throw.
+    if (!_ready) return;
     final now = DateTime.now();
     state = state.copyWith(
       photosUsed: state.photosUsedToday + 1,
@@ -99,6 +149,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
   /// Explicit counter reset (the local-date check in [SubscriptionState]
   /// already makes stale counters read as 0).
   void resetDaily() {
+    if (!_ready) return;
     state = state.copyWith(photosUsed: 0);
   }
 }

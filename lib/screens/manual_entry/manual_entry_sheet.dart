@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../providers/meals_provider.dart';
-import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
-import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_dark.dart';
 
 /// Free manual meal logging — no limits. Photo scanning is the paid
 /// convenience; typing a dish in is always available.
@@ -20,12 +18,12 @@ Future<void> showManualEntrySheet(
     context: context,
     // Root navigator: the sheet must cover the shell (incl. the camera FAB).
     useRootNavigator: true,
-    backgroundColor: SalamatTokens.surface,
+    backgroundColor: sc.surface,
     isScrollControlled: true,
     useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
-        top: Radius.circular(SalamatTokens.radiusHero),
+        top: Radius.circular(SalamatDarkDims.rHero),
       ),
     ),
     builder: (_) => ManualEntrySheet(initialMealType: initialMealType),
@@ -115,10 +113,10 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
       SnackBar(
         content: Text(
           loc.manualAddedSnack(_mealType.labelLower(loc)),
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: SalamatTokens.pillText,
+            color: sc.primaryInk,
           ),
         ),
       ),
@@ -143,7 +141,7 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: SalamatTokens.ringTrack,
+                  color: sc.surface3,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -151,7 +149,7 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: SalamatDims.screenPadding,
+                horizontal: SalamatDarkDims.screenPadH,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,10 +166,10 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
                       Expanded(
                         child: Text(
                           loc.manualTitle,
-                          style: GoogleFonts.manrope(
+                          style: SalamatDarkType.style(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
-                            color: SalamatTokens.textPrimary,
+                            color: sc.text,
                             letterSpacing: -0.3,
                           ),
                         ),
@@ -201,7 +199,10 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration:
-                        SalamatTokens.card(color: SalamatTokens.surfaceAlt),
+                        BoxDecoration(
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+      ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -240,15 +241,15 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
                                       ? PhosphorIcons.caretUp()
                                       : PhosphorIcons.caretDown(),
                                   size: 16,
-                                  color: SalamatTokens.accentDeep,
+                                  color: sc.primary,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   loc.manualAddDetails,
-                                  style: GoogleFonts.manrope(
+                                  style: SalamatDarkType.style(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: SalamatTokens.accentDeep,
+                                    color: sc.primary,
                                   ),
                                 ),
                               ],
@@ -307,23 +308,23 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
-                    height: SalamatDims.buttonHeight,
+                    height: SalamatDarkDims.buttonHeight,
                     child: ElevatedButton(
                       onPressed: _canSave ? _save : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: SalamatTokens.accentDeep,
-                        foregroundColor: SalamatTokens.onAccent,
-                        disabledBackgroundColor: SalamatTokens.pillBg,
-                        disabledForegroundColor: SalamatTokens.textMuted,
+                        backgroundColor: sc.primary,
+                        foregroundColor: sc.onPrimary,
+                        disabledBackgroundColor: sc.primarySoft,
+                        disabledForegroundColor: sc.text2,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(SalamatTokens.radiusCta),
+                              BorderRadius.circular(SalamatDarkDims.rButton),
                         ),
                       ),
                       child: Text(
                         loc.manualAddToMeal(_mealType.label(loc)),
-                        style: GoogleFonts.manrope(
+                        style: SalamatDarkType.style(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.1,
@@ -362,15 +363,15 @@ class _MealChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? SalamatTokens.accent : SalamatTokens.pillBg,
+          color: selected ? sc.primary : sc.primarySoft,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           type.label(loc),
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: selected ? SalamatTokens.onAccent : SalamatTokens.pillText,
+            color: selected ? sc.onPrimary : sc.primaryInk,
           ),
         ),
       ),
@@ -400,7 +401,7 @@ class _Field extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+      borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
       borderSide: BorderSide.none,
     );
     return TextField(
@@ -410,17 +411,17 @@ class _Field extends StatelessWidget {
       inputFormatters:
           digitsOnly ? [FilteringTextInputFormatter.digitsOnly] : null,
       onChanged: onChanged,
-      style: SalamatType.body.copyWith(fontWeight: FontWeight.w600),
-      cursorColor: SalamatTokens.accent,
+      style: SalamatDarkType.bodyL.copyWith(fontWeight: FontWeight.w600),
+      cursorColor: sc.primary,
       decoration: InputDecoration(
         isDense: true,
         hintText: hint,
         errorText: errorText,
         hintStyle:
-            SalamatType.body.copyWith(color: SalamatTokens.textMuted),
+            SalamatDarkType.bodyL.copyWith(color: sc.text2),
         filled: true,
         // Fields sit on the white card — the pill tint keeps them visible.
-        fillColor: SalamatTokens.pillBg,
+        fillColor: sc.primarySoft,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,
@@ -428,9 +429,9 @@ class _Field extends StatelessWidget {
         enabledBorder: border,
         border: border,
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+          borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
           borderSide:
-              const BorderSide(color: SalamatTokens.accent, width: 1.5),
+               BorderSide(color: sc.primary, width: 1.5),
         ),
       ),
     );

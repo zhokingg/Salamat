@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../config/legal.dart';
@@ -13,10 +12,8 @@ import '../../providers/user_provider.dart';
 import '../../services/onboarding_flag.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/update_weight_dialog.dart';
-import '../../theme/colors.dart';
 import '../../theme/salamat_icons.dart';
-import '../../theme/salamat_theme.dart';
-import '../../theme/dimensions.dart';
+import '../../theme/salamat_dark.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -38,27 +35,52 @@ class ProfileScreen extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.only(
         top: 56,
-        bottom: SalamatDims.tabBarHeight + 40,
+        bottom: SalamatDarkDims.navHeight + 40,
       ),
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
-          child: Text(
-            loc.profileTitle,
-            style: GoogleFonts.manrope(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: SalamatColors.ink,
-              letterSpacing: -0.3,
-            ),
+          // Prototype: title with the gear on the trailing edge.
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  loc.profileTitle,
+                  style: SalamatDarkType.h2.copyWith(color: sc.text),
+                ),
+              ),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => context.push('/settings'),
+                child: Semantics(
+                  button: true,
+                  label: loc.settingsTitle,
+                  child: Container(
+                    width: SalamatDarkDims.iconBtn36,
+                    height: SalamatDarkDims.iconBtn36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: sc.surface2,
+                      borderRadius:
+                          BorderRadius.circular(SalamatDarkDims.rIcon36),
+                    ),
+                    child: PhosphorIcon(
+                      PhosphorIcons.gear(),
+                      size: 16,
+                      color: sc.text,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,10 +90,10 @@ class ProfileScreen extends ConsumerWidget {
                   Flexible(
                     child: Text(
                       fullName,
-                      style: GoogleFonts.manrope(
+                      style: SalamatDarkType.style(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        color: SalamatTokens.textPrimary,
+                        color: sc.text,
                         letterSpacing: -0.2,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -92,10 +114,10 @@ class ProfileScreen extends ConsumerWidget {
                   if (user.calorieNorm != null)
                     loc.dashboardKcalWithValue(user.calorieNorm!),
                 ].join(' · '),
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: SalamatTokens.textMuted,
+                  color: sc.text2,
                 ),
               ),
             ],
@@ -187,10 +209,10 @@ class ProfileScreen extends ConsumerWidget {
             ),
             child: Text(
               loc.profileDeleteAccount,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: SalamatColors.danger,
+                color: sc.err,
               ),
             ),
           ),
@@ -208,24 +230,24 @@ class ProfileScreen extends ConsumerWidget {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: SalamatColors.surf,
+        backgroundColor: sc.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
         ),
         title: Text(
           loc.profileDeleteDialogTitle,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: SalamatColors.ink,
+            color: sc.text,
           ),
         ),
         content: Text(
           loc.profileDeleteDialogBody,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: SalamatColors.i2,
+            color: sc.text2,
             height: 1.4,
           ),
         ),
@@ -234,10 +256,10 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
               loc.buttonCancel,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: SalamatColors.i2,
+                color: sc.text2,
               ),
             ),
           ),
@@ -245,10 +267,10 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               loc.profileDeleteConfirm,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: SalamatColors.danger,
+                color: sc.err,
               ),
             ),
           ),
@@ -261,8 +283,8 @@ class ProfileScreen extends ConsumerWidget {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: SalamatColors.g1),
+      builder: (_) =>  Center(
+        child: CircularProgressIndicator(color: sc.primaryInk),
       ),
     );
 
@@ -279,17 +301,17 @@ class ProfileScreen extends ConsumerWidget {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: SalamatColors.danger,
+          backgroundColor: sc.err,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           content: Text(
             loc.profileDeleteError,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: SalamatColors.surf,
+              color: sc.surface,
             ),
           ),
         ),
@@ -324,25 +346,25 @@ class _LanguageRow extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: SalamatColors.surf,
-        borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-        border: Border.all(color: SalamatColors.line),
+        color: sc.surface,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+        border: Border.all(color: sc.line),
       ),
       child: Row(
         children: [
           SalamatIcon(
             PhosphorIcons.globe(),
             size: 20,
-            color: SalamatTokens.iconQuiet,
+            color: sc.text3,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               loc.profileSettingLanguage,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: SalamatColors.ink,
+                color: sc.text,
               ),
             ),
           ),
@@ -384,15 +406,15 @@ class _LangPill extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? SalamatColors.g1 : SalamatColors.g4,
+          color: selected ? sc.primaryInk : sc.surface2,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           label,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: selected ? SalamatColors.surf : SalamatColors.g1,
+            color: selected ? sc.surface : sc.primaryInk,
           ),
         ),
       ),
@@ -408,18 +430,18 @@ class _PlanBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = isPro ? SalamatColors.g4 : SalamatColors.bg;
-    final fg = isPro ? SalamatColors.g1 : SalamatColors.i3;
+    final bg = isPro ? sc.surface2 : sc.bg;
+    final fg = isPro ? sc.primaryInk : sc.text3;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(10),
-        border: isPro ? null : Border.all(color: SalamatColors.line),
+        border: isPro ? null : Border.all(color: sc.line),
       ),
       child: Text(
         label,
-        style: GoogleFonts.manrope(
+        style: SalamatDarkType.style(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: fg,
@@ -441,19 +463,19 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       decoration: BoxDecoration(
-        color: SalamatColors.surf,
-        borderRadius: BorderRadius.circular(SalamatDims.buttonRadius),
-        border: Border.all(color: SalamatColors.line),
+        color: sc.surface,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rButton),
+        border: Border.all(color: sc.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             value,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: SalamatColors.ink,
+              color: sc.text,
               height: 1.0,
               letterSpacing: -0.4,
             ),
@@ -461,10 +483,10 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             label,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: SalamatColors.i3,
+              color: sc.text3,
             ),
             maxLines: 2,
           ),
@@ -501,19 +523,19 @@ class _DataCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: SalamatColors.surf,
-        borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-        border: Border.all(color: SalamatColors.line),
+        color: sc.surface,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+        border: Border.all(color: sc.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             loc.profileDataTitle,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: SalamatColors.ink,
+              color: sc.text,
             ),
           ),
           const SizedBox(height: 12),
@@ -523,18 +545,18 @@ class _DataCard extends StatelessWidget {
               children: [
                 Text(
                   rows[i].$1,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: SalamatColors.i3,
+                    color: sc.text3,
                   ),
                 ),
                 Text(
                   rows[i].$2,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: SalamatColors.ink,
+                    color: sc.text,
                   ),
                 ),
               ],
@@ -568,9 +590,9 @@ class _SettingsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: SalamatColors.surf,
-        borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-        border: Border.all(color: SalamatColors.line),
+        color: sc.surface,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+        border: Border.all(color: sc.line),
       ),
       child: Column(
         children: [
@@ -593,22 +615,22 @@ class _SettingsCard extends StatelessWidget {
                     SalamatIcon(
                       items[i].icon,
                       size: 20,
-                      color: SalamatTokens.iconQuiet,
+                      color: sc.text3,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         items[i].label,
-                        style: GoogleFonts.manrope(
+                        style: SalamatDarkType.style(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: SalamatColors.ink,
+                          color: sc.text,
                         ),
                       ),
                     ),
-                    const Icon(
+                     Icon(
                       Icons.chevron_right_rounded,
-                      color: SalamatColors.i3,
+                      color: sc.text3,
                     ),
                   ],
                 ),
@@ -617,7 +639,7 @@ class _SettingsCard extends StatelessWidget {
             if (i != items.length - 1)
               Container(
                 height: 1,
-                color: SalamatColors.line,
+                color: sc.line,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
               ),
           ],

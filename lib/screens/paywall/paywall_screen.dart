@@ -4,7 +4,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -13,26 +12,109 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../config/legal.dart';
 import '../../providers/user_provider.dart';
 import '../../services/purchases_service.dart';
-import '../../theme/colors.dart';
-import '../../theme/dimensions.dart';
-import '../../theme/elevation.dart';
-import '../../theme/text_styles.dart';
+import '../../theme/salamat_dark.dart';
 
 enum _Tier { month1, year }
 
-/// Card content resolved from a store package — prices and currency come
-/// from Google Play via RevenueCat, never from hardcoded tables.
+/// What the primary button is currently for.
+///
+/// Split out so the error case is a first-class state rather than a disabled
+/// button: prices failing to load must not strand the user on a screen whose
+/// only action is greyed out.
+enum _PaywallCtaState { trial, plain, error }
+
+/// A free trial actually offered by the store product.
+///
+/// Never inferred and never assumed: if the store does not report an
+/// introductory free phase, there is no trial and the UI must not imply one.
+class _Trial {
+  const _Trial({
+    required this.unit,
+    required this.count,
+    required this.firstChargePrice,
+  });
+
+  final PeriodUnit unit;
+  final int count;
+
+  /// The recurring price the user pays once the trial ends, formatted by the
+  /// store in the local currency.
+  final String firstChargePrice;
+
+  /// When the first charge lands, counted from now with the trial length.
+  DateTime get firstChargeDate {
+    final now = DateTime.now();
+    return switch (unit) {
+      PeriodUnit.day => now.add(Duration(days: count)),
+      PeriodUnit.week => now.add(Duration(days: 7 * count)),
+      PeriodUnit.month => DateTime(now.year, now.month + count, now.day),
+      PeriodUnit.year => DateTime(now.year + count, now.month, now.day),
+      PeriodUnit.unknown => now,
+    };
+  }
+
+  String label(AppLocalizations loc) => switch (unit) {
+        PeriodUnit.day => loc.paywallPeriodDays(count),
+        PeriodUnit.week => loc.paywallPeriodWeeks(count),
+        PeriodUnit.month => loc.paywallPeriodMonths(count),
+        PeriodUnit.year => loc.paywallPeriodYears(count),
+        // An unrecognised unit is not describable, so it is not a trial we
+        // are willing to advertise.
+        PeriodUnit.unknown => '',
+      };
+
+  bool get isDescribable => unit != PeriodUnit.unknown && count > 0;
+}
+
+/// Reads a free trial off a store product.
+///
+/// Android exposes it as the `freePhase` of the default subscription option;
+/// iOS as an `introductoryPrice` whose price is zero. Anything else — a
+/// discounted intro, a paid upfront phase — is deliberately NOT treated as a
+/// free trial.
+_Trial? _trialOf(StoreProduct product) {
+  final free = product.defaultOption?.freePhase;
+  if (free != null) {
+    final period = free.billingPeriod;
+    // Guard the price too: a "free phase" that costs money is not free.
+    if (period != null && free.price.amountMicros == 0) {
+      return _Trial(
+        unit: period.unit,
+        count: period.value,
+        firstChargePrice: product.priceString,
+      );
+    }
+  }
+  final intro = product.introductoryPrice;
+  if (intro != null && intro.price == 0) {
+    return _Trial(
+      unit: intro.periodUnit,
+      count: intro.periodNumberOfUnits,
+      firstChargePrice: product.priceString,
+    );
+  }
+  return null;
+}
+
+/// Card content resolved from a store package — prices, currency and trial
+/// come from the store via RevenueCat, never from hardcoded tables.
 class _TierData {
   const _TierData({
-    required this.main,
-    required this.sub,
+    required this.price,
+    required this.perMonth,
     required this.discount,
+    required this.trial,
     required this.package,
   });
 
-  final String main;
-  final String sub;
+  /// Store-formatted recurring price, e.g. "3 490 сом".
+  final String price;
+
+  /// Per-month equivalent, annual tier only. Null when not applicable.
+  final String? perMonth;
+
   final int? discount;
+  final _Trial? trial;
   final Package package;
 }
 
@@ -94,15 +176,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       setState(() {
         _tiers = {
           _Tier.year: _TierData(
-            main: annual.storeProduct.priceString,
-            sub: perMonth,
+            price: annual.storeProduct.priceString,
+            perMonth: perMonth,
             discount: (discount != null && discount > 0) ? discount : null,
+            trial: _trialOf(annual.storeProduct),
             package: annual,
           ),
           _Tier.month1: _TierData(
-            main: monthly.storeProduct.priceString,
-            sub: '',
+            price: monthly.storeProduct.priceString,
+            perMonth: null,
             discount: null,
+            trial: _trialOf(monthly.storeProduct),
             package: monthly,
           ),
         };
@@ -121,7 +205,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   void _snack(String text, {Color? bg, SnackBarAction? action}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: bg ?? SalamatColors.g1,
+        backgroundColor: bg ?? sc.primaryInk,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -129,10 +213,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         action: action,
         content: Text(
           text,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: SalamatColors.surf,
+            color: sc.surface,
           ),
         ),
       ),
@@ -166,10 +250,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       if (code != PurchasesErrorCode.purchaseCancelledError) {
         _snack(
           loc.paywallPurchaseError,
-          bg: SalamatColors.danger,
+          bg: sc.err,
           action: SnackBarAction(
             label: loc.retryButton,
-            textColor: SalamatColors.surf,
+            textColor: sc.surface,
             onPressed: _purchase,
           ),
         );
@@ -182,7 +266,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   Future<void> _restore() async {
     final loc = AppLocalizations.of(context)!;
     if (!PurchasesService.isReady) {
-      _snack(loc.paywallRestoreNotFound, bg: SalamatColors.i2);
+      _snack(loc.paywallRestoreNotFound, bg: sc.text2);
       return;
     }
     try {
@@ -192,16 +276,16 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         _snack(loc.paywallRestoreFound);
         _close();
       } else {
-        _snack(loc.paywallRestoreNotFound, bg: SalamatColors.i2);
+        _snack(loc.paywallRestoreNotFound, bg: sc.text2);
       }
     } on PlatformException catch (_) {
       if (!mounted) return;
       _snack(
         loc.paywallPurchaseError,
-        bg: SalamatColors.danger,
+        bg: sc.err,
         action: SnackBarAction(
           label: loc.retryButton,
-          textColor: SalamatColors.surf,
+          textColor: sc.surface,
           onPressed: _restore,
         ),
       );
@@ -233,17 +317,30 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
     final t = _targetSnapshot(user);
 
+    // The trial shown on the button is the one attached to the SELECTED tier —
+    // annual and monthly can differ, and promising the wrong one would be a
+    // misstatement of the charge.
+    final selectedTrial = _tiers[_selected]?.trial;
+    final activeTrial =
+        (selectedTrial != null && selectedTrial.isDescribable)
+            ? selectedTrial
+            : null;
+    final ctaState = _loadError
+        ? _PaywallCtaState.error
+        : (activeTrial != null
+            ? _PaywallCtaState.trial
+            : _PaywallCtaState.plain);
+
     return Scaffold(
-      backgroundColor: SalamatColors.bg,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: SalamatElevation.pageGradient,
-        ),
-        child: SafeArea(
+      backgroundColor: c.bg,
+      // The prototype's paywall sits flat on `--bg`; the legacy page gradient
+      // is dropped rather than re-tinted.
+      body: SafeArea(
           child: Column(
             children: [
               _HeaderRow(onClose: _close, onRestore: _restore),
@@ -269,38 +366,44 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         _formatDate(t.date, loc),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: SalamatDarkDims.gap24),
+                    // Benefits are the argument for paying, so they render in
+                    // every state — including when prices failed to load.
+                    const _Benefits(),
+                    const SizedBox(height: SalamatDarkDims.gap16),
                     if (_loading)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 48),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
                         child: Center(
-                          child: CircularProgressIndicator(
-                            color: SalamatColors.g1,
-                          ),
+                          child: CircularProgressIndicator(color: c.primary),
                         ),
                       )
                     else if (_loadError)
-                      _OfferingsError(onRetry: _loadOfferings)
+                      const _OfferingsError()
                     else
-                      _TierRow(
+                      _TierList(
                         selected: _selected,
                         tiers: _tiers,
                         onSelect: (t) => setState(() => _selected = t),
                       ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: SalamatDarkDims.gap24),
                   ],
                 ),
               ),
               _BottomBar(
-                onContinue:
-                    (_loading || _loadError || _purchasing) ? null : _purchase,
+                state: ctaState,
+                trial: activeTrial,
+                onPrimary: _purchasing
+                    ? null
+                    : (_loadError
+                        ? _loadOfferings
+                        : (_loading ? null : _purchase)),
                 finePrint: loc.paywallFinePrint,
               ),
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -323,9 +426,9 @@ class _HeaderRow extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onClose,
-            icon: const Icon(
+            icon:  Icon(
               LucideIcons.x,
-              color: SalamatColors.i2,
+              color: sc.text2,
               size: 22,
             ),
             splashRadius: 22,
@@ -341,10 +444,10 @@ class _HeaderRow extends StatelessWidget {
               ),
               child: Text(
                 loc.paywallRestore,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: SalamatColors.i2,
+                  color: sc.text2,
                   letterSpacing: -0.1,
                 ),
               ),
@@ -368,23 +471,23 @@ class _Hero extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: SalamatDims.screenPadding,
+        horizontal: SalamatDarkDims.screenPadH,
       ),
       child: AspectRatio(
         aspectRatio: 16 / 10,
         child: ClipRRect(
           borderRadius:
-              BorderRadius.circular(SalamatElevation.cardRadius + 4),
+              BorderRadius.circular(SalamatDarkDims.rCard + 4),
           child: Stack(
             fit: StackFit.expand,
             children: [
               // Soft on-brand background gradient.
               Container(
-                decoration: const BoxDecoration(
+                decoration:  BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [SalamatColors.g3, SalamatColors.g4],
+                    colors: [sc.surface3, sc.surface2],
                   ),
                 ),
               ),
@@ -392,12 +495,12 @@ class _Hero extends StatelessWidget {
               const Positioned(
                 top: -40,
                 right: -30,
-                child: _Blob(size: 160, color: Color(0x33C9E4D4)),
+                child: _Blob(size: 160, color: Color(0x333AE07E)),
               ),
               const Positioned(
                 bottom: -50,
                 left: -30,
-                child: _Blob(size: 140, color: Color(0x22A1C9B0)),
+                child: _Blob(size: 140, color: Color(0x222DD4BF)),
               ),
               // Centered mock card.
               Center(
@@ -454,9 +557,9 @@ class _RecognizedMealCard extends StatelessWidget {
       width: 220,
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
       decoration: BoxDecoration(
-        color: SalamatColors.surf,
+        color: sc.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: SalamatElevation.selectedCard,
+        boxShadow: sc.shadow2,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -468,24 +571,24 @@ class _RecognizedMealCard extends StatelessWidget {
                 width: 22,
                 height: 22,
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: SalamatColors.g1,
+                decoration:  BoxDecoration(
+                  color: sc.primaryInk,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child:  Icon(
                   LucideIcons.check,
                   size: 14,
-                  color: SalamatColors.surf,
+                  color: sc.surface,
                 ),
               ),
               const SizedBox(width: 8),
               Text(
                 eyebrow.toUpperCase(),
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
-                  color: SalamatColors.g1,
+                  color: sc.primaryInk,
                 ),
               ),
             ],
@@ -499,18 +602,18 @@ class _RecognizedMealCard extends StatelessWidget {
               height: 76,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient:  LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [SalamatColors.g4, Color(0xFFD8E8DC)],
+                  colors: [sc.surface2, sc.surface3],
                 ),
                 shape: BoxShape.circle,
-                boxShadow: SalamatElevation.card,
+                boxShadow: sc.shadow1,
               ),
-              child: const Icon(
+              child: Icon(
                 LucideIcons.utensils,
                 size: 30,
-                color: SalamatColors.g1,
+                color: sc.primary,
               ),
             ),
           )
@@ -519,20 +622,20 @@ class _RecognizedMealCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             name,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 17,
               fontWeight: FontWeight.w800,
-              color: SalamatColors.ink,
+              color: sc.text,
               letterSpacing: -0.2,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             kcal,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: SalamatColors.g1,
+              color: sc.primaryInk,
             ),
           ),
         ],
@@ -552,11 +655,11 @@ class _Headline extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: SalamatDims.screenPadding,
+        horizontal: SalamatDarkDims.screenPadH,
       ),
       child: Text(
         text,
-        style: SalamatText.h2,
+        style: SalamatDarkType.h1,
       ).animate().fadeIn(delay: 150.ms, duration: 380.ms).moveY(
             begin: 6,
             end: 0,
@@ -574,7 +677,7 @@ class _UrgencyLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: SalamatDims.screenPadding,
+        horizontal: SalamatDarkDims.screenPadH,
       ),
       child: Row(
         children: [
@@ -583,23 +686,23 @@ class _UrgencyLine extends StatelessWidget {
             height: 18,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: SalamatColors.g1.withValues(alpha: 0.12),
+              color: sc.primaryInk.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child:  Icon(
               LucideIcons.target,
               size: 11,
-              color: SalamatColors.g1,
+              color: sc.primaryInk,
             ),
           ),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               text,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: SalamatColors.i2,
+                color: sc.text2,
                 height: 1.35,
               ),
             ),
@@ -611,11 +714,110 @@ class _UrgencyLine extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Tier row
+// Benefits — three rows from the localisation that was never rendered
 // ---------------------------------------------------------------------------
 
-class _TierRow extends StatelessWidget {
-  const _TierRow({
+/// The three value props. These strings have existed in both ARBs since the
+/// paywall was written and were never put on screen; they carry the actual
+/// argument for paying, so they stay visible in every state including the
+/// price-load failure.
+class _Benefits extends StatelessWidget {
+  const _Benefits();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    final rows = <({IconData icon, String title, String sub})>[
+      (
+        icon: LucideIcons.camera,
+        title: loc.paywallFeature1Title,
+        sub: loc.paywallFeature1Sub,
+      ),
+      (
+        icon: LucideIcons.trendingUp,
+        title: loc.paywallFeature2Title,
+        sub: loc.paywallFeature2Sub,
+      ),
+      (
+        icon: LucideIcons.history,
+        title: loc.paywallFeature3Title,
+        sub: loc.paywallFeature3Sub,
+      ),
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SalamatDarkDims.screenPadH,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(SalamatDarkDims.padCardTight),
+        decoration: BoxDecoration(
+          color: c.surface2,
+          borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+        ),
+        child: Column(
+          children: [
+            for (var i = 0; i < rows.length; i++) ...[
+              if (i > 0) const SizedBox(height: SalamatDarkDims.gap14),
+              Row(
+                children: [
+                  Container(
+                    width: SalamatDarkDims.iconTile42,
+                    height: SalamatDarkDims.iconTile42,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: c.primarySoft,
+                      borderRadius:
+                          BorderRadius.circular(SalamatDarkDims.rIcon42),
+                    ),
+                    child: Icon(rows[i].icon, size: 19, color: c.primary),
+                  ),
+                  const SizedBox(width: SalamatDarkDims.gap14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          rows[i].title,
+                          style: SalamatDarkType.bodyM.copyWith(
+                            color: c.text,
+                            fontWeight: SalamatDarkType.semi,
+                          ),
+                        ),
+                        const SizedBox(height: SalamatDarkDims.gap2),
+                        Text(
+                          rows[i].sub,
+                          style:
+                              SalamatDarkType.micro.copyWith(color: c.text3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ).animate().fadeIn(
+                    delay: (200 + i * 70).ms,
+                    duration: 320.ms,
+                  ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tiers — full-width rows
+// ---------------------------------------------------------------------------
+
+/// Tier selector.
+///
+/// Rows, not columns: `priceString` comes back store-formatted in the local
+/// currency, and Central Asian amounts are long ("18 990 ₸", "479 900 сўм").
+/// Side-by-side columns collapsed those to two lines or ellipsised them, so
+/// each tier now owns a full-width row with the price on the trailing edge.
+class _TierList extends StatelessWidget {
+  const _TierList({
     required this.selected,
     required this.tiers,
     required this.onSelect,
@@ -625,53 +827,32 @@ class _TierRow extends StatelessWidget {
   final Map<_Tier, _TierData> tiers;
   final ValueChanged<_Tier> onSelect;
 
-  // Two tiers, stacked: Annual (best value, default) on top, Monthly below.
+  // Annual first: it is the default and the better value.
   static const _order = [_Tier.year, _Tier.month1];
-
-  /// Card content for the given tier, straight from the store package.
-  ({
-    String main,
-    String sub,
-    bool popular,
-    int? discount,
-  }) _spec(_Tier t) {
-    final d = tiers[t]!;
-    return (
-      main: d.main,
-      sub: d.sub,
-      popular: t == _Tier.year,
-      discount: d.discount,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        SalamatDims.screenPadding,
-        16,
-        SalamatDims.screenPadding,
+        SalamatDarkDims.screenPadH,
+        0,
+        SalamatDarkDims.screenPadH,
         0,
       ),
       child: Column(
         children: [
           for (var i = 0; i < _order.length; i++) ...[
-            _TierCard(
+            if (i > 0) const SizedBox(height: SalamatDarkDims.gap10),
+            _TierRowCard(
               tier: _order[i],
-              spec: _spec(_order[i]),
+              data: tiers[_order[i]]!,
               selected: selected == _order[i],
+              popular: _order[i] == _Tier.year,
               onTap: () => onSelect(_order[i]),
             ).animate().fadeIn(
                   delay: (260 + i * 80).ms,
                   duration: 320.ms,
-                ).moveY(
-                  begin: 6,
-                  end: 0,
-                  delay: (260 + i * 80).ms,
-                  duration: 320.ms,
-                  curve: Curves.easeOutCubic,
                 ),
-            if (i != _order.length - 1) const SizedBox(height: 10),
           ],
         ],
       ),
@@ -679,298 +860,233 @@ class _TierRow extends StatelessWidget {
   }
 }
 
-/// Fixed-height region that holds the Popular pill OR an empty placeholder
-/// so all three cards line up at the same top edge.
-const double _kPopularSlotHeight = 22;
-
-/// Fixed-height region that holds the savings pill OR an empty placeholder.
-const double _kSavingsSlotHeight = 22;
-
-class _TierCard extends StatefulWidget {
-  const _TierCard({
+/// One tier as a full-width row: radio, label + sub-line, price on the right.
+/// Follows the prototype's plan row — radius 22, 2px border, `--surface` fill.
+class _TierRowCard extends StatelessWidget {
+  const _TierRowCard({
     required this.tier,
-    required this.spec,
+    required this.data,
     required this.selected,
+    required this.popular,
     required this.onTap,
   });
 
   final _Tier tier;
-  final ({String main, String sub, bool popular, int? discount}) spec;
+  final _TierData data;
   final bool selected;
+  final bool popular;
   final VoidCallback onTap;
 
   @override
-  State<_TierCard> createState() => _TierCardState();
-}
-
-class _TierCardState extends State<_TierCard> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
-    final selected = widget.selected;
-    final spec = widget.spec;
+    final trial = data.trial;
+    // Sub-line priority: a real trial outranks the per-month equivalent.
+    final sub = (trial != null && trial.isDescribable)
+        ? loc.paywallTrialCta(trial.label(loc))
+        : (data.perMonth != null
+            ? loc.paywallPerMonthShort(data.perMonth!)
+            : null);
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      child: AnimatedScale(
-        scale: _pressed ? 0.98 : (selected ? 1.0 : 0.995),
-        duration: const Duration(milliseconds: 140),
-        curve: Curves.easeOut,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
-          decoration: BoxDecoration(
-            color: selected ? SalamatColors.g4 : SalamatColors.surf,
-            borderRadius: BorderRadius.circular(SalamatElevation.tileRadius),
-            border: Border.all(
-              color:
-                  selected ? SalamatColors.g1 : SalamatElevation.hairline,
-              width: selected ? 1.5 : 1,
-            ),
-            boxShadow: selected
-                ? SalamatElevation.selectedCard
-                : SalamatElevation.card,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(17),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+          border: Border.all(
+            color: selected ? c.primary : Colors.transparent,
+            width: 2,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Popular slot — same height on every card so eyebrow / price
-              // baselines line up across the row.
-              SizedBox(
-                height: _kPopularSlotHeight,
-                child: spec.popular
-                    ? Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: SalamatElevation.primaryGradient,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: SalamatElevation.primaryButton,
-                          ),
-                          child: Text(
-                            loc.paywallPopular.toUpperCase(),
-                            style: GoogleFonts.manrope(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w800,
-                              color: SalamatColors.surf,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                _tierLabel(loc, widget.tier),
-                style: GoogleFonts.manrope(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.0,
-                  color: selected ? SalamatColors.g1 : SalamatColors.i3,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Main price (big). Annual: total. Others: per-mo.
-              // Manrope doesn't include U+20B8 (₸) or every Cyrillic-script
-              // currency abbreviation, so price text falls back to Roboto /
-              // Noto Sans for missing glyphs — otherwise users see tofu (▯)
-              // where the symbol should be.
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  spec.main,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.manrope(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: SalamatColors.ink,
-                    letterSpacing: -0.4,
-                    height: 1.0,
-                  ).copyWith(
-                    fontFamilyFallback: const ['Roboto', 'Noto Sans', 'sans-serif'],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
-              SizedBox(
-                height: 14,
-                child: spec.sub.isEmpty
-                    ? Text(
-                        loc.paywallPerMonthUnit,
-                        style: GoogleFonts.manrope(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: SalamatColors.i3,
-                          height: 1.0,
-                        ).copyWith(
-                          fontFamilyFallback: const ['Roboto', 'Noto Sans', 'sans-serif'],
-                        ),
-                      )
-                    : FittedBox(
-                        fit: BoxFit.scaleDown,
+          boxShadow: selected ? c.shadow1 : null,
+        ),
+        child: Row(
+          children: [
+            _Radio(selected: selected),
+            const SizedBox(width: SalamatDarkDims.gap14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
                         child: Text(
-                          // Every multi-month card: big = period total,
-                          // small = per-month equivalent for comparison.
-                          loc.paywallPerMonthValue(spec.sub),
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: SalamatColors.i3,
-                            height: 1.0,
-                          ).copyWith(
-                            fontFamilyFallback: const ['Roboto', 'Noto Sans', 'sans-serif'],
-                          ),
+                          _tierLabel(loc, tier),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: SalamatDarkType.btnS.copyWith(color: c.text),
                         ),
                       ),
-              ),
-              const SizedBox(height: 10),
-              // Savings slot — fixed height so all card bottoms line up.
-              SizedBox(
-                height: _kSavingsSlotHeight,
-                child: spec.discount != null
-                    ? Center(
-                        child: Container(
+                      if (popular) ...[
+                        const SizedBox(width: SalamatDarkDims.gap8),
+                        Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: selected
-                                ? SalamatColors.g1
-                                : SalamatColors.g3,
-                            borderRadius: BorderRadius.circular(8),
+                            color: c.primarySoft,
+                            borderRadius: BorderRadius.circular(
+                              SalamatDarkDims.rPill,
+                            ),
                           ),
                           child: Text(
-                            loc.paywallSaveBadge(spec.discount!),
-                            style: GoogleFonts.manrope(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              color: selected
-                                  ? SalamatColors.surf
-                                  : SalamatColors.g1,
-                              letterSpacing: 0.2,
+                            loc.paywallPopular.toUpperCase(),
+                            style: SalamatDarkType.eyebrowS.copyWith(
+                              color: c.primaryInk,
+                              fontSize: 9.5,
                             ),
                           ),
                         ),
-                      )
-                    : const SizedBox.shrink(),
+                      ],
+                    ],
+                  ),
+                  if (sub != null) ...[
+                    const SizedBox(height: SalamatDarkDims.gap2),
+                    Text(
+                      sub,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: SalamatDarkType.micro.copyWith(color: c.text3),
+                    ),
+                  ],
+                ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: SalamatDarkDims.gap10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  data.price,
+                  style: SalamatDarkType.numStat.copyWith(color: c.text),
+                ),
+                if (data.discount != null) ...[
+                  const SizedBox(height: SalamatDarkDims.gap2),
+                  Text(
+                    loc.paywallSaveBadge(data.discount!),
+                    style: SalamatDarkType.micro.copyWith(color: c.primaryInk),
+                  ),
+                ],
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Risk reversal row
-// ---------------------------------------------------------------------------
+class _Radio extends StatelessWidget {
+  const _Radio({required this.selected});
 
-class _NoPaymentRow extends StatelessWidget {
-  const _NoPaymentRow();
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    return Center(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 22,
-            height: 22,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: SalamatColors.g1.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              LucideIcons.check,
-              size: 13,
-              color: SalamatColors.g1,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            loc.paywallNoPaymentNow,
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: SalamatColors.ink,
-              letterSpacing: -0.1,
-            ),
-          ),
-        ],
+    final c = context.c;
+    return Container(
+      width: 20,
+      height: 20,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: selected ? c.primary : c.line2,
+          width: 2,
+        ),
       ),
+      child: selected
+          ? Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: c.primary,
+                shape: BoxShape.circle,
+              ),
+            )
+          : null,
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Bottom bar: CTA + trust + fine print
+// Bottom bar: CTA + fine print
 // ---------------------------------------------------------------------------
 
+/// The action area.
+///
+/// The CTA wording is decided by the store, not by us: a product with a free
+/// phase gets the trial CTA plus the exact first charge and its date; a
+/// product without one gets a plain "Subscribe". When prices failed to load
+/// the same button becomes Retry, so the screen is never a dead end — and no
+/// price is ever invented to fill the gap.
 class _BottomBar extends StatelessWidget {
   const _BottomBar({
-    required this.onContinue,
+    required this.state,
+    required this.trial,
+    required this.onPrimary,
     required this.finePrint,
   });
 
-  final VoidCallback? onContinue;
+  final _PaywallCtaState state;
+  final _Trial? trial;
+  final VoidCallback? onPrimary;
   final String finePrint;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
+
+    final label = switch (state) {
+      _PaywallCtaState.error => loc.retryButton,
+      _PaywallCtaState.trial => loc.paywallTrialCta(trial!.label(loc)),
+      _PaywallCtaState.plain => loc.paywallSubscribeCta,
+    };
+
     return Container(
       padding: const EdgeInsets.fromLTRB(
-        SalamatDims.screenPadding,
+        SalamatDarkDims.screenPadH,
         12,
-        SalamatDims.screenPadding,
+        SalamatDarkDims.screenPadH,
         16,
       ),
       decoration: BoxDecoration(
-        color: SalamatColors.bg.withValues(alpha: 0.94),
-        border: Border(
-          top: BorderSide(
-            color: SalamatElevation.hairline.withValues(alpha: 0.6),
-          ),
-        ),
+        color: c.bg,
+        border: Border(top: BorderSide(color: c.line)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Risk-reversal sits directly above the CTA — closest visual link
-          // to the action it reassures.
-          const _NoPaymentRow(),
-          const SizedBox(height: 10),
-          _PrimaryCta(label: loc.buttonContinue, onTap: onContinue),
-          const SizedBox(height: 8),
+          _PrimaryCta(label: label, onTap: onPrimary),
+          if (state == _PaywallCtaState.trial) ...[
+            const SizedBox(height: SalamatDarkDims.gap6),
+            Text(
+              '${loc.paywallTrialThen(
+                trial!.firstChargePrice,
+                _shortDate(context, trial!.firstChargeDate),
+              )} · ${loc.paywallCancelAnytime}',
+              textAlign: TextAlign.center,
+              style: SalamatDarkType.micro.copyWith(color: c.text2),
+            ),
+          ],
+          const SizedBox(height: SalamatDarkDims.gap8),
           Text(
             finePrint,
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 10.5,
-              fontWeight: FontWeight.w400,
               height: 1.4,
-              color: SalamatColors.i3,
+              color: c.text3,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: SalamatDarkDims.gap6),
           // Explicit clickable legal links — Play requires the Privacy
           // Policy to be reachable from within the app, not just from the
           // store listing.
@@ -985,10 +1101,7 @@ class _BottomBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
                   '·',
-                  style: GoogleFonts.manrope(
-                    fontSize: 11,
-                    color: SalamatColors.i3,
-                  ),
+                  style: SalamatDarkType.style(fontSize: 11, color: c.text3),
                 ),
               ),
               _LegalLink(
@@ -1001,6 +1114,9 @@ class _BottomBar extends StatelessWidget {
       ),
     );
   }
+
+  static String _shortDate(BuildContext context, DateTime d) =>
+      MaterialLocalizations.of(context).formatShortMonthDay(d);
 }
 
 class _LegalLink extends StatelessWidget {
@@ -1022,12 +1138,12 @@ class _LegalLink extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Text(
         label,
-        style: GoogleFonts.manrope(
+        style: SalamatDarkType.style(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: SalamatColors.i2,
+          color: sc.text2,
           decoration: TextDecoration.underline,
-          decorationColor: SalamatColors.i3,
+          decorationColor: sc.text3,
         ),
       ),
     );
@@ -1069,14 +1185,18 @@ class _PrimaryCtaState extends State<_PrimaryCta> {
           opacity: enabled ? 1.0 : 0.5,
           child: Container(
             width: double.infinity,
-            height: SalamatDims.buttonHeight,
+            height: SalamatDarkDims.buttonHeight,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: SalamatElevation.primaryGradient,
-              borderRadius: BorderRadius.circular(SalamatDims.buttonRadius),
-              boxShadow: SalamatElevation.primaryButton,
+              gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [sc.primary, sc.accent],
+      ),
+              borderRadius: BorderRadius.circular(SalamatDarkDims.rButton),
+              boxShadow: sc.shadow1,
             ),
-            child: Text(widget.label, style: SalamatText.btn),
+            child: Text(widget.label, style: SalamatDarkType.btn),
           ),
         ),
       ),
@@ -1088,51 +1208,40 @@ class _PrimaryCtaState extends State<_PrimaryCta> {
 
 /// Store prices could not be loaded (offline / SDK not configured). No
 /// hardcoded fallback prices — retry is the only way forward.
+/// Prices could not be loaded.
+///
+/// An explanatory note only — no inline retry button, because the primary CTA
+/// at the bottom already becomes Retry, and no placeholder price, because
+/// showing a number we do not have would misstate what the user would be
+/// charged.
 class _OfferingsError extends StatelessWidget {
-  const _OfferingsError({required this.onRetry});
-
-  final VoidCallback onRetry;
+  const _OfferingsError();
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        SalamatDims.screenPadding,
-        16,
-        SalamatDims.screenPadding,
-        0,
+      padding: const EdgeInsets.symmetric(
+        horizontal: SalamatDarkDims.screenPadH,
       ),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(SalamatDarkDims.padCard),
         decoration: BoxDecoration(
-          color: SalamatColors.surf,
-          borderRadius: BorderRadius.circular(SalamatElevation.cardRadius),
-          border: Border.all(color: SalamatElevation.hairline),
+          color: c.surface,
+          borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+          border: Border.all(color: c.line),
         ),
-        child: Column(
+        child: Row(
           children: [
-            Text(
-              loc.paywallOfferingsError,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: SalamatColors.i2,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: onRetry,
+            Icon(LucideIcons.wifiOff, size: 18, color: c.text3),
+            const SizedBox(width: SalamatDarkDims.gap12),
+            Expanded(
               child: Text(
-                loc.retryButton,
-                style: GoogleFonts.manrope(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: SalamatColors.g1,
-                ),
+                loc.paywallOfferingsError,
+                style: SalamatDarkType.caption
+                    .copyWith(color: c.text2, height: 1.4),
               ),
             ),
           ],

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class TargetWeightScreen extends ConsumerStatefulWidget {
   const TargetWeightScreen({super.key});
@@ -72,13 +71,15 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
       if (proceed != true) {
         // "Change goal" or backdrop dismiss: bounce back to /onboarding/goal
         // so they can pick maintain/healthy instead. Don't persist target.
+        // Resets the funnel to the goal step rather than stacking a
+        // second copy of it on top of the current chain.
         if (mounted) context.go('/onboarding/goal');
         return;
       }
     }
 
     ref.read(userProvider.notifier).setTargetWeight(_target.toDouble());
-    if (mounted) context.go('/onboarding/celebration');
+    if (mounted) context.push('/onboarding/celebration');
   }
 
   Future<bool?> _showUnderweightWarning() {
@@ -89,25 +90,25 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
       // health warnings, no swipe-away.
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: SalamatTokens.surfaceAlt,
+        backgroundColor: sc.surface2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
         ),
         title: Text(
           loc.underweightWarningTitle,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 18,
             fontWeight: FontWeight.w800,
-            color: SalamatTokens.textPrimary,
+            color: sc.text,
           ),
         ),
         content: Text(
           loc.underweightWarningBody,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 14,
             fontWeight: FontWeight.w400,
             height: 1.45,
-            color: SalamatTokens.textMuted,
+            color: sc.text2,
           ),
         ),
         actionsAlignment: MainAxisAlignment.spaceBetween,
@@ -116,10 +117,10 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
               loc.underweightWarningChangeGoal,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: SalamatTokens.accentDeep,
+                color: sc.primary,
               ),
             ),
           ),
@@ -127,10 +128,10 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               loc.underweightWarningProceed,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: SalamatTokens.iconQuiet,
+                color: sc.text3,
               ),
             ),
           ),
@@ -165,15 +166,15 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: SalamatTokens.pillBg,
+                color: sc.primarySoft,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 _deltaLabel(loc),
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: SalamatTokens.accentDeep,
+                  color: sc.primary,
                 ),
               ),
             ),

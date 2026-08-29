@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 
 import '../providers/user_provider.dart';
 import '../providers/weight_provider.dart';
 import '../services/supabase_service.dart';
-import '../theme/salamat_theme.dart';
+import '../theme/salamat_dark.dart';
 
 /// Shared "Update weight" dialog — used from the profile setting row and the
 /// dashboard Weight card. Persists via upsertUser + logWeight and refreshes
@@ -28,16 +27,16 @@ Future<void> showUpdateWeightDialog(
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDialogState) {
         return AlertDialog(
-          backgroundColor: SalamatTokens.surfaceAlt,
+          backgroundColor: sc.surface2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(SalamatTokens.radiusCard),
+            borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
           ),
           title: Text(
             loc.profileUpdateWeightDialog,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: SalamatTokens.textPrimary,
+              color: sc.text,
             ),
           ),
           content: TextField(
@@ -49,21 +48,21 @@ Future<void> showUpdateWeightDialog(
               hintText: loc.profileWeightHint,
               suffixText: loc.profileKgShort,
               errorText: error,
-              hintStyle: GoogleFonts.manrope(
+              hintStyle: SalamatDarkType.style(
                 fontSize: 15,
-                color: SalamatTokens.textMuted,
+                color: sc.text2,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: SalamatTokens.ringTrack,
+                borderSide:  BorderSide(
+                  color: sc.surface3,
                   width: 2,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: SalamatTokens.accent,
+                borderSide:  BorderSide(
+                  color: sc.primary,
                   width: 2,
                 ),
               ),
@@ -74,10 +73,10 @@ Future<void> showUpdateWeightDialog(
               onPressed: () => Navigator.of(ctx).pop(),
               child: Text(
                 loc.buttonCancel,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: SalamatTokens.textMuted,
+                  color: sc.text2,
                 ),
               ),
             ),
@@ -95,10 +94,10 @@ Future<void> showUpdateWeightDialog(
               },
               child: Text(
                 loc.buttonSave,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: SalamatTokens.accentDeep,
+                  color: sc.primary,
                 ),
               ),
             ),

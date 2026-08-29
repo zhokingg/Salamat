@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:salamat/l10n/app_localizations.dart';
 
 import '../../providers/bootstrap_provider.dart';
 import '../../services/onboarding_flag.dart';
-import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_dark.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -17,9 +18,11 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fade;
+  late final AnimationController _pulseCtl;
+  late final Animation<double> _pulse;
   Timer? _minTimer;
   Timer? _maxTimer;
   bool _minElapsed = false;
@@ -38,6 +41,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _controller.forward();
+    // vBreathe: 4s, ease-in-out, infinite alternate.
+    _pulseCtl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+    _pulse = CurvedAnimation(parent: _pulseCtl, curve: Curves.easeInOut);
 
     // The local flag decides the route for returning users — a dead network
     // must never bounce them back into onboarding.
@@ -112,6 +121,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _minTimer?.cancel();
     _maxTimer?.cancel();
     _controller.dispose();
+    _pulseCtl.dispose();
     super.dispose();
   }
 
@@ -121,32 +131,43 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // react when it settles. profileProvider transitively starts bootstrap.
     ref.listen(profileProvider, (_, __) => _tryNavigate());
     ref.watch(profileProvider);
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: SalamatTokens.background,
+      backgroundColor: c.bg,
       body: Center(
         child: FadeTransition(
           opacity: _fade,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const _LeafIcon(size: 88),
-              const SizedBox(height: 20),
+              // Prototype: 112x112 tile, radius 34, breathing
+              // primary -> accent -> secondary gradient with a white leaf.
+              _BrandTile(pulse: _pulse),
+              const SizedBox(height: SalamatDarkDims.gap26),
               Text(
-                'Salamat',
-                style: GoogleFonts.manrope(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w700,
-                  color: SalamatTokens.textPrimary,
-                  letterSpacing: -0.5,
+                loc.appName,
+                style: SalamatDarkType.logo.copyWith(color: c.text),
+              ),
+              const SizedBox(height: SalamatDarkDims.gap8),
+              Text(
+                loc.splashTagline.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: SalamatDarkType.medium,
+                  letterSpacing: 0.14 * 14,
+                  color: c.text2,
                 ),
               ),
-              const SizedBox(height: 32),
-              const SizedBox(
+              const SizedBox(height: SalamatDarkDims.gap26),
+              // No prototype analog: the prototype's splash is a static brand
+              // screen, this one waits on bootstrap and needs a busy hint.
+              SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.4,
-                  color: SalamatTokens.accent,
+                  color: c.primary,
                 ),
               ),
             ],
@@ -157,51 +178,51 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 }
 
-class _LeafIcon extends StatelessWidget {
-  const _LeafIcon({required this.size});
+/// Gradient brand tile from the prototype splash. `vBreathe`: opacity
+/// 0.5 -> 1 and scale 1 -> 1.05 over 4s, ease-in-out, infinite.
+class _BrandTile extends StatelessWidget {
+  const _BrandTile({required this.pulse});
 
-  final double size;
+  final Animation<double> pulse;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(painter: _LeafPainter()),
+      width: SalamatDarkDims.splashTile,
+      height: SalamatDarkDims.splashTile,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: pulse,
+            builder: (_, __) => Opacity(
+              opacity: 0.5 + 0.5 * pulse.value,
+              child: Transform.scale(
+                scale: 1 + 0.05 * pulse.value,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(SalamatDarkDims.rSplashTile),
+                    gradient: LinearGradient(
+                      // CSS 150deg.
+                      begin: const Alignment(-0.5, -1),
+                      end: const Alignment(0.5, 1),
+                      colors: [c.primary, c.accent, c.secondary],
+                      stops: const [0.0, 0.55, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          PhosphorIcon(
+            PhosphorIcons.leaf(),
+            size: SalamatDarkDims.splashIcon,
+            color: Colors.white,
+          ),
+        ],
+      ),
     );
   }
-}
-
-class _LeafPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = SalamatTokens.accent
-      ..style = PaintingStyle.fill;
-
-    final w = size.width;
-    final h = size.height;
-    final path = Path()
-      ..moveTo(w * 0.5, h * 0.08)
-      ..cubicTo(w * 0.95, h * 0.25, w * 0.95, h * 0.75, w * 0.5, h * 0.95)
-      ..cubicTo(w * 0.05, h * 0.75, w * 0.05, h * 0.25, w * 0.5, h * 0.08)
-      ..close();
-
-    canvas.drawPath(path, paint);
-
-    final vein = Paint()
-      ..color = SalamatTokens.background
-      ..strokeWidth = size.width * 0.04
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawLine(
-      Offset(w * 0.5, h * 0.18),
-      Offset(w * 0.5, h * 0.85),
-      vein,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

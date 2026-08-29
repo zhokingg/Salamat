@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'providers/meals_provider.dart';
 import 'screens/camera/camera_screen.dart';
+import 'screens/cook/cook_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
+import 'screens/detail/meal_detail_screen.dart';
 import 'screens/goal_edit/goal_edit_screen.dart';
 import 'screens/meals/meals_screen.dart';
 import 'screens/onboarding/activity_screen.dart';
@@ -24,6 +27,7 @@ import 'screens/onboarding/year_screen.dart';
 import 'screens/onboarding/yes_question_screen.dart';
 import 'screens/paywall/paywall_screen.dart';
 import 'screens/profile/profile_screen.dart';
+import 'screens/settings/settings_screen.dart';
 import 'screens/progress/progress_screen.dart';
 import 'screens/splash/splash_screen.dart';
 import 'widgets/dashboard_shell.dart';
@@ -144,6 +148,30 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/camera',
       builder: (context, state) => const CameraScreen(),
+    ),
+    GoRoute(
+      path: '/cook',
+      builder: (context, state) => const CookScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
+    ),
+    // Meal detail is addressed by slot + row id rather than by passing the
+    // entry object, so the screen always reads the live row out of
+    // mealsProvider and cannot render a stale copy after an edit.
+    GoRoute(
+      path: '/meal/:type/:id',
+      builder: (context, state) {
+        final type = MealType.values.firstWhere(
+          (t) => t.name == state.pathParameters['type'],
+          orElse: () => MealType.lunch,
+        );
+        return MealDetailScreen(
+          mealType: type,
+          entryId: state.pathParameters['id'] ?? '',
+        );
+      },
     ),
     GoRoute(
       path: '/paywall',

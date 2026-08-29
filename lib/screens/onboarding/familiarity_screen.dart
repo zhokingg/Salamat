@@ -3,11 +3,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class FamiliarityScreen extends ConsumerStatefulWidget {
   const FamiliarityScreen({super.key});
@@ -35,7 +35,7 @@ class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
   void _next() {
     if (_selected == null) return;
     ref.read(userProvider.notifier).setFamiliarity(_selected!);
-    context.go('/onboarding/activity');
+    context.push('/onboarding/activity');
   }
 
   @override
@@ -53,7 +53,7 @@ class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFFFBF4DE),
+              color: sc.warn.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(16.0),
             ),
             child: Row(
@@ -63,23 +63,23 @@ class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
                   height: 32,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF4D679),
+                    color: sc.warn,
                     shape: BoxShape.circle,
                   ),
                   child: PhosphorIcon(
                     PhosphorIcons.lightbulb(PhosphorIconsStyle.duotone),
                     size: 16,
-                    color: const Color(0xFF7A5A0F),
+                    color: sc.onPrimary,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     loc.familiarityHint,
-                    style: GoogleFonts.manrope(
+                    style: SalamatDarkType.style(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF7A5A0F),
+                      color: sc.onPrimary,
                       height: 1.4,
                     ),
                   ),

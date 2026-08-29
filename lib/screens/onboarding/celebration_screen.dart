@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class CelebrationScreen extends ConsumerStatefulWidget {
   const CelebrationScreen({super.key});
@@ -56,19 +55,19 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
               SalamatIcon(
                 PhosphorIcons.thumbsUp(PhosphorIconsStyle.duotone),
                 size: 72,
-                color: SalamatTokens.accentDeep,
-                bubbleColor: SalamatTokens.bubbleMint,
+                color: sc.primary,
+                bubbleColor: sc.accentSoft,
               ),
               const SizedBox(height: 28),
               Text(
                 headline,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   height: 1.25,
                   letterSpacing: -0.4,
-                  color: SalamatTokens.textPrimary,
+                  color: sc.text,
                 ),
               ),
               const SizedBox(height: 20),
@@ -78,7 +77,7 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: SalamatTokens.pillBg,
+                  color: sc.primarySoft,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -90,10 +89,10 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
                     _ => loc.celebrationStatLose,
                   },
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: SalamatTokens.accentDeep,
+                    color: sc.primary,
                     height: 1.35,
                   ),
                 ),
@@ -102,7 +101,7 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
             ],
           ),
           buttonLabel: loc.buttonContinue,
-          onContinue: () => context.go('/onboarding/long-term'),
+          onContinue: () => context.push('/onboarding/long-term'),
         ),
         Align(
           alignment: Alignment.topCenter,
@@ -114,11 +113,11 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
             maxBlastForce: 12,
             minBlastForce: 6,
             gravity: 0.25,
-            colors: const [
-              SalamatTokens.accentDeep,
-              SalamatTokens.accent,
-              SalamatTokens.pillBg,
-              SalamatTokens.amber,
+            colors:  [
+              sc.primary,
+              sc.primary,
+              sc.primarySoft,
+              sc.warn,
             ],
           ),
         ),

@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 
 import '../../providers/meals_provider.dart';
 import '../../providers/subscription_provider.dart';
-import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
-import '../../theme/salamat_theme.dart';
 import '../manual_entry/manual_entry_sheet.dart';
 import '../manual_entry/photo_limit_sheet.dart';
+import '../../theme/salamat_dark.dart';
 
 /// Today's diary, grouped by meal slot. Pure recomposition of existing data —
 /// all reads/writes still go through [mealsProvider].
@@ -41,44 +39,70 @@ class MealsScreen extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.only(
         top: 56,
-        bottom: SalamatDims.tabBarHeight + 40,
+        bottom: SalamatDarkDims.navHeight + 40,
       ),
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
-          child: Column(
+          // Prototype: `Today's meals` as an H2 with a `--primary-ink` text
+          // action on the right that jumps to the camera.
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                loc.dashboardMeals,
-                style: GoogleFonts.manrope(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: SalamatTokens.textPrimary,
-                  letterSpacing: -0.3,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      loc.dashboardTodaysMeals,
+                      style: SalamatDarkType.h2.copyWith(color: sc.text),
+                    ),
+                    const SizedBox(height: SalamatDarkDims.gap2),
+                    Text(
+                      dateLine,
+                      style:
+                          SalamatDarkType.captionS.copyWith(color: sc.text3),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                dateLine,
-                style: GoogleFonts.manrope(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: SalamatTokens.textMuted,
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _onCamera(context, ref),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: SalamatDarkDims.gap10,
+                    top: SalamatDarkDims.gap6,
+                    bottom: SalamatDarkDims.gap6,
+                  ),
+                  child: Text(
+                    loc.dashboardScanAction,
+                    style: SalamatDarkType.captionS.copyWith(
+                      color: sc.primaryInk,
+                      fontWeight: SalamatDarkType.semi,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 20),
-        if (isEmptyDay)
+        if (isEmptyDay) ...[
           _EmptyDay(
             onCamera: () => _onCamera(context, ref),
             onManual: () => showManualEntrySheet(context),
-          )
-        else ...[
+          ),
+          const SizedBox(height: SalamatDarkDims.gap10),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: SalamatDarkDims.screenPadH,
+            ),
+            child: _CookAction(onTap: () => context.push('/cook')),
+          ),
+        ] else ...[
           for (final type in MealType.values) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -88,6 +112,8 @@ class MealsScreen extends ConsumerWidget {
                 totalKcal: meals.totalKcal(type),
                 onEntryTap: () =>
                     showManualEntrySheet(context, initialMealType: type),
+                onEntryOpen: (e) =>
+                    context.push('/meal/${type.name}/${e.id}'),
               ),
             ),
             const SizedBox(height: 12),
@@ -100,23 +126,30 @@ class MealsScreen extends ConsumerWidget {
               child: OutlinedButton(
                 onPressed: () => showManualEntrySheet(context),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: SalamatTokens.accentDeep,
-                  side: const BorderSide(
-                      color: SalamatTokens.accent, width: 1.5),
+                  foregroundColor: sc.primary,
+                  side:  BorderSide(
+                      color: sc.primary, width: 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius:
-                        BorderRadius.circular(SalamatTokens.radiusCta),
+                        BorderRadius.circular(SalamatDarkDims.rButton),
                   ),
                 ),
                 child: Text(
                   loc.manualAddButton,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ),
+          ),
+          const SizedBox(height: SalamatDarkDims.gap10),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: SalamatDarkDims.screenPadH,
+            ),
+            child: _CookAction(onTap: () => context.push('/cook')),
           ),
         ],
       ],
@@ -135,6 +168,7 @@ class _MealSection extends StatelessWidget {
     required this.entries,
     required this.totalKcal,
     required this.onEntryTap,
+    required this.onEntryOpen,
   });
 
   final MealType type;
@@ -142,13 +176,20 @@ class _MealSection extends StatelessWidget {
   final int totalKcal;
   final VoidCallback onEntryTap;
 
+  /// Opens the detail card for one logged entry.
+  final ValueChanged<MealEntry> onEntryOpen;
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final empty = entries.isEmpty;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: SalamatTokens.card(),
+      decoration: BoxDecoration(
+        color: sc.surface,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+        boxShadow: sc.shadow1,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -157,32 +198,35 @@ class _MealSection extends StatelessWidget {
               SalamatIcon(
                 type.icon,
                 size: 20,
-                color: SalamatTokens.accentDeep,
-                bubbleColor: SalamatTokens.bubbleMint,
+                color: sc.primary,
+                bubbleColor: sc.accentSoft,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   type.label(loc),
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: SalamatTokens.textPrimary,
+                    color: sc.text,
                   ),
                 ),
               ),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: SalamatTokens.pill(),
+                decoration: BoxDecoration(
+        color: sc.primarySoft,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
+      ),
                 child: Text(
                   loc.dashboardKcalWithValue(totalKcal),
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: totalKcal == 0
-                        ? SalamatTokens.textMuted
-                        : SalamatTokens.pillText,
+                        ? sc.text2
+                        : sc.primaryInk,
                     height: 1.0,
                   ),
                 ),
@@ -193,18 +237,21 @@ class _MealSection extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               loc.mealsNothingYet,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: SalamatTokens.textMuted,
+                color: sc.text2,
               ),
             ),
           ] else ...[
             const SizedBox(height: 10),
-            Container(height: 1, color: SalamatTokens.ringTrack),
+            Container(height: 1, color: sc.surface3),
             const SizedBox(height: 10),
             for (var i = 0; i < entries.length; i++) ...[
-              _EntryRow(entry: entries[i], onTap: onEntryTap),
+              _EntryRow(
+                entry: entries[i],
+                onTap: () => onEntryOpen(entries[i]),
+              ),
               if (i != entries.length - 1) const SizedBox(height: 8),
             ],
           ],
@@ -240,7 +287,7 @@ class _EntryRow extends StatelessWidget {
     final detail = parts.join(' · ');
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+      borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -253,10 +300,10 @@ class _EntryRow extends StatelessWidget {
               children: [
                 Text(
                   entry.name,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: SalamatTokens.textPrimary,
+                    color: sc.text,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -264,10 +311,10 @@ class _EntryRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   detail,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: SalamatTokens.textMuted,
+                    color: sc.text2,
                   ),
                 ),
               ],
@@ -297,38 +344,38 @@ class _EmptyDay extends StatelessWidget {
           SalamatIcon(
             PhosphorIcons.camera(PhosphorIconsStyle.duotone),
             size: 40,
-            color: SalamatTokens.accent,
-            bubbleColor: SalamatTokens.bubbleMint,
+            color: sc.primary,
+            bubbleColor: sc.accentSoft,
           ),
           const SizedBox(height: 16),
           Text(
             loc.dashboardSnapFirstMeal,
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: SalamatTokens.textPrimary,
+              color: sc.text,
               height: 1.35,
             ),
           ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
-            height: SalamatDims.buttonHeight,
+            height: SalamatDarkDims.buttonHeight,
             child: ElevatedButton(
               onPressed: onCamera,
               style: ElevatedButton.styleFrom(
-                backgroundColor: SalamatTokens.accentDeep,
-                foregroundColor: SalamatTokens.onAccent,
+                backgroundColor: sc.primary,
+                foregroundColor: sc.onPrimary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius:
-                      BorderRadius.circular(SalamatTokens.radiusCta),
+                      BorderRadius.circular(SalamatDarkDims.rButton),
                 ),
               ),
               child: Text(
                 loc.navCameraAction,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -338,21 +385,21 @@ class _EmptyDay extends StatelessWidget {
           const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
-            height: SalamatDims.buttonHeight,
+            height: SalamatDarkDims.buttonHeight,
             child: OutlinedButton(
               onPressed: onManual,
               style: OutlinedButton.styleFrom(
-                foregroundColor: SalamatTokens.accentDeep,
+                foregroundColor: sc.primary,
                 side:
-                    const BorderSide(color: SalamatTokens.accent, width: 1.5),
+                     BorderSide(color: sc.primary, width: 1.5),
                 shape: RoundedRectangleBorder(
                   borderRadius:
-                      BorderRadius.circular(SalamatTokens.radiusCta),
+                      BorderRadius.circular(SalamatDarkDims.rButton),
                 ),
               ),
               child: Text(
                 loc.manualAddButton,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -375,4 +422,72 @@ extension MealTypeIcon on MealType {
           PhosphorIcons.moonStars(PhosphorIconsStyle.duotone),
         MealType.snack => PhosphorIcons.cookie(PhosphorIconsStyle.duotone),
       };
+}
+
+/// Quiet entry point to "What to cook". Secondary by design: photo and manual
+/// logging stay the primary paths, this is the "I don't know what to make"
+/// detour.
+class _CookAction extends StatelessWidget {
+  const _CookAction({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(SalamatDarkDims.padCardSmall),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: SalamatDarkDims.iconTile42,
+              height: SalamatDarkDims.iconTile42,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: c.secondarySoft,
+                borderRadius: BorderRadius.circular(SalamatDarkDims.rIcon42),
+              ),
+              child: PhosphorIcon(
+                PhosphorIcons.cookingPot(),
+                size: 20,
+                color: c.secondary,
+              ),
+            ),
+            const SizedBox(width: SalamatDarkDims.gap14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.cookTitle,
+                    style: SalamatDarkType.bodyL.copyWith(color: c.text),
+                  ),
+                  const SizedBox(height: SalamatDarkDims.gap2),
+                  Text(
+                    loc.cookSubtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: SalamatDarkType.micro.copyWith(color: c.text3),
+                  ),
+                ],
+              ),
+            ),
+            PhosphorIcon(
+              PhosphorIcons.caretRight(),
+              size: 13,
+              color: c.text3,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

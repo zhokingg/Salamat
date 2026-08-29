@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 
 import '../providers/subscription_provider.dart';
 import '../screens/manual_entry/photo_limit_sheet.dart';
-import '../theme/dimensions.dart';
-import '../theme/salamat_icons.dart';
-import '../theme/salamat_theme.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../theme/salamat_dark.dart';
 
 class DashboardShell extends ConsumerWidget {
   const DashboardShell({super.key, required this.child});
@@ -30,7 +28,7 @@ class DashboardShell extends ConsumerWidget {
       labelKey: _NavLabel.meals,
     ),
     _TabItem(
-      icon: PhosphorIcons.chartBar(),
+      icon: PhosphorIcons.chartLineUp(),
       path: '/progress',
       labelKey: _NavLabel.progress,
     ),
@@ -64,7 +62,7 @@ class DashboardShell extends ConsumerWidget {
     final index = _currentIndex(location);
 
     return Scaffold(
-      backgroundColor: SalamatTokens.background,
+      backgroundColor: sc.bg,
       body: child,
       bottomNavigationBar: _TabBar(
         index: index,
@@ -95,8 +93,10 @@ class _TabItem {
       };
 }
 
-/// Floating pill navigation: transparent strip hosting a borderless cream
-/// pill — depth comes from the color layer on the sage canvas.
+/// Bottom navigation, repainted to the prototype: a flat `--surface` strip
+/// 94px tall with a 1px `--line` top border and a `0 -8px 30px` lift, four
+/// 62px-wide tabs (21px icon over a 10/500 label) and the camera FAB
+/// overhanging the strip by 18px.
 class _TabBar extends StatelessWidget {
   const _TabBar({
     required this.index,
@@ -110,28 +110,42 @@ class _TabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     return Container(
-      height: SalamatDims.tabBarHeight,
-      color: Colors.transparent,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(top: BorderSide(color: c.line)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D000000),
+            blurRadius: 30,
+            offset: Offset(0, -8),
+          ),
+        ],
+      ),
       child: SafeArea(
         top: false,
-        child: Container(
-          decoration: BoxDecoration(
-            color: SalamatTokens.surface,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Row(
-            children: [
-              _tabButton(context, 0),
-              _tabButton(context, 1),
-              // Camera is an ACTION slot, not a tab: geometrically centered
-              // (2 + 2), opens the camera on top of the current tab and
-              // never becomes "selected".
-              Expanded(child: _CameraButton(onTap: onCamera)),
-              _tabButton(context, 2),
-              _tabButton(context, 3),
-            ],
+        child: SizedBox(
+          height: SalamatDarkDims.navHeight,
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: SalamatDarkDims.gap8,
+              right: SalamatDarkDims.gap8,
+              top: SalamatDarkDims.gap10,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _tabButton(context, 0),
+                _tabButton(context, 1),
+                // Camera is an ACTION slot, not a tab: geometrically centered,
+                // opens over the current tab and never becomes "selected".
+                _CameraFab(onTap: onCamera),
+                _tabButton(context, 2),
+                _tabButton(context, 3),
+              ],
+            ),
           ),
         ),
       ),
@@ -139,28 +153,26 @@ class _TabBar extends StatelessWidget {
   }
 
   Widget _tabButton(BuildContext context, int i) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
     final tab = tabs[i];
     final selected = i == index;
-    final color =
-        selected ? SalamatTokens.accentDeep : SalamatTokens.iconQuiet;
-    return Expanded(
-      child: InkWell(
+    final color = selected ? c.primary : c.text3;
+    return SizedBox(
+      width: SalamatDarkDims.navTabWidth,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () => context.go(tab.path),
-        borderRadius: BorderRadius.circular(28),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SalamatIcon(tab.icon, color: color, size: 26),
-            const SizedBox(height: 4),
+            PhosphorIcon(tab.icon, color: color, size: SalamatDarkDims.navIcon),
+            const SizedBox(height: SalamatDarkDims.gap4),
             Text(
               tab.label(loc),
-              style: GoogleFonts.manrope(
-                fontSize: 11,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: color,
-                height: 1.0,
-              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: SalamatDarkType.tab.copyWith(color: color),
             ),
           ],
         ),
@@ -169,32 +181,44 @@ class _TabBar extends StatelessWidget {
   }
 }
 
-
-/// Round accentDeep camera action in the nav pill — ~20% larger than the
-/// neighbouring tab icons to read as the primary action.
-class _CameraButton extends StatelessWidget {
-  const _CameraButton({required this.onTap});
+/// 58px circular FAB on a `primary -> accent` gradient, lifted 18px above the
+/// nav strip, carrying `--shadow-2`.
+class _CameraFab extends StatelessWidget {
+  const _CameraFab({required this.onTap});
 
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(28),
-      child: Center(
-        child: Container(
-          width: 48,
-          height: 48,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: SalamatTokens.accentDeep,
-            shape: BoxShape.circle,
-          ),
-          child: SalamatIcon(
-            PhosphorIcons.camera(PhosphorIconsStyle.duotone),
-            size: 24,
-            color: SalamatTokens.onAccent,
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    return Transform.translate(
+      offset: const Offset(0, -SalamatDarkDims.fabOverlap),
+      child: Semantics(
+        button: true,
+        label: loc.navCameraAction,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Container(
+            width: SalamatDarkDims.fabSize,
+            height: SalamatDarkDims.fabSize,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                // CSS 150deg.
+                begin: const Alignment(-0.5, -1),
+                end: const Alignment(0.5, 1),
+                colors: [c.primary, c.accent],
+              ),
+              boxShadow: c.shadow2,
+            ),
+            child: PhosphorIcon(
+              PhosphorIcons.camera(),
+              size: SalamatDarkDims.fabIcon,
+              color: Colors.white,
+            ),
           ),
         ),
       ),

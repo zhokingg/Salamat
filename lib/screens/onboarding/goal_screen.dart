@@ -34,7 +34,7 @@ class _GoalScreenState extends ConsumerState<GoalScreen> {
   void _next() {
     if (_selected == null) return;
     ref.read(userProvider.notifier).setGoal(_selected!);
-    context.go('/onboarding/gender');
+    context.push('/onboarding/gender');
   }
 
   @override

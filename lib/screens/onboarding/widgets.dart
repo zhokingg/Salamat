@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../providers/user_provider.dart';
-import '../../theme/dimensions.dart';
-import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_dark.dart';
 
 const int kOnboardingTotalSteps = 17;
 
-/// Common scaffold for onboarding screens. Adds a subtle page gradient, a
-/// thicker progress bar with animated fill, generous spacing, and the
-/// premium primary button.
+/// Common scaffold for onboarding screens, repainted to the prototype's
+/// onboarding frame: `padding: 60px 24px 34px`, a single continuous progress
+/// bar with the step counter on the right, and the flat neon CTA at the
+/// bottom with an optional muted skip link underneath.
+///
+/// Logic is untouched — same constructor, same callbacks.
 class OnboardingShell extends StatelessWidget {
   const OnboardingShell({
     super.key,
@@ -33,18 +36,25 @@ class OnboardingShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     return Scaffold(
-      backgroundColor: SalamatTokens.background,
+      backgroundColor: c.bg,
       body: SafeArea(
+        child: Padding(
+          // Prototype: 60px top absorbs the status bar, which SafeArea already
+          // handles here, so the remaining inset is applied below it.
+          padding: const EdgeInsets.only(
+            left: SalamatDarkDims.gap24,
+            right: SalamatDarkDims.gap24,
+            top: SalamatDarkDims.gap16,
+            bottom: SalamatDarkDims.gap16,
+          ),
           child: Column(
             children: [
               if (step != null)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    SalamatDims.screenPadding,
-                    24,
-                    SalamatDims.screenPadding,
-                    8,
+                  padding: const EdgeInsets.only(
+                    bottom: SalamatDarkDims.gap26,
                   ),
                   child: OnboardingProgressBar(
                     step: step!,
@@ -52,22 +62,30 @@ class OnboardingShell extends StatelessWidget {
                   ),
                 )
               else
-                const SizedBox(height: 16),
+                const SizedBox(height: SalamatDarkDims.gap16),
+              // The body keeps the height it would have with no keyboard, so
+              // `Spacer`/`Expanded` inside the step layouts still resolve, and
+              // a soft-keyboard inset scrolls the frame instead of overflowing
+              // it. The prototype's own onboarding body scrolls too
+              // (`overflow-y: auto` on the plan step).
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SalamatDims.screenPadding,
-                  ),
-                  child: body,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final inset = MediaQuery.viewInsetsOf(context).bottom;
+                    return SingleChildScrollView(
+                      physics: inset > 0
+                          ? const ClampingScrollPhysics()
+                          : const NeverScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: constraints.maxHeight + inset,
+                        child: body,
+                      ),
+                    );
+                  },
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  SalamatDims.screenPadding,
-                  12,
-                  SalamatDims.screenPadding,
-                  16,
-                ),
+                padding: const EdgeInsets.only(top: SalamatDarkDims.gap20),
                 child: Column(
                   children: [
                     OnboardingPrimaryButton(
@@ -76,15 +94,17 @@ class OnboardingShell extends StatelessWidget {
                       onTap: onContinue,
                     ),
                     if (secondaryLabel != null && onSecondary != null) ...[
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: onSecondary,
-                        child: Text(
-                          secondaryLabel!,
-                          style: GoogleFonts.manrope(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: SalamatTokens.textMuted,
+                      const SizedBox(height: SalamatDarkDims.gap10),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onSecondary,
+                        child: Padding(
+                          padding: const EdgeInsets.all(SalamatDarkDims.gap6),
+                          child: Text(
+                            secondaryLabel!,
+                            textAlign: TextAlign.center,
+                            style: SalamatDarkType.captionL
+                                .copyWith(color: c.text3, height: null),
                           ),
                         ),
                       ),
@@ -95,12 +115,19 @@ class OnboardingShell extends StatelessWidget {
             ],
           ),
         ),
+      ),
     );
   }
 }
 
-/// Segmented progress: accentDeep segments on a ringTrack base, with a
-/// muted step counter on the right.
+/// Prototype onboarding header: a 36x36 back button on `--surface-2`, one
+/// continuous 4px pill track (`--surface-3`) with a neon fill that animates
+/// its width over 420 ms, and a tabular `n/total` counter.
+///
+/// The funnel now navigates with `context.push`, so the back button pops the
+/// previous step and each step re-reads its own answer from `userProvider` in
+/// `initState`. It hides itself when there is nothing to pop — the first step,
+/// and the goal step after the underweight bounce resets the stack.
 class OnboardingProgressBar extends StatelessWidget {
   const OnboardingProgressBar({
     super.key,
@@ -113,37 +140,64 @@ class OnboardingProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
+    final canGoBack = context.canPop();
     return Row(
       children: [
+        if (canGoBack) ...[
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.pop(),
+            child: Container(
+              width: SalamatDarkDims.iconBtn36,
+              height: SalamatDarkDims.iconBtn36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: c.surface2,
+                borderRadius: BorderRadius.circular(SalamatDarkDims.rIcon36),
+              ),
+              child: PhosphorIcon(
+                PhosphorIcons.arrowLeft(),
+                size: 15,
+                color: c.text,
+              ),
+            ),
+          ),
+          const SizedBox(width: SalamatDarkDims.gap14),
+        ],
         Expanded(
-          child: Row(
-            children: [
-              for (var i = 0; i < total; i++) ...[
-                Expanded(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: i < step
-                          ? SalamatTokens.accentDeep
-                          : SalamatTokens.ringTrack,
-                      borderRadius: BorderRadius.circular(2),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
+            child: Container(
+              height: SalamatDarkDims.onbProgressBar,
+              color: c.surface3,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: (step / total).clamp(0.0, 1.0)),
+                  duration: const Duration(milliseconds: 420),
+                  curve: SalamatDarkDims.ease,
+                  builder: (_, f, __) => FractionallySizedBox(
+                    widthFactor: f == 0 ? 0.001 : f,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: c.primary,
+                        borderRadius:
+                            BorderRadius.circular(SalamatDarkDims.rPill),
+                      ),
                     ),
                   ),
                 ),
-                if (i != total - 1) const SizedBox(width: 3),
-              ],
-            ],
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: SalamatDarkDims.gap14),
         Text(
           '$step/$total',
-          style: GoogleFonts.manrope(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: SalamatTokens.textMuted,
-            height: 1.0,
+          style: SalamatDarkType.captionXs.copyWith(
+            color: c.text3,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],
@@ -151,7 +205,8 @@ class OnboardingProgressBar extends StatelessWidget {
   }
 }
 
-/// Gradient primary button with a press-down scale animation.
+/// Flat neon CTA: `padding: 17px`, radius 18, `--primary` fill, `#04140A` ink,
+/// 16/600, `--shadow-1`. Keeps the existing press-scale affordance.
 class OnboardingPrimaryButton extends StatefulWidget {
   const OnboardingPrimaryButton({
     super.key,
@@ -174,6 +229,7 @@ class _OnboardingPrimaryButtonState extends State<OnboardingPrimaryButton> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: widget.enabled ? (_) => setState(() => _pressed = true) : null,
@@ -187,20 +243,25 @@ class _OnboardingPrimaryButtonState extends State<OnboardingPrimaryButton> {
           : null,
       child: AnimatedScale(
         scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 160),
+        curve: SalamatDarkDims.ease,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 150),
           opacity: widget.enabled ? 1.0 : 0.45,
           child: Container(
             width: double.infinity,
-            height: SalamatDims.buttonHeight,
+            padding: const EdgeInsets.all(SalamatDarkDims.ctaPad),
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: SalamatTokens.accentDeep,
-              borderRadius: BorderRadius.circular(SalamatTokens.radiusCta),
+              color: c.primary,
+              borderRadius: BorderRadius.circular(SalamatDarkDims.rButton),
+              boxShadow: c.shadow1,
             ),
-            child: Text(widget.label, style: SalamatType.btn),
+            child: Text(
+              widget.label,
+              textAlign: TextAlign.center,
+              style: SalamatDarkType.btn.copyWith(color: c.onPrimary),
+            ),
           ),
         ),
       ),
@@ -208,7 +269,7 @@ class _OnboardingPrimaryButtonState extends State<OnboardingPrimaryButton> {
   }
 }
 
-/// Big bold question headline.
+/// Step headline: 30/600/1.1/−0.035em, with an optional 14.5 muted subtitle.
 class OnboardingHeadline extends StatelessWidget {
   const OnboardingHeadline(this.text, {super.key, this.subtitle});
 
@@ -217,23 +278,24 @@ class OnboardingHeadline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           text,
-          style: SalamatType.h2,
+          style: SalamatDarkType.h1.copyWith(color: c.text),
         ).animate().fadeIn(duration: 320.ms).moveY(
-              begin: 8,
+              begin: 16,
               end: 0,
               duration: 360.ms,
-              curve: Curves.easeOutCubic,
+              curve: SalamatDarkDims.ease,
             ),
         if (subtitle != null) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: SalamatDarkDims.gap10),
           Text(
             subtitle!,
-            style: SalamatType.caption.copyWith(fontSize: 15),
+            style: SalamatDarkType.bodyM.copyWith(color: c.text2),
           ).animate().fadeIn(delay: 120.ms, duration: 320.ms),
         ],
       ],
@@ -241,8 +303,9 @@ class OnboardingHeadline extends StatelessWidget {
   }
 }
 
-/// Selectable card with a refined selected state — soft tinted fill,
-/// elevated shadow, and a press-scale animation.
+/// Option row: `padding: 16`, radius 20, `--surface` fill, 1.5px border that
+/// turns `--primary` when selected, 42×42 icon tile, 16/500 label, and a
+/// trailing check-circle / dashed-circle indicator.
 class OnboardingSelectCard extends StatefulWidget {
   const OnboardingSelectCard({
     super.key,
@@ -268,6 +331,7 @@ class _OnboardingSelectCardState extends State<OnboardingSelectCard> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final selected = widget.selected;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -279,25 +343,26 @@ class _OnboardingSelectCardState extends State<OnboardingSelectCard> {
       },
       child: AnimatedScale(
         scale: _pressed ? 0.985 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 200),
+        curve: SalamatDarkDims.ease,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.all(SalamatDarkDims.padCardSmall),
           decoration: BoxDecoration(
-            color: SalamatTokens.surfaceAlt,
-            borderRadius: BorderRadius.circular(SalamatTokens.radiusCard),
+            color: c.surface,
+            borderRadius: BorderRadius.circular(SalamatDarkDims.rTile),
             border: Border.all(
-              color: selected ? SalamatTokens.accentDeep : Colors.transparent,
-              width: 2,
+              color: selected ? c.primary : Colors.transparent,
+              width: 1.5,
             ),
+            boxShadow: selected ? c.shadow1 : null,
           ),
           child: Row(
             children: [
               if (widget.leading != null) ...[
                 widget.leading!,
-                const SizedBox(width: 14),
+                const SizedBox(width: SalamatDarkDims.gap14),
               ],
               Expanded(
                 child: Column(
@@ -306,31 +371,26 @@ class _OnboardingSelectCardState extends State<OnboardingSelectCard> {
                   children: [
                     Text(
                       widget.title,
-                      style: GoogleFonts.manrope(
-                        fontSize: 16,
-                        fontWeight:
-                            selected ? FontWeight.w700 : FontWeight.w600,
-                        color: SalamatTokens.textPrimary,
-                        letterSpacing: -0.1,
-                      ),
+                      style: SalamatDarkType.bodyL.copyWith(color: c.text),
                     ),
                     if (widget.subtitle != null) ...[
-                      const SizedBox(height: 3),
+                      const SizedBox(height: SalamatDarkDims.gap2),
                       Text(
                         widget.subtitle!,
-                        style: GoogleFonts.manrope(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: SalamatTokens.textMuted,
-                          height: 1.35,
-                        ),
+                        style: SalamatDarkType.micro.copyWith(color: c.text3),
                       ),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              _Radio(selected: selected),
+              const SizedBox(width: SalamatDarkDims.gap8),
+              PhosphorIcon(
+                selected
+                    ? PhosphorIcons.checkCircle()
+                    : PhosphorIcons.circleDashed(),
+                size: 19,
+                color: selected ? c.primary : c.text3,
+              ),
             ],
           ),
         ),
@@ -339,8 +399,8 @@ class _OnboardingSelectCardState extends State<OnboardingSelectCard> {
   }
 }
 
-/// Soft circular icon container used as the leading element on select
-/// cards. Tints itself green when selected.
+/// 42×42 icon tile, radius 14. Fills with `--primary-soft` and tints the glyph
+/// `--primary` when selected; otherwise `--surface-2` on `--text-3`.
 class OnboardingLeadingIcon extends StatelessWidget {
   const OnboardingLeadingIcon({
     super.key,
@@ -353,51 +413,30 @@ class OnboardingLeadingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      width: 40,
-      height: 40,
+      duration: const Duration(milliseconds: 200),
+      width: SalamatDarkDims.iconTile42,
+      height: SalamatDarkDims.iconTile42,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected ? SalamatTokens.pillBg : SalamatTokens.bubbleMint,
-        shape: BoxShape.circle,
+        color: selected ? c.primarySoft : c.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rIcon42),
       ),
       child: Icon(
         icon,
         size: 20,
-        color:
-            selected ? SalamatTokens.accentDeep : SalamatTokens.textMuted,
+        color: selected ? c.primary : c.text3,
       ),
     );
   }
 }
 
-class _Radio extends StatelessWidget {
-  const _Radio({required this.selected});
-  final bool selected;
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      width: 22,
-      height: 22,
-      decoration: BoxDecoration(
-        color: selected ? SalamatTokens.accentDeep : Colors.transparent,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color:
-              selected ? SalamatTokens.accentDeep : SalamatTokens.iconQuiet,
-          width: 1.5,
-        ),
-      ),
-      child: selected
-          ? const Icon(Icons.check_rounded,
-              size: 14, color: SalamatTokens.onAccent)
-          : null,
-    );
-  }
-}
-
+/// Number picker. The prototype states the numeric step as a hero numeral
+/// (82/600/−0.05em, tabular) surrounded by smaller tappable neighbours; the
+/// wheel keeps that visual hierarchy — big centred value, smaller dimmer
+/// siblings — while preserving the existing scroll interaction and callback,
+/// so no picker logic changes.
 class OnboardingWheelPicker extends StatelessWidget {
   const OnboardingWheelPicker({
     super.key,
@@ -420,61 +459,54 @@ class OnboardingWheelPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        ListWheelScrollView.useDelegate(
-          controller: controller,
-          itemExtent: _itemExtent,
-          magnification: 1.2,
-          useMagnifier: true,
-          diameterRatio: 1.8,
-          perspective: 0.003,
-          physics: const FixedExtentScrollPhysics(),
-          onSelectedItemChanged: onChanged,
-          childDelegate: ListWheelChildBuilderDelegate(
-            childCount: max - min + 1,
-            builder: (context, i) {
-              final selected = i == selectedIndex;
-              final label = suffix == null
-                  ? '${min + i}'
-                  : '${min + i} $suffix';
-              return Center(
-                child: Text(
-                  label,
-                  style: GoogleFonts.manrope(
-                    fontSize: selected ? 44 : 22,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                    color: selected
-                        ? SalamatTokens.textPrimary
-                        : SalamatTokens.iconQuiet,
-                    height: 1.0,
-                    letterSpacing: selected ? -0.6 : 0,
+    final c = context.c;
+    return ListWheelScrollView.useDelegate(
+      controller: controller,
+      itemExtent: _itemExtent,
+      magnification: 1.2,
+      useMagnifier: true,
+      diameterRatio: 1.8,
+      perspective: 0.003,
+      physics: const FixedExtentScrollPhysics(),
+      onSelectedItemChanged: onChanged,
+      childDelegate: ListWheelChildBuilderDelegate(
+        childCount: max - min + 1,
+        builder: (context, i) {
+          final selected = i == selectedIndex;
+          if (selected) {
+            return Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '${min + i}',
+                    style: SalamatDarkType.numXl.copyWith(color: c.text),
                   ),
-                ),
-              );
-            },
-          ),
-        ),
-        IgnorePointer(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: double.infinity,
-                height: 1,
-                color: SalamatTokens.ringTrack,
+                  if (suffix != null) ...[
+                    const SizedBox(width: SalamatDarkDims.gap8),
+                    Text(
+                      suffix!,
+                      style: SalamatDarkType.captionL
+                          .copyWith(color: c.text2, height: null),
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(height: _itemExtent),
-              Container(
-                width: double.infinity,
-                height: 1,
-                color: SalamatTokens.ringTrack,
+            );
+          }
+          return Center(
+            child: Text(
+              suffix == null ? '${min + i}' : '${min + i} $suffix',
+              style: SalamatDarkType.bodyL.copyWith(
+                color: c.text3,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -531,10 +563,61 @@ class CountUp extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: value.toDouble()),
       duration: duration,
-      curve: Curves.easeOutCubic,
+      curve: SalamatDarkDims.ease,
       builder: (_, v, __) {
         return Text('${v.round()}', style: style, textAlign: textAlign);
       },
+    );
+  }
+}
+
+/// Eyebrow + card + row helpers shared by the repainted screens.
+///
+/// `SalamatCard` is the prototype's default surface: `--surface` fill, no
+/// border, `--shadow-1`, radius 22 (or 24 for hero cards).
+class SalamatCard extends StatelessWidget {
+  const SalamatCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(SalamatDarkDims.padCard),
+    this.radius = SalamatDarkDims.rCard,
+    this.color,
+    this.shadow = true,
+  });
+
+  final Widget child;
+  final EdgeInsets padding;
+  final double radius;
+  final Color? color;
+  final bool shadow;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: color ?? c.surface,
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: shadow ? c.shadow1 : null,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Uppercase eyebrow label: 11/600/+0.12em.
+class SalamatEyebrow extends StatelessWidget {
+  const SalamatEyebrow(this.text, {super.key, this.color});
+
+  final String text;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text.toUpperCase(),
+      style: SalamatDarkType.eyebrow.copyWith(color: color ?? context.c.text3),
     );
   }
 }

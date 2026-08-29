@@ -486,7 +486,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get dashboardSnapFirstMeal => 'Сфотографируй первое блюдо';
+  String get dashboardSnapFirstMeal => 'Сними первое блюдо';
 
   @override
   String get mealsNothingYet => 'Пока пусто';
@@ -669,10 +669,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cameraMacroCarbs => 'Углеводы';
 
   @override
-  String get cameraAddButton => '✓ Добавить в дневник';
+  String get cameraAddButton => 'Добавить в дневник';
 
   @override
-  String get cameraRetake => '↺ Переснять';
+  String get cameraRetake => 'Переснять';
 
   @override
   String get cameraOutOfPhotos => 'Бесплатный скан на сегодня использован';
@@ -723,9 +723,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paywallPopular => 'Выгоднее всего';
-
-  @override
-  String get paywallTrialButton => 'Попробовать бесплатно — 7 дней';
 
   @override
   String get paywallCancelAnytime => 'Отменить в любой момент';
@@ -791,9 +788,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String paywallSaveBadge(int percent) {
     return '−$percent%';
   }
-
-  @override
-  String get paywallNoPaymentNow => 'Без оплаты сейчас';
 
   @override
   String get paywallFinePrint => 'Подписка продлевается автоматически в конце каждого периода. Отмените в любой момент в аккаунте магазина. Действуют Условия и Политика конфиденциальности.';
@@ -1004,4 +998,337 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get languageSelectTitle => 'Язык';
+
+  @override
+  String get splashTagline => 'ИИ-коуч по питанию';
+
+  @override
+  String get welcomeChipSnap => 'Снимок';
+
+  @override
+  String get welcomeChipConfirm => 'Проверка';
+
+  @override
+  String get welcomeChipDone => 'Готово';
+
+  @override
+  String get dashboardTodaysMeals => 'Приёмы за сегодня';
+
+  @override
+  String get dashboardScanAction => 'Снять';
+
+  @override
+  String get cameraConfirmTitle => 'Confirm your plate';
+
+  @override
+  String cameraLogKcal(int kcal) {
+    return 'Log $kcal kcal';
+  }
+
+  @override
+  String get cameraDetectedOne => '1 item detected';
+
+  @override
+  String get cameraMealSlotHint => 'Add to';
+
+  @override
+  String cameraDetectedBoxLabel(String name, int percent) {
+    return '$name $percent%';
+  }
+
+  @override
+  String get progressRangeDay => 'Day';
+
+  @override
+  String get progressRangeWeek => 'Week';
+
+  @override
+  String get progressRangeMonth => 'Month';
+
+  @override
+  String get progressRangeYear => 'Year';
+
+  @override
+  String get progressCalorieTrend => 'Calorie trend';
+
+  @override
+  String progressDailyAvg(int kcal) {
+    return 'daily avg $kcal';
+  }
+
+  @override
+  String progressGoalLine(int kcal) {
+    return '$kcal goal';
+  }
+
+  @override
+  String get progressProteinScore => 'Protein score';
+
+  @override
+  String progressProteinScoreSub(int hit, int total) {
+    return '$hit of $total days on target';
+  }
+
+  @override
+  String get progressConsistencyLabel => 'Consistency';
+
+  @override
+  String get progressConsistencySub => 'days logged in a row';
+
+  @override
+  String get progressNoRangeData => 'Nothing logged in this period yet';
+
+  @override
+  String get progressWeeklyMilestones => 'Weekly milestones';
+
+  @override
+  String progressMilestoneWeek(int n) {
+    return 'W$n';
+  }
+
+  @override
+  String get cookTitle => 'What to cook';
+
+  @override
+  String get cookSubtitle => 'From what you have, within what\'s left of today';
+
+  @override
+  String get cookPantryHeader => 'Your ingredients';
+
+  @override
+  String get cookAddHint => 'Add an ingredient';
+
+  @override
+  String get cookAddButton => 'Add';
+
+  @override
+  String get cookClearAll => 'Clear all';
+
+  @override
+  String cookRemoveItem(String item) {
+    return 'Remove $item';
+  }
+
+  @override
+  String cookPantryFull(int max) {
+    return 'Up to $max ingredients';
+  }
+
+  @override
+  String get cookSuggestButton => 'Suggest 3 dishes';
+
+  @override
+  String get cookRemainingLabel => 'Left today';
+
+  @override
+  String get cookEmptyPantryTitle => 'Add what you have';
+
+  @override
+  String get cookEmptyPantryBody => 'List the products in your fridge and Salamat will pick three dishes that fit the rest of your day.';
+
+  @override
+  String get cookNoBudgetTitle => 'Today\'s target is used up';
+
+  @override
+  String get cookNoBudgetBody => 'Nothing fits the remainder right now. Come back tomorrow, or adjust your goal.';
+
+  @override
+  String get cookFailedTitle => 'Couldn\'t pick a dish';
+
+  @override
+  String get cookFailedBody => 'The service didn\'t respond. Check your connection and try again.';
+
+  @override
+  String get cookLoading => 'Picking dishes…';
+
+  @override
+  String cookRangeKcal(int min, int max) {
+    return '$min–$max kcal';
+  }
+
+  @override
+  String cookRangeG(int min, int max) {
+    return '$min–$max g';
+  }
+
+  @override
+  String cookTimeMinutes(int n) {
+    return '$n min';
+  }
+
+  @override
+  String get cookFits => 'Fits';
+
+  @override
+  String get cookBorderline => 'Might not fit';
+
+  @override
+  String get cookOver => 'Over the remainder';
+
+  @override
+  String get cookWhyRange => 'Estimate — the range widens when portion or cooking method is unclear';
+
+  @override
+  String get cookIngredientsHeader => 'Ingredients';
+
+  @override
+  String get cookStepsHeader => 'How to cook';
+
+  @override
+  String get cookAddToDiary => 'Add to diary';
+
+  @override
+  String cookAddedToDiary(String dish, int kcal) {
+    return '$dish added — $kcal kcal';
+  }
+
+  @override
+  String get cookMidpointNote => 'Logged at the middle of the range';
+
+  @override
+  String get cookRetry => 'Try again';
+
+  @override
+  String paywallTrialCta(String period) {
+    return 'Start $period free';
+  }
+
+  @override
+  String paywallTrialThen(String price, String date) {
+    return 'Then $price, charged $date';
+  }
+
+  @override
+  String get paywallSubscribeCta => 'Subscribe';
+
+  @override
+  String paywallPeriodDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paywallPeriodWeeks(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paywallPeriodMonths(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n months',
+      one: '1 month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paywallPeriodYears(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n years',
+      one: '1 year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paywallPerMonthShort(String price) {
+    return '$price / mo';
+  }
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsSectionPlan => 'Plan and goals';
+
+  @override
+  String get settingsSectionAbout => 'About';
+
+  @override
+  String get settingsAppearanceUnavailable => 'Theme follows the app build';
+
+  @override
+  String get detailTitle => 'Meal';
+
+  @override
+  String detailLoggedAt(String time) {
+    return 'Logged at $time';
+  }
+
+  @override
+  String detailServing(int grams) {
+    return '$grams g serving';
+  }
+
+  @override
+  String get detailSourcePhoto => 'Recognised from a photo';
+
+  @override
+  String get detailSourceManual => 'Entered by hand';
+
+  @override
+  String get detailSourceSuggested => 'From a suggestion';
+
+  @override
+  String get detailDuplicate => 'Duplicate';
+
+  @override
+  String get detailSave => 'Save';
+
+  @override
+  String detailDeleted(String dish) {
+    return '$dish removed';
+  }
+
+  @override
+  String detailDuplicated(String dish) {
+    return '$dish logged again';
+  }
+
+  @override
+  String get detailDeleteTitle => 'Remove this meal?';
+
+  @override
+  String get detailDeleteBody => 'It will be taken out of today\'s diary.';
+
+  @override
+  String detailShareOfDay(int percent) {
+    return '$percent% of target';
+  }
+
+  @override
+  String detailSharePercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String waterAdd(int ml) {
+    return '+$ml';
+  }
+
+  @override
+  String get waterUndo => 'Undo';
+
+  @override
+  String waterOfGoal(String liters) {
+    return 'of $liters L';
+  }
+
+  @override
+  String get waterNotSynced => 'Saved on this device only';
 }

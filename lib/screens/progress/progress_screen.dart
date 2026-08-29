@@ -1,21 +1,25 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:salamat/l10n/app_localizations.dart';
 
-import '../../providers/meals_provider.dart';
+import '../../providers/history_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../theme/colors.dart';
-import '../../theme/salamat_icons.dart';
-import '../../theme/salamat_theme.dart';
-import '../../theme/dimensions.dart';
+import '../../providers/weight_provider.dart';
+import '../../theme/salamat_dark.dart';
+import '../onboarding/widgets.dart' show SalamatCard, SalamatEyebrow;
 
-const Color _kProteinColor = SalamatColors.g2;
-const Color _kFatColor = SalamatColors.warn;
-const Color _kCarbsColor = Color(0xFF7BB3E8);
-
+/// Progress, rebuilt to the prototype's analytics screen.
+///
+/// Everything here is derived from rows that already exist in `meals` and
+/// `weight_logs` — [historyProvider] widens the existing `eaten_at` query
+/// instead of adding columns. Nothing is estimated: where a number cannot be
+/// computed the card shows an empty state.
+///
+/// The prototype's Eaten / Burned / Net row is deliberately absent: "Burned"
+/// needs activity data the app does not collect, and deriving it from a
+/// formula would put an invented number on screen.
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
 
@@ -23,460 +27,555 @@ class ProgressScreen extends ConsumerStatefulWidget {
   ConsumerState<ProgressScreen> createState() => _ProgressScreenState();
 }
 
-class _HistoryDay {
-  const _HistoryDay(this.label, this.date, this.kcal);
-  final String label;
-  final String date;
-  final int kcal;
-}
-
-class _ProgressScreenState extends ConsumerState<ProgressScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseCtrl;
-  late final Animation<double> _pulse;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 0.9, end: 1.1)
-        .chain(CurveTween(curve: Curves.easeInOut))
-        .animate(_pulseCtrl);
-  }
-
-  @override
-  void dispose() {
-    _pulseCtrl.dispose();
-    super.dispose();
-  }
-
+class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
+    final range = ref.watch(historyRangeProvider);
+    final async = ref.watch(historyProvider);
     final user = ref.watch(userProvider);
-    final meals = ref.watch(mealsProvider).valueOrNull ?? const MealsState();
-
-    final norm = user.calorieNorm ?? 2000;
-    final consumed = meals.totalKcalAll;
-    final proteinConsumed = meals.totalProtein;
-    final fatConsumed = meals.totalFat;
-    final carbsConsumed = meals.totalCarbs;
-
-    final proteinNorm = norm * 0.3 / 4;
-    final fatNorm = norm * 0.3 / 9;
-    final carbsNorm = norm * 0.4 / 4;
-
-    // Real history. Meals are tracked for the current session only (no
-    // multi-day persistence yet), so the only day we can show truthfully is
-    // today — and only once the user has actually logged something. A new
-    // user sees an empty state and a streak of 0. Past days will populate
-    // here once a persisted history feed exists.
-    final loggedToday = consumed > 0;
-    final streak = loggedToday ? 1 : 0;
-    final history = <_HistoryDay>[
-      if (loggedToday)
-        _HistoryDay(
-          loc.progressDayToday,
-          MaterialLocalizations.of(context).formatShortMonthDay(DateTime.now()),
-          consumed,
-        ),
-    ];
-    final maxKcal = history.map((d) => d.kcal).fold<int>(
-          1,
-          (a, b) => a > b ? a : b,
-        );
 
     return ListView(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         top: 56,
-        bottom: SalamatDims.tabBarHeight + 40,
+        bottom: SalamatDarkDims.navHeight + 40,
       ),
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
           child: Text(
             loc.progressTitle,
-            style: GoogleFonts.manrope(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: SalamatColors.ink,
-              letterSpacing: -0.3,
-            ),
+            style: SalamatDarkType.h2.copyWith(color: c.text),
           ),
         ),
-        const SizedBox(height: 20),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _StreakCard(streak: streak, pulse: _pulse),
-        ),
-        const SizedBox(height: 24),
+        const SizedBox(height: SalamatDarkDims.gap20),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
-          child: Text(
-            loc.progressToday,
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: SalamatColors.i3,
-              letterSpacing: 0.2,
-            ),
+          child: _RangeSwitcher(
+            selected: range,
+            onSelect: (r) => ref.read(historyRangeProvider.notifier).set(r),
           ),
         ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _StatsGrid(
-            consumed: consumed,
-            norm: norm,
-            protein: proteinConsumed,
-            proteinNorm: proteinNorm,
-            fat: fatConsumed,
-            fatNorm: fatNorm,
-            carbs: carbsConsumed,
-            carbsNorm: carbsNorm,
-          ),
-        ),
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
-          ),
-          child: Text(
-            loc.progressHistory,
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: SalamatColors.i3,
-              letterSpacing: 0.2,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: SalamatColors.surf,
-              borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-              border: Border.all(color: SalamatColors.line),
-            ),
-            child: history.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 20,
-                    ),
-                    child: Text(
-                      loc.progressHistoryEmpty,
-                      style: GoogleFonts.manrope(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: SalamatColors.i3,
-                        height: 1.4,
-                      ),
-                    ),
-                  )
-                : Column(
-                    children: [
-                      for (var i = 0; i < history.length; i++) ...[
-                        _HistoryRow(day: history[i], maxKcal: maxKcal),
-                        if (i != history.length - 1)
-                          Container(
-                            height: 1,
-                            color: SalamatColors.line,
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                          ),
-                      ],
-                    ],
+        const SizedBox(height: SalamatDarkDims.gap20),
+        ...switch (async) {
+          AsyncLoading() => [
+              const Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SalamatDarkDims.screenPadH,
+                ),
+                child: _HistorySkeleton(),
+              ),
+            ],
+          AsyncError() => [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SalamatDarkDims.screenPadH,
+                ),
+                child: SalamatCard(
+                  child: Text(
+                    loc.progressHistoryEmpty,
+                    style: SalamatDarkType.captionL.copyWith(color: c.text3),
                   ),
-          ),
-        ),
+                ),
+              ),
+            ],
+          AsyncValue(:final value?) => _cards(context, loc, value, user),
+          _ => const <Widget>[],
+        },
       ],
+    );
+  }
+
+  List<Widget> _cards(
+    BuildContext context,
+    AppLocalizations loc,
+    HistoryStats stats,
+    UserState user,
+  ) {
+    const pad = EdgeInsets.symmetric(
+      horizontal: SalamatDarkDims.screenPadH,
+    );
+    final logs = ref.watch(weightLogsProvider).valueOrNull ?? const [];
+    return [
+      Padding(padding: pad, child: _TrendCard(stats: stats)),
+      const SizedBox(height: SalamatDarkDims.gap16),
+      Padding(padding: pad, child: _WeightCard(user: user, logs: logs)),
+      const SizedBox(height: SalamatDarkDims.gap16),
+      Padding(padding: pad, child: _ScoreCards(stats: stats)),
+      const SizedBox(height: SalamatDarkDims.gap20),
+      Padding(padding: pad, child: _ConsistencyMap(stats: stats)),
+      if (user.targetWeight != null && user.weight != null) ...[
+        const SizedBox(height: SalamatDarkDims.gap20),
+        Padding(padding: pad, child: _Milestones(user: user)),
+      ],
+    ];
+  }
+}
+
+/// Segmented range control: `padding: 4`, radius 16 on `--surface-2`, the
+/// active pill on `--surface` with `--shadow-1`.
+class _RangeSwitcher extends StatelessWidget {
+  const _RangeSwitcher({required this.selected, required this.onSelect});
+
+  final HistoryRange selected;
+  final ValueChanged<HistoryRange> onSelect;
+
+  String _label(AppLocalizations loc, HistoryRange r) => switch (r) {
+        HistoryRange.day => loc.progressRangeDay,
+        HistoryRange.week => loc.progressRangeWeek,
+        HistoryRange.month => loc.progressRangeMonth,
+        HistoryRange.year => loc.progressRangeYear,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.all(SalamatDarkDims.gap4),
+      decoration: BoxDecoration(
+        color: c.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rField),
+      ),
+      child: Row(
+        children: [
+          for (final r in HistoryRange.values) ...[
+            if (r != HistoryRange.values.first)
+              const SizedBox(width: SalamatDarkDims.gap4),
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onSelect(r),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: r == selected ? c.surface : Colors.transparent,
+                    borderRadius:
+                        BorderRadius.circular(SalamatDarkDims.rIcon36),
+                    boxShadow: r == selected ? c.shadow1 : null,
+                  ),
+                  child: Text(
+                    _label(loc, r),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: SalamatDarkType.caption.copyWith(
+                      color: r == selected ? c.text : c.text3,
+                      fontWeight: SalamatDarkType.medium,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
 
-class _StreakCard extends StatelessWidget {
-  const _StreakCard({required this.streak, required this.pulse});
+/// Calorie trend: one bar per bucket, height relative to the tallest bucket,
+/// a `--line-2` goal line with its label, `--warn` for over-target days and
+/// `--primary` for the newest bucket.
+class _TrendCard extends StatelessWidget {
+  const _TrendCard({required this.stats});
 
-  final int streak;
-  final Animation<double> pulse;
+  final HistoryStats stats;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
-    const goal = 7;
-    final progress = (streak / goal).clamp(0.0, 1.0);
-    final completed = (streak - 1).clamp(0, goal - 1);
-    final todayIdx = streak > 0 ? completed : -1;
+    final buckets = stats.chartBuckets;
+    final peak = buckets.fold<int>(0, (a, b) => math.max(a, b.kcal));
+    final goal = stats.bucketGoal;
+    final scale = math.max(peak, goal).toDouble();
+    final anyData = peak > 0;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: SalamatColors.surf,
-        borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-        border: Border.all(color: SalamatColors.line),
-      ),
+    return SalamatCard(
+      radius: SalamatDarkDims.rHero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              streak > 0
-                  ? SalamatIcon.flame(size: 22)
-                  : SalamatIcon(
-                      PhosphorIcons.plant(PhosphorIconsStyle.duotone),
-                      size: 22,
-                      color: SalamatTokens.accent,
-                      bubbleColor: SalamatTokens.bubbleMint,
-                    ),
-              const SizedBox(width: 10),
-              Text(
-                streak > 0
-                    ? loc.progressStreak(streak)
-                    : loc.progressStreakStart,
-                style: GoogleFonts.manrope(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: SalamatColors.ink,
-                  letterSpacing: -0.3,
+              Expanded(
+                child: Text(
+                  loc.progressCalorieTrend,
+                  style: SalamatDarkType.captionL.copyWith(
+                    color: c.text,
+                    fontWeight: SalamatDarkType.semi,
+                    height: null,
+                  ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            streak > 0 ? loc.progressNextGoal : loc.progressStreakStartHint,
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: SalamatColors.i3,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: SalamatColors.g4,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(SalamatColors.g2),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              for (var i = 0; i < goal; i++)
-                _StreakDot(
-                  state: i < completed
-                      ? _DotState.done
-                      : i == todayIdx
-                          ? _DotState.today
-                          : _DotState.empty,
-                  pulse: pulse,
+              if (anyData)
+                Text(
+                  loc.progressDailyAvg(stats.dailyAverageKcal),
+                  style: SalamatDarkType.captionXs.copyWith(color: c.text3),
                 ),
             ],
           ),
+          const SizedBox(height: SalamatDarkDims.gap16),
+          if (!anyData)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 28),
+              child: Center(
+                child: Text(
+                  loc.progressNoRangeData,
+                  textAlign: TextAlign.center,
+                  style: SalamatDarkType.caption.copyWith(color: c.text3),
+                ),
+              ),
+            )
+          else
+            SizedBox(
+              height: SalamatDarkDims.chartHeight,
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final plot = box.maxHeight - 26;
+                  final goalY = scale <= 0 ? 0.0 : plot * (goal / scale);
+                  return Stack(
+                    children: [
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 26 + goalY,
+                        child: Container(height: 1, color: c.line2),
+                      ),
+                      Positioned(
+                        right: 0,
+                        // Sits above the line, but flips below it when the
+                        // line is near the top of the plot, so the label is
+                        // never clipped out of the chart box.
+                        bottom: goalY > plot - 16
+                            ? 26 + goalY - 14
+                            : 26 + goalY + 3,
+                        child: Text(
+                          loc.progressGoalLine(goal),
+                          style: SalamatDarkType.eyebrowS.copyWith(
+                            color: c.text3,
+                            fontSize: 9.5,
+                            letterSpacing: 0.04 * 9.5,
+                          ),
+                        ),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          for (var i = 0; i < buckets.length; i++) ...[
+                            if (i > 0) const SizedBox(width: 3),
+                            Expanded(
+                              child: _Bar(
+                                bucket: buckets[i],
+                                isLast: i == buckets.length - 1,
+                                goal: goal,
+                                scale: scale,
+                                plot: plot,
+                                label: _bucketLabel(context, buckets[i]),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );
   }
-}
 
-enum _DotState { done, today, empty }
-
-class _StreakDot extends StatelessWidget {
-  const _StreakDot({required this.state, required this.pulse});
-
-  final _DotState state;
-  final Animation<double> pulse;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget circle;
-    switch (state) {
-      case _DotState.done:
-        circle = Container(
-          width: 28,
-          height: 28,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: SalamatColors.g1,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.check_rounded,
-            size: 16,
-            color: SalamatColors.surf,
-          ),
-        );
-        break;
-      case _DotState.today:
-        circle = ScaleTransition(
-          scale: pulse,
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: SalamatColors.g2,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: SalamatColors.g2.withValues(alpha: 0.35),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-          ),
-        );
-        break;
-      case _DotState.empty:
-        circle = Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: SalamatColors.line, width: 2),
-          ),
-        );
-        break;
-    }
-    return SizedBox(width: 32, height: 32, child: Center(child: circle));
+  String _bucketLabel(BuildContext context, DayTotals b) {
+    final tag = Localizations.localeOf(context).toString();
+    return switch (stats.range) {
+      // A single day gets no axis label — the card title carries the context.
+      HistoryRange.day => '',
+      HistoryRange.week => _weekdayShort(context, b.date),
+      // 30 bars cannot all be labelled; every fifth day carries the date.
+      HistoryRange.month => b.date.day % 5 == 0 ? '${b.date.day}' : '',
+      HistoryRange.year => _monthShort(tag, b.date),
+    };
   }
+
+  static String _weekdayShort(BuildContext context, DateTime d) =>
+      MaterialLocalizations.of(context).narrowWeekdays[d.weekday % 7];
+
+  static String _monthShort(String localeTag, DateTime d) =>
+      DateTime(d.year, d.month).month.toString();
 }
 
-class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({
-    required this.consumed,
-    required this.norm,
-    required this.protein,
-    required this.proteinNorm,
-    required this.fat,
-    required this.fatNorm,
-    required this.carbs,
-    required this.carbsNorm,
+class _Bar extends StatelessWidget {
+  const _Bar({
+    required this.bucket,
+    required this.isLast,
+    required this.goal,
+    required this.scale,
+    required this.plot,
+    required this.label,
   });
 
-  final int consumed;
-  final int norm;
-  final double protein;
-  final double proteinNorm;
-  final double fat;
-  final double fatNorm;
-  final double carbs;
-  final double carbsNorm;
+  final DayTotals bucket;
+  final bool isLast;
+  final int goal;
+  final double scale;
+  final double plot;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
+    final c = context.c;
+    final over = bucket.kcal > goal;
+    final h = scale <= 0 ? 0.0 : (plot * (bucket.kcal / scale));
+    final color = !bucket.logged
+        ? c.surface3
+        : over
+            ? c.warn
+            : isLast
+                ? c.primary
+                : c.primary.withValues(alpha: 0.28);
     return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _CaloriesStatCard(consumed: consumed, norm: norm),
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: math.max(bucket.logged ? 4 : 3, h)),
+          duration: const Duration(milliseconds: 500),
+          curve: SalamatDarkDims.ease,
+          builder: (_, v, __) => Container(
+            width: double.infinity,
+            height: v,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(SalamatDarkDims.rBar),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MacroStatCard(
-                value: protein,
-                norm: proteinNorm,
-                label: loc.progressMacroProtein,
-                color: _kProteinColor,
-              ),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _MacroStatCard(
-                value: fat,
-                norm: fatNorm,
-                label: loc.progressMacroFat,
-                color: _kFatColor,
+        SizedBox(
+          height: 26,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: SalamatDarkDims.gap6),
+              child: Text(
+                label,
+                maxLines: 1,
+                style: SalamatDarkType.eyebrowS.copyWith(
+                  color: isLast ? c.text : c.text3,
+                  fontSize: 10.5,
+                  letterSpacing: 0,
+                ),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MacroStatCard(
-                value: carbs,
-                norm: carbsNorm,
-                label: loc.progressMacroCarbs,
-                color: _kCarbsColor,
-              ),
-            ),
-          ],
+          ),
         ),
       ],
     );
   }
 }
 
-class _CaloriesStatCard extends StatelessWidget {
-  const _CaloriesStatCard({required this.consumed, required this.norm});
+/// Weight card: current weight against the goal plus the logged trend line.
+/// Draws only real weigh-ins; with fewer than two points the line is omitted.
+class _WeightCard extends StatelessWidget {
+  const _WeightCard({required this.user, required this.logs});
 
-  final int consumed;
-  final int norm;
+  final UserState user;
+  final List<WeightLog> logs;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
-    final progress = norm == 0 ? 0.0 : (consumed / norm).clamp(0.0, 1.0);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: SalamatColors.surf,
-        borderRadius: BorderRadius.circular(SalamatDims.buttonRadius),
-        border: Border.all(color: SalamatColors.line),
+    // weightLogsProvider is ordered oldest -> newest.
+    final current = logs.isNotEmpty ? logs.last.kg : user.weight;
+    final goal = user.targetWeight;
+    if (current == null) {
+      return SalamatCard(
+        radius: SalamatDarkDims.rHero,
+        child: Text(
+          loc.dashboardWeightFirstLog,
+          style: SalamatDarkType.captionL.copyWith(color: c.text3),
+        ),
+      );
+    }
+    final delta =
+        logs.length >= 2 ? logs.last.kg - logs.first.kg : null;
+    return SalamatCard(
+      radius: SalamatDarkDims.rHero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Text(
+                  loc.dashboardWeightTitle,
+                  style: SalamatDarkType.captionL.copyWith(
+                    color: c.text,
+                    fontWeight: SalamatDarkType.semi,
+                    height: null,
+                  ),
+                ),
+              ),
+              if (delta != null)
+                Text(
+                  loc.dashboardWeightSinceStart(delta.toStringAsFixed(1)),
+                  style: SalamatDarkType.captionXs.copyWith(
+                    color: delta <= 0 ? c.primaryInk : c.warn,
+                    fontWeight: SalamatDarkType.semi,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: SalamatDarkDims.gap14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                current.toStringAsFixed(1),
+                style: SalamatDarkType.numXl.copyWith(color: c.text),
+              ),
+              const SizedBox(width: SalamatDarkDims.gap10),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5),
+                child: Text(
+                  goal == null
+                      ? loc.profileKgShort
+                      : '${loc.profileKgShort} · '
+                          '${loc.planTarget.toLowerCase()} '
+                          '${goal.toStringAsFixed(0)}',
+                  style: SalamatDarkType.caption.copyWith(color: c.text3),
+                ),
+              ),
+            ],
+          ),
+          if (logs.length >= 2) ...[
+            const SizedBox(height: SalamatDarkDims.gap14),
+            SizedBox(
+              height: SalamatDarkDims.weightChartHeight,
+              width: double.infinity,
+              child: CustomPaint(
+                painter: _WeightLinePainter(
+                  values: logs.map((e) => e.kg).toList(),
+                  goal: goal,
+                  line: c.primary,
+                  guide: c.line2,
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
+    );
+  }
+}
+
+class _WeightLinePainter extends CustomPainter {
+  _WeightLinePainter({
+    required this.values,
+    required this.goal,
+    required this.line,
+    required this.guide,
+  });
+
+  final List<double> values;
+  final double? goal;
+  final Color line;
+  final Color guide;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (values.length < 2) return;
+    final lo = values.reduce(math.min);
+    final hi = values.reduce(math.max);
+    final span = (hi - lo).abs() < 0.5 ? 1.0 : hi - lo;
+    double y(double v) => size.height - ((v - lo) / span) * (size.height - 8) - 4;
+    final dx = size.width / (values.length - 1);
+
+    // Goal guide: dashed, only when it falls inside the plotted band.
+    final g = goal;
+    if (g != null && g >= lo - span && g <= hi + span) {
+      final gp = Paint()
+        ..color = guide
+        ..strokeWidth = 1.5;
+      final gy = y(g).clamp(0.0, size.height);
+      for (var x = 0.0; x < size.width; x += 11) {
+        canvas.drawLine(Offset(x, gy), Offset(x + 4, gy), gp);
+      }
+    }
+
+    final path = Path()..moveTo(0, y(values.first));
+    for (var i = 1; i < values.length; i++) {
+      path.lineTo(dx * i, y(values[i]));
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = line
+        ..strokeWidth = 2.5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke,
+    );
+    canvas.drawCircle(
+      Offset(size.width, y(values.last)),
+      4,
+      Paint()..color = line,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeightLinePainter old) =>
+      old.values != values || old.goal != goal;
+}
+
+/// Two score cards: protein adherence and the logging streak.
+class _ScoreCards extends StatelessWidget {
+  const _ScoreCards({required this.stats});
+
+  final HistoryStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    final score = stats.proteinScore;
+    // IntrinsicHeight gives `stretch` a finite height to fill. A bare
+    // stretch-Row inside a ListView asks its children for infinite height and
+    // takes the rest of the list down with it.
+    return IntrinsicHeight(
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$consumed',
-                  style: GoogleFonts.manrope(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: SalamatColors.ink,
-                    letterSpacing: -0.6,
-                    height: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  loc.progressOfNormKcal(norm),
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: SalamatColors.i3,
-                  ),
-                ),
-              ],
+            child: _ScoreCard(
+              label: loc.progressProteinScore,
+              color: c.primary,
+              value: score == null ? loc.valueDash : '$score',
+              sub: loc.progressProteinScoreSub(
+                stats.proteinDaysOnTarget,
+                stats.loggedDayCount,
+              ),
             ),
           ),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: CustomPaint(
-              painter: _MiniRingPainter(progress: progress),
+          const SizedBox(width: SalamatDarkDims.gap12),
+          Expanded(
+            child: _ScoreCard(
+              label: loc.progressConsistencyLabel,
+              color: c.secondary,
+              value: '${stats.streak}',
+              sub: loc.progressConsistencySub,
             ),
           ),
         ],
@@ -485,61 +584,34 @@ class _CaloriesStatCard extends StatelessWidget {
   }
 }
 
-class _MacroStatCard extends StatelessWidget {
-  const _MacroStatCard({
-    required this.value,
-    required this.norm,
+class _ScoreCard extends StatelessWidget {
+  const _ScoreCard({
     required this.label,
+    required this.value,
+    required this.sub,
     required this.color,
   });
 
-  final double value;
-  final double norm;
   final String label;
+  final String value;
+  final String sub;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final progress = norm == 0 ? 0.0 : (value / norm).clamp(0.0, 1.0);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: SalamatColors.surf,
-        borderRadius: BorderRadius.circular(SalamatDims.buttonRadius),
-        border: Border.all(color: SalamatColors.line),
-      ),
+    final c = context.c;
+    return SalamatCard(
+      padding: const EdgeInsets.all(SalamatDarkDims.padCardTight),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
+          SalamatEyebrow(label, color: color),
+          const SizedBox(height: SalamatDarkDims.gap8),
+          Text(value, style: SalamatDarkType.numM.copyWith(color: c.text)),
+          const SizedBox(height: SalamatDarkDims.gap8),
           Text(
-            '${value.round()}',
-            style: GoogleFonts.manrope(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: SalamatColors.ink,
-              letterSpacing: -0.6,
-              height: 1.0,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.manrope(
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: SalamatColors.i3,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: SalamatColors.g4,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
+            sub,
+            style: SalamatDarkType.micro.copyWith(color: c.text3),
           ),
         ],
       ),
@@ -547,120 +619,153 @@ class _MacroStatCard extends StatelessWidget {
   }
 }
 
-class _MiniRingPainter extends CustomPainter {
-  _MiniRingPainter({required this.progress});
+/// Consistency heat map: one cell per day in the range, intensity by how close
+/// the day came to the calorie norm. Untouched days stay `--surface-3`.
+class _ConsistencyMap extends StatelessWidget {
+  const _ConsistencyMap({required this.stats});
 
-  final double progress;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const stroke = 5.0;
-    final rect = Rect.fromLTWH(
-      stroke / 2,
-      stroke / 2,
-      size.width - stroke,
-      size.height - stroke,
-    );
-    final bg = Paint()
-      ..color = const Color(0xFFF0F4EE)
-      ..strokeWidth = stroke
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(rect, 0, 2 * math.pi, false, bg);
-
-    if (progress <= 0) return;
-
-    final gradient = SweepGradient(
-      startAngle: -math.pi / 2,
-      endAngle: -math.pi / 2 + 2 * math.pi,
-      colors: const [SalamatColors.g1, SalamatColors.g2],
-    );
-    final fg = Paint()
-      ..shader = gradient.createShader(rect)
-      ..strokeWidth = stroke
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * progress, false, fg);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MiniRingPainter oldDelegate) =>
-      oldDelegate.progress != progress;
-}
-
-class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({required this.day, required this.maxKcal});
-
-  final _HistoryDay day;
-  final int maxKcal;
+  final HistoryStats stats;
 
   @override
   Widget build(BuildContext context) {
-    final ratio = maxKcal == 0 ? 0.0 : (day.kcal / maxKcal).clamp(0.0, 1.0);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 92,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    // The prototype draws a 28-cell grid at 10.5 % width; the range decides
+    // how many days we actually have to show.
+    final days = stats.days.length > 28
+        ? stats.days.sublist(stats.days.length - 28)
+        : stats.days;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SalamatEyebrow(loc.progressConsistencyLabel),
+        const SizedBox(height: SalamatDarkDims.gap10),
+        LayoutBuilder(
+          builder: (context, box) {
+            const perRow = 9;
+            final cell = (box.maxWidth - (perRow - 1) * 4) / perRow;
+            return Wrap(
+              spacing: 4,
+              runSpacing: 4,
               children: [
-                Text(
-                  day.label,
-                  style: GoogleFonts.manrope(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: SalamatColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  day.date,
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: SalamatColors.i3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: SizedBox(
-                width: 80,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: ratio,
-                    minHeight: 6,
-                    backgroundColor: SalamatColors.g4,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      SalamatColors.g2,
+                for (final d in days)
+                  Container(
+                    width: cell,
+                    height: cell,
+                    decoration: BoxDecoration(
+                      color: _cellColor(c, d),
+                      borderRadius:
+                          BorderRadius.circular(SalamatDarkDims.rCell),
                     ),
                   ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Color _cellColor(SalamatColorsDark c, DayTotals d) {
+    if (!d.logged) return c.surface3;
+    final ratio = stats.calorieNorm == 0 ? 0.0 : d.kcal / stats.calorieNorm;
+    if (ratio > 1.1) return c.warn;
+    if (ratio >= 0.8) return c.primary;
+    return c.primarySoft;
+  }
+}
+
+/// Weekly milestones: the projected weight path at a steady 0.5 kg a week,
+/// the same rate the plan screen already commits to. Shown only when both the
+/// current and the target weight exist.
+class _Milestones extends StatelessWidget {
+  const _Milestones({required this.user});
+
+  final UserState user;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    final from = user.weight!;
+    final to = user.targetWeight!;
+    final losing = to < from;
+    final step = losing ? -0.5 : 0.5;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SalamatEyebrow(loc.progressWeeklyMilestones),
+        const SizedBox(height: SalamatDarkDims.gap10),
+        Row(
+          children: [
+            for (var w = 1; w <= 4; w++) ...[
+              if (w > 1) const SizedBox(width: SalamatDarkDims.gap8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: SalamatDarkDims.gap12,
+                    horizontal: SalamatDarkDims.gap4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: w == 1 ? c.primarySoft : c.surface2,
+                    borderRadius:
+                        BorderRadius.circular(SalamatDarkDims.rField),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        loc.progressMilestoneWeek(w),
+                        style: SalamatDarkType.eyebrowS.copyWith(
+                          color: c.text3,
+                          fontSize: 10.5,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: SalamatDarkDims.gap5),
+                      Text(
+                        _clamp(from + step * w, from, to).toStringAsFixed(1),
+                        style: SalamatDarkType.bodyM.copyWith(
+                          color: w == 1 ? c.primary : c.text,
+                          fontWeight: SalamatDarkType.semi,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Never project past the goal.
+  static double _clamp(double v, double from, double to) =>
+      to < from ? math.max(v, to) : math.min(v, to);
+}
+
+/// Shimmer placeholder matching the card rhythm above.
+class _HistorySkeleton extends StatelessWidget {
+  const _HistorySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return Column(
+      children: [
+        for (final h in [180.0, 150.0, 90.0]) ...[
+          Container(
+            height: h,
+            decoration: BoxDecoration(
+              color: c.skeletonBase,
+              borderRadius: BorderRadius.circular(SalamatDarkDims.rHero),
             ),
           ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 64,
-            child: Text(
-              '${day.kcal}',
-              textAlign: TextAlign.right,
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: SalamatColors.ink,
-              ),
-            ),
-          ),
+          const SizedBox(height: SalamatDarkDims.gap16),
         ],
-      ),
+      ],
     );
   }
 }

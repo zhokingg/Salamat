@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class SocialProofScreen extends StatelessWidget {
   const SocialProofScreen({super.key});
@@ -22,12 +21,12 @@ class SocialProofScreen extends StatelessWidget {
           Text(
             loc.socialTitle,
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               height: 1.2,
               letterSpacing: -0.6,
-              color: SalamatTokens.textPrimary,
+              color: sc.text,
             ),
           ),
           const SizedBox(height: 32),
@@ -40,22 +39,22 @@ class SocialProofScreen extends StatelessWidget {
                   left: 90,
                   child: _Avatar(
                     icon: PhosphorIcons.user(PhosphorIconsStyle.duotone),
-                    fg: SalamatTokens.accentDeep,
-                    bg: SalamatTokens.pillBg,
+                    fg: sc.primary,
+                    bg: sc.primarySoft,
                   ),
                 ),
                 Positioned(
                   right: 90,
                   child: _Avatar(
                     icon: PhosphorIcons.user(PhosphorIconsStyle.duotone),
-                    fg: SalamatTokens.onAccent,
-                    bg: SalamatTokens.amber,
+                    fg: sc.onPrimary,
+                    bg: sc.warn,
                   ),
                 ),
                 _Avatar(
                   icon: PhosphorIcons.user(PhosphorIconsStyle.duotone),
-                  fg: SalamatTokens.onAccent,
-                  bg: SalamatTokens.accentDeep,
+                  fg: sc.onPrimary,
+                  bg: sc.primary,
                   big: true,
                 ),
               ],
@@ -65,7 +64,7 @@ class SocialProofScreen extends StatelessWidget {
         ],
       ),
       buttonLabel: loc.buttonContinue,
-      onContinue: () => context.go('/onboarding/building'),
+      onContinue: () => context.push('/onboarding/building'),
     );
   }
 }
@@ -92,7 +91,7 @@ class _Avatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         shape: BoxShape.circle,
-        border: Border.all(color: SalamatTokens.surfaceAlt, width: 4),
+        border: Border.all(color: sc.surface2, width: 4),
       ),
       child: PhosphorIcon(icon, size: big ? 36 : 28, color: fg),
     );

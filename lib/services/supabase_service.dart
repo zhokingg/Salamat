@@ -186,6 +186,59 @@ class SupabaseService {
     }
   }
 
+  /// Food logs from [since] (inclusive, local time) up to now.
+  ///
+  /// Same `meals` table and columns as [getTodayFoodLogs] — only the lower
+  /// bound differs, so multi-day analytics need no schema change. Returns an
+  /// empty list rather than throwing: analytics are a read-only view and a
+  /// transient failure should degrade to "no data", not break the screen.
+  static Future<List<Map<String, dynamic>>> getFoodLogsSince(
+    DateTime since,
+  ) async {
+    if (!isSignedIn) return [];
+    try {
+      final rows = await client
+          .from('meals')
+          .select()
+          .gte('eaten_at', since.toUtc().toIso8601String())
+          .order('eaten_at', ascending: false);
+      return List<Map<String, dynamic>>.from(rows);
+    } catch (e) {
+      if (kDebugMode) debugPrint('getFoodLogsSince error: $e');
+      return [];
+    }
+  }
+
+  /// Rewrites the nutrition of one existing row.
+  ///
+  /// An update rather than delete-and-insert so `eaten_at` and the row id
+  /// survive — re-inserting would move the meal to "now" and break the day it
+  /// belongs to. The `meals_all_own` policy is `for all`, so this needs no
+  /// schema or policy change.
+  static Future<bool> updateFoodLog({
+    required String id,
+    required double portionG,
+    required int calories,
+    required double proteinG,
+    required double carbsG,
+    required double fatG,
+  }) async {
+    if (!isSignedIn) return false;
+    try {
+      await client.from('meals').update({
+        'grams': portionG,
+        'kcal': calories,
+        'protein': proteinG,
+        'carbs': carbsG,
+        'fat': fatG,
+      }).eq('id', id);
+      return true;
+    } catch (e) {
+      if (kDebugMode) debugPrint('updateFoodLog error: $e');
+      return false;
+    }
+  }
+
   static Future<bool> deleteFoodLog(String id) async {
     if (!isSignedIn) return false;
     try {
@@ -193,6 +246,69 @@ class SupabaseService {
       return true;
     } catch (e) {
       if (kDebugMode) debugPrint('deleteFoodLog error: $e');
+      return false;
+    }
+  }
+
+  // -------- water --------
+
+  /// Today's water rows, oldest first.
+  ///
+  /// Returns null — distinct from an empty list — when the table is not there
+  /// yet or the read fails, so the caller can tell "no water logged" apart
+  /// from "cannot persist water at all" and fall back accordingly.
+  /// `water_logs` ships in migration 0004.
+  static Future<List<Map<String, dynamic>>?> getTodayWater() async {
+    if (!isSignedIn) return null;
+    try {
+      final now = DateTime.now();
+      final startLocal = DateTime(now.year, now.month, now.day);
+      final rows = await client
+          .from('water_logs')
+          .select()
+          .gte('logged_at', startLocal.toUtc().toIso8601String())
+          .order('logged_at', ascending: true);
+      return List<Map<String, dynamic>>.from(rows);
+    } catch (e) {
+      if (kDebugMode) debugPrint('getTodayWater unavailable: $e');
+      return null;
+    }
+  }
+
+  /// Logs one portion. False when the row could not be written — most likely
+  /// because migration 0004 has not been applied.
+  static Future<bool> logWater(int amountMl) async {
+    final uid = currentUser?.id;
+    if (uid == null) return false;
+    try {
+      await client.from('water_logs').insert({
+        'user_id': uid,
+        'amount_ml': amountMl,
+      });
+      return true;
+    } catch (e) {
+      if (kDebugMode) debugPrint('logWater unavailable: $e');
+      return false;
+    }
+  }
+
+  /// Deletes today's most recent water row.
+  static Future<bool> deleteLatestWater() async {
+    final uid = currentUser?.id;
+    if (uid == null) return false;
+    try {
+      final rows = await client
+          .from('water_logs')
+          .select('id')
+          .eq('user_id', uid)
+          .order('logged_at', ascending: false)
+          .limit(1);
+      final list = List<Map<String, dynamic>>.from(rows);
+      if (list.isEmpty) return false;
+      await client.from('water_logs').delete().eq('id', list.first['id']);
+      return true;
+    } catch (e) {
+      if (kDebugMode) debugPrint('deleteLatestWater unavailable: $e');
       return false;
     }
   }

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 /// Step 14: what the app actually does. Deliberately capability-only copy —
 /// no effectiveness multipliers, percentages or outcome promises.
@@ -41,7 +40,7 @@ class ComparisonScreen extends StatelessWidget {
         ],
       ),
       buttonLabel: loc.buttonContinue,
-      onContinue: () => context.go('/onboarding/social-proof'),
+      onContinue: () => context.push('/onboarding/social-proof'),
     );
   }
 }
@@ -56,23 +55,26 @@ class _FeatureRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: SalamatTokens.card(color: SalamatTokens.surfaceAlt),
+      decoration: BoxDecoration(
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+      ),
       child: Row(
         children: [
           SalamatIcon(
             icon,
             size: 22,
-            color: SalamatTokens.accentDeep,
-            bubbleColor: SalamatTokens.bubbleMint,
+            color: sc.primary,
+            bubbleColor: sc.accentSoft,
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: SalamatTokens.textPrimary,
+                color: sc.text,
                 height: 1.35,
               ),
             ),

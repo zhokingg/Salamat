@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../providers/user_provider.dart';
 import '../../theme/salamat_icons.dart';
-import '../../theme/salamat_theme.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class GenderScreen extends ConsumerStatefulWidget {
   const GenderScreen({super.key});
@@ -27,7 +27,7 @@ class _GenderScreenState extends ConsumerState<GenderScreen> {
   void _next() {
     if (_selected == null) return;
     ref.read(userProvider.notifier).setGender(_selected!);
-    context.go('/onboarding/year');
+    context.push('/onboarding/year');
   }
 
   @override
@@ -46,8 +46,8 @@ class _GenderScreenState extends ConsumerState<GenderScreen> {
             leading: SalamatIcon(
               PhosphorIcons.genderFemale(PhosphorIconsStyle.duotone),
               size: 22,
-              color: SalamatTokens.accentDeep,
-              bubbleColor: SalamatTokens.bubbleMint,
+              color: sc.primary,
+              bubbleColor: sc.accentSoft,
             ),
             selected: _selected == Gender.female,
             onTap: () => setState(() => _selected = Gender.female),
@@ -58,8 +58,8 @@ class _GenderScreenState extends ConsumerState<GenderScreen> {
             leading: SalamatIcon(
               PhosphorIcons.genderMale(PhosphorIconsStyle.duotone),
               size: 22,
-              color: SalamatTokens.accentDeep,
-              bubbleColor: SalamatTokens.bubbleMint,
+              color: sc.primary,
+              bubbleColor: sc.accentSoft,
             ),
             selected: _selected == Gender.male,
             onTap: () => setState(() => _selected = Gender.male),

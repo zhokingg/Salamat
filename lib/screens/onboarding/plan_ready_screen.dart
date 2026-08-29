@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/user_provider.dart';
 import '../../services/supabase_service.dart';
 import '../../services/onboarding_flag.dart';
-import '../../theme/dimensions.dart';
-import '../../theme/salamat_theme.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../theme/salamat_dark.dart';
 
 class PlanReadyScreen extends ConsumerStatefulWidget {
   const PlanReadyScreen({super.key});
@@ -126,21 +124,21 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
           const SizedBox(height: 16),
           Text(
             loc.planTitle,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               height: 1.2,
               letterSpacing: -0.6,
-              color: SalamatTokens.textPrimary,
+              color: sc.text,
             ),
           ),
           const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: SalamatTokens.surfaceAlt,
-              borderRadius: BorderRadius.circular(SalamatDims.cardRadius),
-              border: Border.all(color: SalamatTokens.ringTrack),
+              color: sc.surface2,
+              borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+              border: Border.all(color: sc.surface3),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -177,10 +175,10 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
                   _weeksToTarget > 0
                       ? loc.planWeeksToTarget(_weeksToTarget)
                       : loc.planMaintain,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: SalamatTokens.textMuted,
+                    color: sc.text2,
                   ),
                 ),
               ],
@@ -192,8 +190,8 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: SalamatTokens.surfaceAlt,
-              borderRadius: BorderRadius.circular(SalamatTokens.radiusCard),
+              color: sc.surface2,
+              borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,11 +202,11 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
                     const SizedBox(width: 10),
                     Text(
                       loc.planCaloriesLabel,
-                      style: GoogleFonts.manrope(
+                      style: SalamatDarkType.style(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.6,
-                        color: SalamatTokens.textMuted,
+                        color: sc.text2,
                       ),
                     ),
                   ],
@@ -221,10 +219,10 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
                         curve: Curves.easeOutCubic,
                         builder: (_, v, __) => Text(
                           loc.planCaloriesValue(v.round()),
-                          style: GoogleFonts.manrope(
+                          style: SalamatDarkType.style(
                             fontSize: 32,
                             fontWeight: FontWeight.w600,
-                            color: SalamatTokens.textPrimary,
+                            color: sc.text,
                             letterSpacing: -0.6,
                             height: 1.0,
                           ),
@@ -232,10 +230,10 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
                       )
                     : Text(
                         loc.valueDash,
-                        style: GoogleFonts.manrope(
+                        style: SalamatDarkType.style(
                           fontSize: 32,
                           fontWeight: FontWeight.w600,
-                          color: SalamatTokens.textPrimary,
+                          color: sc.text,
                           height: 1.0,
                         ),
                       ),
@@ -266,10 +264,10 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
                   const SizedBox(height: 14),
                   Text(
                     loc.planReachLine(target, _reachMonth(loc)),
-                    style: GoogleFonts.manrope(
+                    style: SalamatDarkType.style(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: SalamatTokens.accentDeep,
+                      color: sc.primary,
                       height: 1.35,
                     ),
                   ),
@@ -305,23 +303,23 @@ class _Endpoint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = highlighted ? SalamatTokens.accentDeep : SalamatTokens.textMuted;
+    final c = highlighted ? sc.primary : sc.text2;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title.toUpperCase(),
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.0,
-            color: SalamatTokens.iconQuiet,
+            color: sc.text3,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: c,
@@ -331,10 +329,10 @@ class _Endpoint extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           date,
-          style: GoogleFonts.manrope(
+          style: SalamatDarkType.style(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: SalamatTokens.iconQuiet,
+            color: sc.text3,
           ),
         ),
       ],
@@ -353,17 +351,17 @@ class _PlanChartPainter extends CustomPainter {
     final h = size.height;
 
     final axis = Paint()
-      ..color = SalamatTokens.ringTrack
+      ..color = sc.surface3
       ..strokeWidth = 1;
     canvas.drawLine(Offset(0, h - 1), Offset(w, h - 1), axis);
 
     final line = Paint()
-      ..color = SalamatTokens.accentDeep
+      ..color = sc.primary
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
     final fill = Paint()
-      ..color = SalamatTokens.accentDeep.withValues(alpha: 0.08)
+      ..color = sc.primary.withValues(alpha: 0.08)
       ..style = PaintingStyle.fill;
 
     final path = Path();
@@ -394,7 +392,7 @@ class _PlanChartPainter extends CustomPainter {
     canvas.drawPath(filledPath, fill);
     canvas.drawPath(path, line);
 
-    final dot = Paint()..color = SalamatTokens.accentDeep;
+    final dot = Paint()..color = sc.primary;
     final endEase = 1.0;
     final double endY;
     if (losing) {
@@ -428,15 +426,15 @@ class _MacroPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: SalamatTokens.pillBg,
-        borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+        color: sc.primarySoft,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
       ),
       child: Text(
         '$label \u00b7 $grams $unit',
-        style: GoogleFonts.manrope(
+        style: SalamatDarkType.style(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: SalamatTokens.pillText,
+          color: sc.primaryInk,
           height: 1.0,
         ),
       ),

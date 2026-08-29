@@ -5,16 +5,20 @@ import 'package:salamat/l10n/app_localizations.dart';
 
 import 'providers/locale_provider.dart';
 import 'router.dart';
+import 'theme/salamat_dark.dart';
 import 'theme/salamat_theme.dart';
+import 'theme/theme_flag.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Status-bar icons must contrast with the canvas: the redesign's dark skin
+  // needs light icons, both light skins need dark ones.
+  final darkCanvas = SalamatDarkTheme.brightness == Brightness.dark;
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
+    SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      // Light theme → dark status-bar icons.
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
+      statusBarIconBrightness: darkCanvas ? Brightness.light : Brightness.dark,
+      statusBarBrightness: darkCanvas ? Brightness.dark : Brightness.light,
     ),
   );
   // Supabase init + anonymous sign-in are driven by `bootstrapProvider`, which
@@ -35,7 +39,9 @@ class SalamatApp extends ConsumerWidget {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      theme: SalamatTheme.light,
+      // One flag, one switch: `kAppSkin` in theme/theme_flag.dart. The legacy
+      // `SalamatTheme.light` is kept intact as the rollback target.
+      theme: kRedesignActive ? SalamatDarkTheme.theme : SalamatTheme.light,
     );
   }
 }

@@ -5,17 +5,16 @@ import 'package:intl/intl.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../providers/meals_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/water_provider.dart';
 import '../../providers/weight_provider.dart';
 import '../../screens/manual_entry/manual_entry_sheet.dart';
 import '../../widgets/update_weight_dialog.dart';
-import '../../screens/onboarding/widgets.dart' show CountUp;
-import '../../theme/dimensions.dart';
 import '../../theme/salamat_icons.dart';
-import '../../theme/salamat_theme.dart';
+import '../../theme/salamat_dark.dart';
+import '../onboarding/widgets.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -111,7 +110,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     return ListView(
       padding: EdgeInsets.only(
         top: 56,
-        bottom: SalamatDims.tabBarHeight + 40,
+        bottom: SalamatDarkDims.navHeight + 40,
       ),
       children: [
         if (offline)
@@ -123,27 +122,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           ),
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 greeting,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: SalamatTokens.textPrimary,
+                  color: sc.text,
                   letterSpacing: -0.3,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 dateLine,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: SalamatTokens.textMuted,
+                  color: sc.text2,
                 ),
               ),
             ],
@@ -151,12 +150,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         ),
         const SizedBox(height: 16),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
           child: _WeekStrip(today: now, localeTag: localeTag),
         ),
         const SizedBox(height: 16),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
           child: _CaloriesCard(
             ringAnim: _ringAnim,
             progress: progress,
@@ -170,7 +173,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         ),
         const SizedBox(height: 12),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
           // IntrinsicHeight gives the stretch a FINITE height to fill.
           // A bare stretch-Row inside a ListView asks its children for
           // infinite height -> layout exception -> the whole dashboard
@@ -188,7 +193,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         ),
         const SizedBox(height: 12),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
+          child: const _WaterCard(),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
           child: _WeightCard(
             weight: user.weight,
             logs: ref.watch(weightLogsProvider).valueOrNull ?? const [],
@@ -198,30 +212,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         if (left > 0) ...[
           const SizedBox(height: 12),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
             child: _SnackIdeaCard(kcalLeft: left),
           ),
         ],
         if (allEntries.isEmpty) ...[
           const SizedBox(height: 12),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
             child: SizedBox(
               height: 48,
               child: OutlinedButton(
                 onPressed: () => showManualEntrySheet(context),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: SalamatTokens.accentDeep,
-                  side: const BorderSide(
-                      color: SalamatTokens.accent, width: 1.5),
+                  foregroundColor: sc.primary,
+                  side:  BorderSide(
+                      color: sc.primary, width: 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius:
-                        BorderRadius.circular(SalamatTokens.radiusCta),
+                        BorderRadius.circular(SalamatDarkDims.rButton),
                   ),
                 ),
                 child: Text(
                   loc.manualAddButton,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -243,22 +261,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 class _Skeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Widget box(double h, {double r = SalamatTokens.radiusCard}) => Container(
+    Widget box(double h, {double r = SalamatDarkDims.rCard}) => Container(
           height: h,
           decoration: BoxDecoration(
-            color: SalamatTokens.surface,
+            color: sc.surface,
             borderRadius: BorderRadius.circular(r),
           ),
         );
     return ListView(
       padding: EdgeInsets.only(
         top: 56,
-        bottom: SalamatDims.tabBarHeight + 40,
+        bottom: SalamatDarkDims.navHeight + 40,
       ),
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: SalamatDims.screenPadding,
+            horizontal: SalamatDarkDims.screenPadH,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,17 +295,23 @@ class _Skeleton extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: box(52, r: SalamatTokens.radiusPill),
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
+          child: box(52, r: SalamatDarkDims.rPill),
         ),
         const SizedBox(height: 16),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: box(340, r: SalamatTokens.radiusHero),
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
+          child: box(340, r: SalamatDarkDims.rHero),
         ),
         const SizedBox(height: 12),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
           child: Row(
             children: [
               Expanded(child: box(72)),
@@ -299,7 +323,9 @@ class _Skeleton extends StatelessWidget {
         const SizedBox(height: 28),
         for (var i = 0; i < 3; i++) ...[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
             child: box(64),
           ),
           const SizedBox(height: 12),
@@ -322,24 +348,24 @@ class _OfflineBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
       decoration: BoxDecoration(
-        color: SalamatTokens.surfaceAlt,
-        borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
       ),
       child: Row(
         children: [
           SalamatIcon(
             PhosphorIcons.wifiSlash(),
             size: 18,
-            color: SalamatTokens.amber,
+            color: sc.warn,
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               loc.dashboardOffline,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: SalamatTokens.textPrimary,
+                color: sc.text,
                 height: 1.2,
               ),
             ),
@@ -348,10 +374,10 @@ class _OfflineBanner extends StatelessWidget {
             onPressed: onRetry,
             child: Text(
               loc.retryButton,
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: SalamatTokens.accentDeep,
+                color: sc.primary,
               ),
             ),
           ),
@@ -407,32 +433,32 @@ class _DayChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: isToday ? SalamatTokens.accentDeep : SalamatTokens.surface,
-        borderRadius: BorderRadius.circular(SalamatTokens.radiusPill),
+        color: isToday ? sc.primary : sc.surface,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
       ),
       child: Column(
         children: [
           Text(
             letter,
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.4,
               color: isToday
-                  ? SalamatTokens.onAccent.withValues(alpha: 0.85)
-                  : SalamatTokens.textMuted,
+                  ? sc.onPrimary.withValues(alpha: 0.85)
+                  : sc.text2,
               height: 1.0,
             ),
           ),
           const SizedBox(height: 5),
           Text(
             '${date.day}',
-            style: GoogleFonts.manrope(
+            style: SalamatDarkType.style(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: isToday
-                  ? SalamatTokens.onAccent
-                  : SalamatTokens.textPrimary,
+                  ? sc.onPrimary
+                  : sc.text,
               height: 1.0,
             ),
           ),
@@ -445,6 +471,13 @@ class _DayChip extends StatelessWidget {
 /// Cream "Calories budget" card: full calorie ring (accent fill on the beige
 /// track, white disc in the centre) with the remaining value large (w600),
 /// and three macro mini-bars underneath.
+/// Hero card, repainted to the prototype's Home layout: a 132px calorie ring
+/// on the left, the three macro bars stacked on the right, radius 24,
+/// `--surface` fill, `--shadow-1`, padding 22.
+///
+/// The prototype also carries an Eaten / Burned / Net footer row under a
+/// `--line` divider. It is omitted: "Burned" needs activity data (Apple
+/// Health / step count) which this tranche does not touch.
 class _CaloriesCard extends StatelessWidget {
   const _CaloriesCard({
     required this.ringAnim,
@@ -468,96 +501,89 @@ class _CaloriesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
     final statusLabel =
         left >= 0 ? loc.dashboardLeftLabel : loc.dashboardOverflowLabel;
-    final numberColor =
-        left >= 0 ? SalamatTokens.textPrimary : SalamatTokens.danger;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
-      decoration: SalamatTokens.card(radius: SalamatTokens.radiusHero),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final numberColor = left >= 0 ? c.text : c.err;
+    return SalamatCard(
+      radius: SalamatDarkDims.rHero,
+      padding: const EdgeInsets.all(SalamatDarkDims.padHero),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            loc.dashboardCaloriesBudget,
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: SalamatTokens.textPrimary,
-              letterSpacing: -0.2,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: SizedBox(
-              width: 188,
-              height: 188,
-              child: AnimatedBuilder(
-                animation: ringAnim,
-                builder: (context, _) {
-                  final p = progress * ringAnim.value;
-                  return CustomPaint(
-                    painter: _RingPainter(progress: p, overflow: overflow),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CountUp(
-                            value: left.abs(),
-                            style: GoogleFonts.manrope(
-                              fontSize: 44,
-                              fontWeight: FontWeight.w600,
-                              color: numberColor,
-                              height: 1.0,
-                              letterSpacing: -1.0,
-                            ),
+          SizedBox(
+            width: SalamatDarkDims.ringSize,
+            height: SalamatDarkDims.ringSize,
+            child: AnimatedBuilder(
+              animation: ringAnim,
+              builder: (context, _) {
+                final p = progress * ringAnim.value;
+                return CustomPaint(
+                  painter: _RingPainter(
+                    progress: p,
+                    overflow: overflow,
+                    track: c.surface3,
+                    fill: overflow ? c.err : c.primary,
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CountUp(
+                          value: left.abs(),
+                          style: SalamatDarkType.numL
+                              .copyWith(color: numberColor),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          '${loc.dashboardKcalUnit} $statusLabel',
+                          style: SalamatDarkType.eyebrow.copyWith(
+                            color: c.text3,
+                            letterSpacing: 0,
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            statusLabel,
-                            style: GoogleFonts.manrope(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: SalamatTokens.textMuted,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            loc.dashboardConsumedOfNorm(norm),
-                            style: GoogleFonts.manrope(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: SalamatTokens.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ),
-          const SizedBox(height: 18),
-          _MacroBars(protein: protein, fat: fat, carbs: carbs, norm: norm),
+          const SizedBox(width: SalamatDarkDims.gap20),
+          Expanded(
+            child: _MacroBars(
+              protein: protein,
+              fat: fat,
+              carbs: carbs,
+              norm: norm,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-/// Full calorie ring: beige track, accent progress (danger on overflow),
-/// white disc in the centre for the numerals to sit on.
+/// Calorie ring: `--surface-3` track, `--primary` sweep (`--err` on overflow),
+/// stroke 11, round cap, no inner disc — the prototype's ring sits directly on
+/// the card surface.
 class _RingPainter extends CustomPainter {
-  _RingPainter({required this.progress, required this.overflow});
+  _RingPainter({
+    required this.progress,
+    required this.overflow,
+    required this.track,
+    required this.fill,
+  });
 
   final double progress;
   final bool overflow;
+  final Color track;
+  final Color fill;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const stroke = 16.0;
+    const stroke = SalamatDarkDims.ringStroke;
     final side = math.min(size.width, size.height);
     final center = Offset(size.width / 2, size.height / 2);
     final rect = Rect.fromCenter(
@@ -566,23 +592,16 @@ class _RingPainter extends CustomPainter {
       height: side - stroke,
     );
 
-    // White inner disc — the numerals sit on a clean layer.
-    final disc = Paint()
-      ..color = SalamatTokens.surfaceAlt
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, side / 2 - stroke, disc);
-
-    final track = Paint()
-      ..color = SalamatTokens.ringTrack
+    final trackPaint = Paint()
+      ..color = track
       ..strokeWidth = stroke
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(rect, 0, 2 * math.pi, false, track);
+      ..style = PaintingStyle.stroke;
+    canvas.drawArc(rect, 0, 2 * math.pi, false, trackPaint);
 
     if (progress <= 0) return;
 
     final fg = Paint()
-      ..color = overflow ? SalamatTokens.danger : SalamatTokens.accent
+      ..color = fill
       ..strokeWidth = stroke
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -591,11 +610,15 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RingPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.overflow != overflow;
+      oldDelegate.progress != progress ||
+      oldDelegate.overflow != overflow ||
+      oldDelegate.fill != fill;
 }
 
-/// Three macro mini-bars. Display targets are derived from the calorie norm
-/// with a standard 30/30/40 split (visual reference only, not stored).
+/// Three stacked macro rows: `label` left, `value / target` right, then a 6px
+/// pill bar. Colours follow the prototype — protein `--primary`,
+/// carbs `--secondary`, fat `--accent`. Targets are the existing 30/30/40
+/// display split, unchanged.
 class _MacroBars extends StatelessWidget {
   const _MacroBars({
     required this.protein,
@@ -611,37 +634,32 @@ class _MacroBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final loc = AppLocalizations.of(context)!;
-    final proteinTarget = norm * 0.30 / 4; // g
-    final fatTarget = norm * 0.30 / 9; // g
-    final carbsTarget = norm * 0.40 / 4; // g
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _MacroBar(
-            label: loc.dashboardMacroProtein,
-            value: protein,
-            target: proteinTarget,
-            unit: loc.gramsUnit,
-          ),
+        _MacroBar(
+          label: loc.dashboardMacroProtein,
+          value: protein,
+          target: norm * 0.30 / 4,
+          unit: loc.gramsUnit,
+          color: c.primary,
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _MacroBar(
-            label: loc.dashboardMacroFat,
-            value: fat,
-            target: fatTarget,
-            unit: loc.gramsUnit,
-          ),
+        const SizedBox(height: 13),
+        _MacroBar(
+          label: loc.dashboardMacroCarbs,
+          value: carbs,
+          target: norm * 0.40 / 4,
+          unit: loc.gramsUnit,
+          color: c.secondary,
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _MacroBar(
-            label: loc.dashboardMacroCarbs,
-            value: carbs,
-            target: carbsTarget,
-            unit: loc.gramsUnit,
-          ),
+        const SizedBox(height: 13),
+        _MacroBar(
+          label: loc.dashboardMacroFat,
+          value: fat,
+          target: norm * 0.30 / 9,
+          unit: loc.gramsUnit,
+          color: c.accent,
         ),
       ],
     );
@@ -654,66 +672,62 @@ class _MacroBar extends StatelessWidget {
     required this.value,
     required this.target,
     required this.unit,
+    required this.color,
   });
 
   final String label;
   final double value;
   final double target;
   final String unit;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final fill = target <= 0 ? 0.0 : (value / target).clamp(0.0, 1.0);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text.rich(
-          TextSpan(
-            text: '${value.round()}',
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: SalamatTokens.textPrimary,
-              height: 1.0,
-            ),
-            children: [
-              TextSpan(
-                text: ' / ${target.round()} $unit',
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: SalamatTokens.textMuted,
-                ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: SalamatDarkType.captionXs.copyWith(color: c.text2),
               ),
-            ],
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              '${value.round()} / ${target.round()} $unit',
+              style: SalamatDarkType.captionXs.copyWith(
+                color: c.text3,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: SalamatDarkDims.gap5),
         ClipRRect(
-          borderRadius: BorderRadius.circular(3),
+          borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
           child: SizedBox(
-            height: 5,
+            height: SalamatDarkDims.macroBar,
             child: Stack(
               children: [
-                Container(color: SalamatTokens.ringTrack),
-                FractionallySizedBox(
-                  widthFactor: fill,
-                  child: Container(color: SalamatTokens.accent),
+                Container(color: c.surface3),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: fill),
+                  duration: const Duration(milliseconds: 620),
+                  curve: SalamatDarkDims.ease,
+                  builder: (_, f, __) => FractionallySizedBox(
+                    widthFactor: f,
+                    child: Container(color: color),
+                  ),
                 ),
               ],
             ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: GoogleFonts.manrope(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-            color: SalamatTokens.textMuted,
           ),
         ),
       ],
@@ -733,7 +747,10 @@ class _StreakCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       alignment: Alignment.centerLeft,
-      decoration: SalamatTokens.card(color: SalamatTokens.surfaceAlt),
+      decoration: BoxDecoration(
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+      ),
       child: Row(
         children: [
           SalamatIcon.flame(size: 22),
@@ -741,10 +758,10 @@ class _StreakCard extends StatelessWidget {
           Expanded(
             child: Text(
               loc.dashboardStreakLine(days),
-              style: GoogleFonts.manrope(
+              style: SalamatDarkType.style(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: SalamatTokens.textPrimary,
+                color: sc.text,
                 height: 1.2,
               ),
             ),
@@ -778,23 +795,26 @@ class _LastMealCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(16),
         alignment: Alignment.centerLeft,
-        decoration: SalamatTokens.card(color: SalamatTokens.surfaceAlt),
+        decoration: BoxDecoration(
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+      ),
         child: Row(
           children: [
             SalamatIcon(
               PhosphorIcons.camera(PhosphorIconsStyle.duotone),
               size: 22,
-              color: SalamatTokens.accent,
-              bubbleColor: SalamatTokens.bubbleMint,
+              color: sc.primary,
+              bubbleColor: sc.accentSoft,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 loc.dashboardSnapFirstMeal,
-                style: GoogleFonts.manrope(
+                style: SalamatDarkType.style(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: SalamatTokens.textMuted,
+                  color: sc.text2,
                   height: 1.25,
                 ),
                 maxLines: 2,
@@ -808,7 +828,10 @@ class _LastMealCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       alignment: Alignment.centerLeft,
-      decoration: SalamatTokens.card(color: SalamatTokens.surfaceAlt),
+      decoration: BoxDecoration(
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+      ),
       child: Row(
         children: [
           FoodIllustration.forDish(entry!.name, size: 40),
@@ -820,21 +843,21 @@ class _LastMealCard extends StatelessWidget {
               children: [
                 Text(
                   loc.dashboardLastMeal,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.1,
-                    color: SalamatTokens.textMuted,
+                    color: sc.text2,
                     height: 1.0,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   entry!.name,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SalamatTokens.textPrimary,
+                    color: sc.text,
                     height: 1.1,
                   ),
                   maxLines: 1,
@@ -843,10 +866,10 @@ class _LastMealCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   loc.dashboardKcalWithValue(entry!.kcal),
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: SalamatTokens.textMuted,
+                    color: sc.text2,
                     height: 1.0,
                   ),
                 ),
@@ -887,7 +910,11 @@ class _WeightCard extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: SalamatTokens.card(),
+        decoration: BoxDecoration(
+        color: sc.surface,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+        boxShadow: sc.shadow1,
+      ),
         child: Row(
           children: [
             Expanded(
@@ -896,11 +923,11 @@ class _WeightCard extends StatelessWidget {
                 children: [
                   Text(
                     loc.dashboardWeightTitle,
-                    style: GoogleFonts.manrope(
+                    style: SalamatDarkType.style(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
-                      color: SalamatTokens.textMuted,
+                      color: sc.text2,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -908,10 +935,10 @@ class _WeightCard extends StatelessWidget {
                     current == null
                         ? '—'
                         : '${_fmt(current)} ${loc.profileKgShort}',
-                    style: GoogleFonts.manrope(
+                    style: SalamatDarkType.style(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: SalamatTokens.textPrimary,
+                      color: sc.text,
                       height: 1.0,
                       letterSpacing: -0.5,
                     ),
@@ -922,10 +949,10 @@ class _WeightCard extends StatelessWidget {
                       loc.dashboardWeightSinceStart(
                         '${delta >= 0 ? '+' : '−'}${_fmt(delta.abs())}',
                       ),
-                      style: GoogleFonts.manrope(
+                      style: SalamatDarkType.style(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: SalamatTokens.accentDeep,
+                        color: sc.primary,
                       ),
                     )
                   else
@@ -934,10 +961,10 @@ class _WeightCard extends StatelessWidget {
                     // showing an empty delta.
                     Text(
                       loc.dashboardWeightFirstLog,
-                      style: GoogleFonts.manrope(
+                      style: SalamatDarkType.style(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: SalamatTokens.textMuted,
+                        color: sc.text2,
                       ),
                     ),
                 ],
@@ -963,14 +990,14 @@ class _WeightCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: SalamatTokens.accentDeep,
+                decoration:  BoxDecoration(
+                  color: sc.primary,
                   shape: BoxShape.circle,
                 ),
                 child: SalamatIcon(
                   PhosphorIcons.plus(PhosphorIconsStyle.bold),
                   size: 18,
-                  color: SalamatTokens.onAccent,
+                  color: sc.onPrimary,
                 ),
               ),
             ),
@@ -1009,7 +1036,7 @@ class _SparklinePainter extends CustomPainter {
         ),
     ];
     final line = Paint()
-      ..color = SalamatTokens.accent
+      ..color = sc.primary
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -1021,7 +1048,7 @@ class _SparklinePainter extends CustomPainter {
     canvas.drawCircle(
       points.last,
       3,
-      Paint()..color = SalamatTokens.accentDeep,
+      Paint()..color = sc.primary,
     );
   }
 
@@ -1047,15 +1074,18 @@ class _SnackIdeaCard extends StatelessWidget {
             : loc.snackIdeaTiny;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: SalamatTokens.card(color: SalamatTokens.surfaceAlt),
+      decoration: BoxDecoration(
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rCard),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SalamatIcon(
             PhosphorIcons.cookie(PhosphorIconsStyle.duotone),
             size: 20,
-            color: SalamatTokens.accentDeep,
-            bubbleColor: SalamatTokens.bubbleMint,
+            color: sc.primary,
+            bubbleColor: sc.accentSoft,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1064,25 +1094,146 @@ class _SnackIdeaCard extends StatelessWidget {
               children: [
                 Text(
                   loc.snackIdeaTitle,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SalamatTokens.textPrimary,
+                    color: sc.text,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   text,
-                  style: GoogleFonts.manrope(
+                  style: SalamatDarkType.style(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: SalamatTokens.textMuted,
+                    color: sc.text2,
                     height: 1.35,
                   ),
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Water card, from the prototype's Home: droplet + `+250` action, the total
+/// in litres, and a row of pips that fill as the day goes on.
+///
+/// `water_logs` ships in migration 0004, which is not applied yet. Until it
+/// is, every write falls back to a device-local copy for the day and the card
+/// says so in one muted line rather than pretending the value is stored.
+class _WaterCard extends ConsumerWidget {
+  const _WaterCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    final async = ref.watch(waterProvider);
+    final water = async.valueOrNull ?? const WaterState();
+
+    return SalamatCard(
+      radius: SalamatDarkDims.rCard,
+      padding: const EdgeInsets.all(SalamatDarkDims.padCardSmall),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              PhosphorIcon(PhosphorIcons.drop(), size: 17, color: c.accent),
+              const SizedBox(width: SalamatDarkDims.gap8),
+              Expanded(
+                child: Text(
+                  loc.dashboardWater,
+                  style: SalamatDarkType.captionS.copyWith(color: c.text2),
+                ),
+              ),
+              if (water.canUndo)
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => ref.read(waterProvider.notifier).undo(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SalamatDarkDims.gap6,
+                      vertical: 2,
+                    ),
+                    child: Text(
+                      loc.waterUndo,
+                      style: SalamatDarkType.micro.copyWith(color: c.text3),
+                    ),
+                  ),
+                ),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => ref.read(waterProvider.notifier).add(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: c.primarySoft,
+                    borderRadius:
+                        BorderRadius.circular(SalamatDarkDims.rPill),
+                  ),
+                  child: Text(
+                    loc.waterAdd(kWaterSipMl),
+                    style: SalamatDarkType.micro.copyWith(
+                      color: c.primaryInk,
+                      fontWeight: SalamatDarkType.semi,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: SalamatDarkDims.gap10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                loc.dashboardWaterLiters(
+                  (water.totalMl / 1000).toStringAsFixed(2),
+                ),
+                style: SalamatDarkType.numTitle.copyWith(color: c.text),
+              ),
+              const SizedBox(width: SalamatDarkDims.gap6),
+              Text(
+                loc.waterOfGoal((kWaterGoalMl / 1000).toStringAsFixed(1)),
+                style: SalamatDarkType.micro.copyWith(color: c.text3),
+              ),
+            ],
+          ),
+          const SizedBox(height: SalamatDarkDims.gap10),
+          Row(
+            children: [
+              for (var i = 0; i < kWaterPips; i++) ...[
+                if (i > 0) const SizedBox(width: SalamatDarkDims.gap4),
+                Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: i < water.filledPips ? c.accent : c.surface3,
+                      borderRadius:
+                          BorderRadius.circular(SalamatDarkDims.rPill),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          if (!water.synced && !water.loading) ...[
+            const SizedBox(height: SalamatDarkDims.gap8),
+            Text(
+              loc.waterNotSynced,
+              style: SalamatDarkType.micro.copyWith(color: c.text3),
+            ),
+          ],
         ],
       ),
     );
