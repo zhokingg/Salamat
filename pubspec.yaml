@@ -51,6 +51,7 @@ flutter:
   generate: true
   assets:
     - assets/food_icons/
+    - assets/dish_icons/
 
 # App launcher icon — Salamat brand sprout (green #26593C). Regenerate with:
 #   /Users/user/flutter/bin/dart run flutter_launcher_icons

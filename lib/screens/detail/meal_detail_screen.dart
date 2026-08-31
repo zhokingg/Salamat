@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../providers/meals_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/salamat_dark.dart';
+import '../../theme/salamat_icons.dart';
 
 /// Detail card for an already-logged meal, built to the prototype's
 /// `scDetail`: back / sub-line / delete header, a 168px gradient hero with a
@@ -256,11 +256,14 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
                 ),
                 child: Stack(
                   children: [
+                    // The matched dish icon, not the same bowl for every
+                    // entry. This panel is a sixth of the screen; showing the
+                    // identical pictogram on every meal made it decoration.
                     Center(
-                      child: PhosphorIcon(
-                        PhosphorIcons.bowlFood(),
-                        size: 56,
-                        color: c.primary,
+                      child: FoodIllustration.forDish(
+                        entry.name,
+                        size: 104,
+                        radius: SalamatDarkDims.rCard,
                       ),
                     ),
                     if (source != null)

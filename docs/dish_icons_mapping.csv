@@ -1,0 +1,130 @@
+file,ru,en,category
+plov.svg,Плов,Plov (pilaf),Рис и крупы
+rice.svg,Рис отварной,Boiled rice,Рис и крупы
+buckwheat.svg,Гречка,Buckwheat,Рис и крупы
+oatmeal.svg,Овсянка,Oatmeal,Рис и крупы
+bulgur.svg,Булгур,Bulgur,Рис и крупы
+couscous.svg,Кускус,Couscous,Рис и крупы
+quinoa.svg,Киноа,Quinoa,Рис и крупы
+borsch.svg,Борщ,Borscht,Супы
+shurpa.svg,Шурпа,Shurpa,Супы
+lagman.svg,Лагман,Lagman,Супы
+solyanka.svg,Солянка,Solyanka,Супы
+chicken_broth.svg,Куриный бульон,Chicken broth,Супы
+kharcho.svg,Харчо,Kharcho,Супы
+okroshka.svg,Окрошка,Okroshka,Супы
+mushroom_soup.svg,Грибной суп,Mushroom soup,Супы
+tom_yam.svg,Том ям,Tom yum,Супы
+miso.svg,Мисо,Miso soup,Супы
+shashlik.svg,Шашлык,Shashlik (kebab),Мясо
+steak.svg,Стейк,Steak,Мясо
+cutlet.svg,Котлета,Cutlet,Мясо
+beef_stroganoff.svg,Бефстроганов,Beef stroganoff,Мясо
+meatballs.svg,Тефтели,Meatballs,Мясо
+goulash.svg,Гуляш,Goulash,Мясо
+ribs.svg,Ребра,Ribs,Мясо
+bacon.svg,Бекон,Bacon,Мясо
+sausage.svg,Колбаса,Sausage,Мясо
+frankfurters.svg,Сосиски,Frankfurters,Мясо
+chicken_breast.svg,Куриная грудка,Chicken breast,Птица
+chicken_thigh.svg,Куриное бедро,Chicken thigh,Птица
+chicken_wings.svg,Крылья,Chicken wings,Птица
+grilled_chicken.svg,Курица гриль,Grilled chicken,Птица
+turkey.svg,Индейка,Turkey,Птица
+duck.svg,Утка,Duck,Птица
+salmon.svg,Лосось,Salmon,Рыба и морепродукты
+trout.svg,Форель,Trout,Рыба и морепродукты
+cod.svg,Треска,Cod,Рыба и морепродукты
+tuna.svg,Тунец,Tuna,Рыба и морепродукты
+shrimp.svg,Креветки,Shrimp,Рыба и морепродукты
+squid.svg,Кальмары,Squid,Рыба и морепродукты
+herring.svg,Селедка,Herring,Рыба и морепродукты
+grilled_fish.svg,Рыба на гриле,Grilled fish,Рыба и морепродукты
+manty.svg,Манты,Manty,Тесто
+pelmeni.svg,Пельмени,Pelmeni,Тесто
+vareniki.svg,Вареники,Vareniki,Тесто
+khinkali.svg,Хинкали,Khinkali,Тесто
+samsa.svg,Самса,Samsa,Тесто
+belyash.svg,Беляш,Belyash,Тесто
+cheburek.svg,Чебурек,Chebureki,Тесто
+bliny.svg,Блины,Blini (crepes),Тесто
+oladyi.svg,Оладьи,Oladyi (fritters),Тесто
+syrniki.svg,Сырники,Syrniki,Тесто
+flatbread.svg,Лепешка,Flatbread (lepeshka),Хлеб
+white_loaf.svg,Батон,White loaf,Хлеб
+rye_bread.svg,Ржаной хлеб,Rye bread,Хлеб
+toast.svg,Тост,Toast,Хлеб
+baguette.svg,Багет,Baguette,Хлеб
+lavash.svg,Лаваш,Lavash,Хлеб
+spaghetti.svg,Спагетти,Spaghetti,Паста
+mac_and_cheese.svg,Макароны с сыром,Mac and cheese,Паста
+lasagna.svg,Лазанья,Lasagna,Паста
+ravioli.svg,Равиоли,Ravioli,Паста
+pasta_bolognese.svg,Паста болоньезе,Pasta bolognese,Паста
+salad_cucumber_tomato.svg,Салат из огурцов и помидоров,Cucumber & tomato salad,Салаты
+olivier.svg,Оливье,Olivier salad,Салаты
+caesar.svg,Цезарь,Caesar salad,Салаты
+greek_salad.svg,Греческий,Greek salad,Салаты
+vinegret.svg,Винегрет,Vinegret,Салаты
+cabbage_salad.svg,Капустный,Cabbage salad,Салаты
+boiled_potato.svg,Картофель отварной,Boiled potato,Овощи
+fried_potato.svg,Картофель жареный,Fried potato,Овощи
+mashed_potato.svg,Пюре,Mashed potato,Овощи
+stewed_vegetables.svg,Тушеные овощи,Stewed vegetables,Овощи
+corn.svg,Кукуруза,Corn,Овощи
+broccoli.svg,Брокколи,Broccoli,Овощи
+carrot.svg,Морковь,Carrot,Овощи
+beet.svg,Свекла,Beet,Овощи
+cottage_cheese.svg,Творог,Cottage cheese,Молочное
+yogurt.svg,Йогурт,Yogurt,Молочное
+kefir.svg,Кефир,Kefir,Молочное
+sour_cream.svg,Сметана,Sour cream,Молочное
+cheese.svg,Сыр,Cheese,Молочное
+brynza.svg,Брынза,Brynza (feta),Молочное
+milk.svg,Молоко,Milk,Молочное
+ayran.svg,Айран,Ayran,Молочное
+fried_egg.svg,Яичница,Fried egg,Яйца
+omelette.svg,Омлет,Omelette,Яйца
+boiled_egg.svg,Вареное яйцо,Boiled egg,Яйца
+burger.svg,Бургер,Burger,Фастфуд
+pizza.svg,Пицца,Pizza,Фастфуд
+shawarma.svg,Шаурма,Shawarma,Фастфуд
+hot_dog.svg,Хот-дог,Hot dog,Фастфуд
+french_fries.svg,Картофель фри,French fries,Фастфуд
+nuggets.svg,Наггетсы,Nuggets,Фастфуд
+sandwich.svg,Сэндвич,Sandwich,Фастфуд
+apple.svg,Яблоко,Apple,Фрукты
+banana.svg,Банан,Banana,Фрукты
+orange.svg,Апельсин,Orange,Фрукты
+grapes.svg,Виноград,Grapes,Фрукты
+watermelon.svg,Арбуз,Watermelon,Фрукты
+melon.svg,Дыня,Melon,Фрукты
+berries.svg,Ягоды,Berries,Фрукты
+pear.svg,Груша,Pear,Фрукты
+nuts.svg,Орехи,Nuts,Орехи и снеки
+dried_fruits.svg,Сухофрукты,Dried fruits,Орехи и снеки
+seeds.svg,Семечки,Sunflower seeds,Орехи и снеки
+chips.svg,Чипсы,Chips,Орехи и снеки
+popcorn.svg,Попкорн,Popcorn,Орехи и снеки
+cake.svg,Торт,Cake,Сладкое
+cookie.svg,Печенье,Cookie,Сладкое
+chocolate.svg,Шоколад,Chocolate,Сладкое
+ice_cream.svg,Мороженое,Ice cream,Сладкое
+honey.svg,Мед,Honey,Сладкое
+jam.svg,Варенье,Jam,Сладкое
+baklava.svg,Пахлава,Baklava,Сладкое
+halva.svg,Халва,Halva,Сладкое
+tea.svg,Чай,Tea,Напитки
+coffee.svg,Кофе,Coffee,Напитки
+juice.svg,Сок,Juice,Напитки
+water.svg,Вода,Water,Напитки
+kompot.svg,Компот,Kompot,Напитки
+soda.svg,Газировка,Soda,Напитки
+smoothie.svg,Смузи,Smoothie,Напитки
+protein_shake.svg,Протеиновый коктейль,Protein shake,Напитки
+beshbarmak.svg,Бешбармак,Beshbarmak,Мясо
+kuurdak.svg,Куырдак,Kuurdak,Мясо
+dymdama.svg,Дымдама,Dymdama,Мясо
+dolma.svg,Долма,Dolma,Мясо
+hummus.svg,Хумус,Hummus,Салаты
+fallback.svg,Нераспознанное блюдо,Unrecognized dish,Запасная

@@ -5,7 +5,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,6 +23,7 @@ import '../../services/image_prep_service.dart';
 import '../../services/photo_recognition_service.dart';
 import '../../theme/salamat_dark.dart';
 import '../../widgets/scan_progress.dart';
+import '../../theme/salamat_icons.dart';
 
 /// Prototype camera canvas (`#07090C`), darker than `--bg` in light mode
 /// and identical in both themes.
@@ -1930,19 +1930,41 @@ class _ResultSheetState extends State<_ResultSheet> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 22,
-                      height: 22,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: c.primary,
-                        borderRadius:
-                            BorderRadius.circular(SalamatDarkDims.rCheck),
-                      ),
-                      child: PhosphorIcon(
-                        PhosphorIcons.check(),
-                        size: 12,
-                        color: c.onPrimary,
+                    // The matched dish, with the confirmation tick tucked into
+                    // its corner. The tick alone said "recognised"; the icon
+                    // says WHAT was recognised, which is the thing being
+                    // confirmed.
+                    SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          FoodIllustration.forDish(
+                            _r.name,
+                            size: 40,
+                            radius: SalamatDarkDims.rTile,
+                          ),
+                          Positioned(
+                            right: -3,
+                            bottom: -3,
+                            child: Container(
+                              width: 18,
+                              height: 18,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: c.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: c.surface2, width: 2),
+                              ),
+                              child: PhosphorIcon(
+                                PhosphorIcons.check(PhosphorIconsStyle.bold),
+                                size: 9,
+                                color: c.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: SalamatDarkDims.gap12),

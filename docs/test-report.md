@@ -3880,3 +3880,273 @@ MinimumOSVersion           => 15.0
 `fvm flutter analyze` — 2 pre-existing infos. `fvm flutter test` — green.
 `fvm flutter build ios --release --no-codesign` — succeeds, 33.7 MB. Nothing
 committed.
+
+
+---
+
+# Dish icon set (2026-08-30)
+
+## 1. Files
+
+124 SVGs from the archive, background stripped and copied to
+`assets/dish_icons/`, declared in `pubspec.yaml`.
+
+The strip was scripted and verified rather than eyeballed: the script asserts
+that each file contains **exactly one** `<rect width="128" height="128"
+fill="#0B0D12">` and refuses to write if it does not — 124/124 matched, one
+removed from each. One file, `kefir.svg`, still contains `#0B0D12`: it uses the
+same colour for a small rounded rectangle inside the drawing. That is a real
+element, not the background, and it was correctly left alone.
+
+**Size: 504 KB of assets.** The built release app went from **33.7 MB to
+34.0 MB**, and the bundle contains all 124 files at 504 KB — so the growth is
+the assets and nothing else. About half a megabyte for the whole set.
+
+**One correction to the brief:** the fallback is `fallback.svg`, not
+`unrecognised.svg`. `mapping.csv` lists it as «Нераспознанное блюдо / Запасная»
+and there is no `unrecognised.svg` in the archive.
+
+## 2. Matching
+
+`lib/services/dish_icon_service.dart`. Normalise (lowercase, ё→е, every
+non-letter to a space — so `Шаурма (донер в лаваше)` becomes
+`шаурма донер в лаваше` and the bracketed alias stays usable), then find
+keywords.
+
+**449 keywords across 123 icons**, both languages in one list, Russian written
+as stems that survive declension (`курин` covers куриный/куриная/куриное).
+Single-word keywords match when a word of the name *starts with* them — prefix,
+not substring, which is what stops `ош` (plov in Kyrgyz) from matching inside
+`картошка`. Keywords containing a space match as a substring.
+
+**Two rules decide, and the second one only exists because I checked.**
+
+1. **Longest matched keyword wins.** «куриный бульон» → broth, not chicken.
+   «картофель фри» → fries, not boiled potato.
+2. **Matching runs on the head of the name first** — everything before the
+   first preposition or conjunction — falling back to the whole string if the
+   head matches nothing.
+
+Rule 2 was added after the live check below caught rule 1 getting three names
+wrong: «Борщ со сметаной» → sour cream, «Кофе с молоком» → milk, and «Шаурма
+(донер в лаваше)» → **lavash**, because the garnish happened to be spelled with
+as many or more letters than the dish. What follows «с», «со», «на», «в» or
+«with» is what the dish is served *with*; it is not the dish.
+
+«Салат из огурцов и помидоров» is why the fallback half of rule 2 matters: its
+head is the bare word «салат», which no icon claims, so the whole string is
+used and the cucumber-and-tomato salad wins on length.
+
+## 3. Where they show
+
+* **Meal card** — the 168 px hero panel that showed the same `bowlFood`
+  pictogram on every entry now shows the matched icon at 104 px.
+* **Diary rows** — already went through `FoodIllustration.forDish`, so
+  reimplementing that on the new set upgraded them and the dashboard's
+  last-meal tile and the manual-entry sheet at the same time. The old
+  ten-category table is gone: it mapped everything meaty to one plate and
+  everything sweet to another, so a diary of ten dishes showed three pictures.
+* **Scan confirmation sheet** — the bare green tick became the matched icon
+  with the tick tucked into its corner. The tick said "recognised"; the icon
+  says *what* was recognised, which is the thing being confirmed.
+
+## 4. Live check
+
+`test/dish_icon_match_test.dart` — pure logic, runs in `flutter test`.
+
+| name | file | matched on |
+|---|---|---|
+| Шаурма (донер в лаваше) | `shawarma.svg` | шаурм |
+| Куриное филе на гриле с помидором | `chicken_breast.svg` | куриное филе |
+| Салат из огурцов и помидоров | `salad_cucumber_tomato.svg` | салат из огурцов |
+| Плов | `plov.svg` | плов |
+| Лагман | `lagman.svg` | лагман |
+| Куриный бульон | `chicken_broth.svg` | куриный бульон |
+| Картофель фри | `french_fries.svg` | картофель фри |
+| Картофель жареный с луком | `fried_potato.svg` | картофель жарен |
+| Борщ со сметаной | `borsch.svg` | борщ |
+| Манты с говядиной | `manty.svg` | манты |
+| Овсянка на молоке | `oatmeal.svg` | овсянк |
+| Творог 5% | `cottage_cheese.svg` | творог |
+| Яблоко | `apple.svg` | яблок |
+| Хот-дог | `hot_dog.svg` | хот дог |
+| Grilled chicken breast with vegetables | `grilled_chicken.svg` | grilled chicken |
+| Cucumber and tomato salad | `salad_cucumber_tomato.svg` | cucumber |
+| Beef stroganoff with mashed potato | `beef_stroganoff.svg` | stroganoff |
+| Двойной чизбургер | `burger.svg` | чизбург |
+| Кофе с молоком | `coffee.svg` | кофе |
+| Протеиновый коктейль | `protein_shake.svg` | протеинов |
+
+### What falls through — the shopping list
+
+| name | file |
+|---|---|
+| Домашний обед | `fallback.svg` |
+| Мясо по-французски | `fallback.svg` |
+| Хумус с питой | `fallback.svg` |
+| Долма | `fallback.svg` |
+| Фалафель | `fallback.svg` |
+| Плошка с гарниром | `fallback.svg` |
+| Ассорти | `fallback.svg` |
+| Куырдак | `fallback.svg` |
+| Бешбармак | `fallback.svg` |
+| Дымдама | `fallback.svg` |
+
+**Ten of twelve fall back, and the pattern is clear: the set has no Central
+Asian main courses beyond plov, lagman, shurpa, manty and samsa.** Бешбармак,
+куырдак, дымдама and долма are ordinary orders in Bishkek and there is nothing
+to draw for them. That is an icon-set gap, not a keyword gap — no amount of
+keyword work fixes a missing picture. Worth five more drawings.
+
+Two of the twelve did *not* fall back, and both are judgement calls rather than
+errors: «Суши с лососем» → `salmon.svg` (there is no sushi icon; salmon is not
+wrong) and «Тортилья с курицей и овощами» → `sandwich.svg` (tortilla is listed
+under the sandwich keywords deliberately).
+
+Generic answers — «Домашний обед», «Ассорти», «Плошка с гарниром» — should keep
+falling back. There is no honest icon for "some lunch".
+
+## Verification
+
+`fvm flutter analyze` — 2 pre-existing infos. `fvm flutter test` — green,
+including the matching table. Release iOS build succeeds at 34.0 MB.
+Screenshots: `dishicons_diary_{en,ru}.png`, `dishicons_detail_{en,ru}.png`.
+Nothing committed.
+
+**One thing the screenshots caught in my own test rig**, not in the app: seeding
+entries with an explicit `eatenAt` made each dish appear twice in the diary —
+the optimistic copy carried my timestamp, the row fetched back carried the
+server's. The app never sets `eatenAt`, so this is not a user-facing bug; the
+test now omits it and the screenshots show each dish once.
+
+
+---
+
+# Dish icon set, second drop: 124 -> 129
+
+## 1. Background strip — the premise was wrong for the new five
+
+The brief said all five new icons carry the same embedded
+`<rect width="128" height="128" fill="#0B0D12">` and that the "exactly one"
+check should pass on them. **They carry none.** Across the new archive:
+
+```
+0 background rect(s): 5 files
+    ['beshbarmak.svg', 'dolma.svg', 'dymdama.svg', 'hummus.svg', 'kuurdak.svg']
+1 background rect(s): 124 files
+```
+
+The five ship transparent already. Had I run the old script unchanged it would
+have aborted on the first of them — which is the check doing its job, just
+about the wrong thing.
+
+So the assertion is now **at most one, never more than one**. That still catches
+the failure that matters (an unexpected extra background nobody spotted) and
+does not treat an already-clean file as an error. Result: 124 stripped, 5 passed
+through untouched.
+
+**The other 124 are byte-identical** to what was already in `assets/dish_icons`
+— checked with `diff -rq` against a fresh strip of the new archive, so the
+second drop changed nothing but added files.
+
+`kefir.svg` still contains one `#0B0D12`, as before: a small rounded rect inside
+the drawing, correctly left alone.
+
+## 2. mapping.csv and keywords
+
+The archive's own `mapping.csv` already has 129 rows and all five are in it —
+nothing to update, so it is copied to `docs/dish_icons_mapping.csv` for
+reference. It is **not** in `assets/`, because bundling a CSV nothing reads
+would just be weight in the app.
+
+| file | ru | en | category |
+|---|---|---|---|
+| `beshbarmak.svg` | Бешбармак | Beshbarmak | Мясо |
+| `kuurdak.svg` | Куырдак | Kuurdak | Мясо |
+| `dymdama.svg` | Дымдама | Dymdama | Мясо |
+| `dolma.svg` | Долма | Dolma | Мясо |
+| `hummus.svg` | Хумус | Hummus | Салаты |
+
+Keywords added, including every spelling you named plus the ones people
+actually type:
+
+| icon | keywords |
+|---|---|
+| `beshbarmak.svg` | бешбармак, бешбарм, бесбармак, **беш**, наарын, besh, beshbarmak |
+| `kuurdak.svg` | **куырдак**, **куурдак**, кувурдак, куырд, куурд, kuurdak, kuyrdak |
+| `dymdama.svg` | дымдама, думляма, димлама, дымлама, дамлама, dymdama, dimlama, damlama |
+| `dolma.svg` | долма, **толма**, дулма, dolma, tolma, сарма |
+| `hummus.svg` | хумус, хуммус, **humus**, hummus |
+
+482 keywords across 128 icons now (fallback has none, by design).
+
+**One keyword I deliberately did not add: `нут`.** Chickpea is the right word
+for hummus, but as a prefix it also swallows «нутелла». Verified — «Нутелла»
+now falls back rather than arriving as hummus, and a chickpea dish falling back
+is the better failure.
+
+**One collision I am keeping, and you should know about it:** `беш` is three
+letters and also prefixes «бешамель». In practice the head-of-name rule
+protects the common case — «Лазанья с соусом бешамель» matches on «лазань»
+before the sauce is ever considered — but a bare «Соус бешамель» would land on
+beshbarmak. You asked for «беш» explicitly and it earns its place on real
+orders; the béchamel case is rare enough to accept knowingly.
+
+## 3. Matching, re-run
+
+All 25 names resolve correctly — the 20 from last time, unchanged, plus:
+
+| name | file | matched on |
+|---|---|---|
+| Бешбармак | `beshbarmak.svg` | бешбармак |
+| Куырдак из баранины | `kuurdak.svg` | куырдак |
+| Дымдама | `dymdama.svg` | дымдама |
+| Долма | `dolma.svg` | долма |
+| Хумус с питой | `hummus.svg` | хумус |
+
+Spelling variants asserted in the test, not just tabled: `Беш` →
+`beshbarmak.svg`, `Куурдак` → `kuurdak.svg`, `Толма` → `dolma.svg`, `Humus` →
+`hummus.svg`.
+
+### What falls back now
+
+| name | file |
+|---|---|
+| Домашний обед | `fallback.svg` |
+| Мясо по-французски | `fallback.svg` |
+| Фалафель | `fallback.svg` |
+| Плошка с гарниром | `fallback.svg` |
+| Ассорти | `fallback.svg` |
+| Что-то из холодильника | `fallback.svg` |
+| Тарелка еды | `fallback.svg` |
+| Хачапури по-аджарски | `fallback.svg` |
+
+**The Central Asian gap is closed.** What is left splits in two:
+
+* **Genuinely generic** — «Домашний обед», «Ассорти», «Тарелка еды», «Что-то из
+  холодильника». These *should* fall back. There is no honest icon for "some
+  lunch", and drawing one would only make the app look confident about
+  something it does not know.
+* **Real dishes still missing a drawing** — фалафель, хачапури, мясо
+  по-французски. Three, down from a category-sized hole. Not urgent.
+
+Three names in that probe list did not fall back and are judgement calls rather
+than misses: «Суши с лососем» → salmon, «Лепёшка с каймаком» → flatbread,
+«Бургер-боул» → burger. Each picks the closest true thing in the set.
+
+## 4. Size
+
+| | 124 icons | **129 icons** |
+|---|---|---|
+| assets on disk | 504 KB | **524 KB** |
+| icons in the built bundle | 504 KB | **524 KB** |
+| release app | 34.0 MB | **34.0 MB** |
+
+Five more icons cost **20 KB**. The app total is unchanged at the precision
+Flutter reports it.
+
+## Verification
+
+`fvm flutter analyze` — 2 pre-existing infos. `fvm flutter test` — green,
+including the matching table and the new spelling assertions. Release iOS build
+succeeds. Nothing committed.
