@@ -144,6 +144,29 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     _loadOfferings();
   }
 
+  /// Anchors the offerings-error card so it can be scrolled into view.
+  final GlobalKey _errorKey = GlobalKey();
+
+  /// Scrolls the offerings-error card fully into view.
+  ///
+  /// The bottom bar does not overlap the list — they are siblings in a Column
+  /// — but in the error state the content is a little taller than the viewport,
+  /// so the card explaining WHY there are no prices lands half below the fold
+  /// and reads as truncated. The one thing the user needs to read is the one
+  /// thing they cannot see, so bring it to them.
+  void _revealError() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _errorKey.currentContext;
+      if (ctx == null || !mounted) return;
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+    });
+  }
+
   Future<void> _loadOfferings() async {
     setState(() {
       _loading = true;
@@ -155,6 +178,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         _loading = false;
         _loadError = true;
       });
+      _revealError();
       return;
     }
     try {
@@ -198,6 +222,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           _loading = false;
           _loadError = true;
         });
+        _revealError();
       }
     }
   }
@@ -292,35 +317,38 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
   }
 
-  // Mirrors the date math in plan_ready_screen so the urgency line and the
-  // plan screen agree on the target date.
-  ({int weight, DateTime date}) _targetSnapshot(UserState u) {
+  /// The goal line under the headline.
+  ///
+  /// Deliberately says nothing about WHEN. The app cannot know when somebody
+  /// will reach a weight — that depends on the rest of their life — and a
+  /// promised date at the moment of payment is the worst place to pretend
+  /// otherwise. The coach's system prompt is forbidden from promising a result
+  /// by a date; the interface should hold to the same rule.
+  ///
+  /// So: the target, and the rate the PLAN is built from, described as an
+  /// assumption rather than an outcome.
+  String _goalLine(UserState u, AppLocalizations loc) {
+    final target = u.targetWeight;
+    // No target set — say something true rather than inventing a number.
+    if (target == null) return loc.paywallGoalGenericLine;
+
+    final weight = target.round();
     final delta = u.weightDelta.abs();
-    final weeks = delta <= 0 ? 8 : (delta * 2).round().clamp(4, 52);
-    final date = DateTime.now().add(Duration(days: weeks * 7));
-    return (weight: u.targetWeight?.round() ?? 65, date: date);
+    if (delta <= 0) return loc.paywallGoalHoldLine(weight);
+
+    // Same arithmetic plan_ready_screen uses, read as a rate instead of a date.
+    final weeks = (delta * 2).round().clamp(4, 52);
+    final pace = delta / weeks;
+    final paceText = NumberFormat('0.#', loc.localeName).format(pace);
+    return loc.paywallGoalPaceLine(weight, paceText);
   }
 
-  String _formatDate(DateTime d, AppLocalizations loc) {
-    const ru = [
-      'янв', 'фев', 'мар', 'апр', 'мая', 'июн',
-      'июл', 'авг', 'сен', 'окт', 'ноя', 'дек',
-    ];
-    const en = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    final isRu = loc.localeName.startsWith('ru');
-    final m = (isRu ? ru : en)[d.month - 1];
-    return '${d.day} $m';
-  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     final loc = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
-    final t = _targetSnapshot(user);
 
     // The trial shown on the button is the one attached to the SELECTED tier —
     // annual and monthly can differ, and promising the wrong one would be a
@@ -346,7 +374,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               _HeaderRow(onClose: _close, onRestore: _restore),
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.zero,
+                  // Real bottom padding rather than a trailing SizedBox: the
+                  // last card must be able to scroll clear of the CTA bar.
+                  padding: const EdgeInsets.only(
+                    bottom: SalamatDarkDims.gap24,
+                  ),
                   children: [
                     const _Hero(),
                     const SizedBox(height: 28),
@@ -360,12 +392,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       },
                     ),
                     const SizedBox(height: 10),
-                    _UrgencyLine(
-                      text: loc.paywallUrgencyLine(
-                        t.weight,
-                        _formatDate(t.date, loc),
-                      ),
-                    ),
+                    _UrgencyLine(text: _goalLine(user, loc)),
                     const SizedBox(height: SalamatDarkDims.gap24),
                     // Benefits are the argument for paying, so they render in
                     // every state — including when prices failed to load.
@@ -379,14 +406,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ),
                       )
                     else if (_loadError)
-                      const _OfferingsError()
+                      _OfferingsError(key: _errorKey)
                     else
                       _TierList(
                         selected: _selected,
                         tiers: _tiers,
                         onSelect: (t) => setState(() => _selected = t),
                       ),
-                    const SizedBox(height: SalamatDarkDims.gap24),
                   ],
                 ),
               ),
@@ -1215,7 +1241,7 @@ class _PrimaryCtaState extends State<_PrimaryCta> {
 /// showing a number we do not have would misstate what the user would be
 /// charged.
 class _OfferingsError extends StatelessWidget {
-  const _OfferingsError();
+  const _OfferingsError({super.key});
 
   @override
   Widget build(BuildContext context) {

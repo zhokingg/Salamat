@@ -9,14 +9,18 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../providers/meals_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../manual_entry/manual_entry_sheet.dart';
+import '../manual_entry/photo_limit_sheet.dart';
+import '../onboarding/widgets.dart' show OnboardingPrimaryButton;
+import '../../services/barcode_lookup_service.dart';
+import '../../services/voice_entry_service.dart';
 import '../../services/photo_recognition_service.dart';
-import '../../services/supabase_service.dart';
 import '../../theme/salamat_dark.dart';
 
 /// Prototype camera canvas (`#07090C`), darker than `--bg` in light mode
@@ -27,6 +31,10 @@ const Color _kCamBg = SalamatColorsDark.camBg;
 /// the user sees — generic "could not recognise" gets blamed on the AI,
 /// network/server errors should make that distinction explicit.
 enum _FailureKind { network, server, notRecognised }
+
+/// What the camera screen is currently doing. One screen, two modes — the
+/// prototype toggles between them rather than opening a separate scanner.
+enum _CaptureMode { photo, barcode, voice }
 
 class _Recognized {
   const _Recognized({
@@ -114,6 +122,23 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   /// show the prototype's "detected" state before the sheet slides up.
   _Recognized? _detected;
   bool _outOfPhotos = false;
+
+  _CaptureMode _mode = _CaptureMode.photo;
+
+  /// Barcode scanning owns its own camera session; the photo controller stays
+  /// untouched so switching back does not re-initialise it.
+  MobileScannerController? _scanner;
+
+  /// Guards against the detector firing repeatedly on the same code while a
+  /// lookup is already in flight.
+  bool _barcodeBusy = false;
+  String? _lastBarcode;
+
+  /// The transcript, kept in a controller so the user can correct it before
+  /// sending: speech recognition mishears more often than people expect.
+  final TextEditingController _voiceCtrl = TextEditingController();
+  bool _voiceListening = false;
+  bool _voiceParsing = false;
   bool _processing = false;
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulse;
@@ -121,6 +146,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   @override
   void initState() {
     super.initState();
+    _voiceCtrl.addListener(_onVoiceTextChanged);
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -135,17 +161,102 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   void dispose() {
     _pulseCtrl.dispose();
     _controller?.dispose();
+    _scanner?.dispose();
+    _voiceCtrl.removeListener(_onVoiceTextChanged);
+    _voiceCtrl.dispose();
+    VoiceEntryService.cancel();
     super.dispose();
   }
 
+  /// The transcript can change two ways: dictation (which already rebuilds via
+  /// setState) and the user typing a correction (which does not). Without this
+  /// listener the send button stayed disabled after a manual edit, because
+  /// `_VoiceView` reads `controller.text` and nothing told it to rebuild.
+  void _onVoiceTextChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _setMode(_CaptureMode mode) {
+    if (_mode == mode) return;
+    setState(() {
+      _mode = mode;
+      _lastBarcode = null;
+      _barcodeBusy = false;
+      if (mode != _CaptureMode.voice && _voiceListening) {
+        _voiceListening = false;
+        VoiceEntryService.cancel();
+      }
+      if (mode == _CaptureMode.barcode) {
+        // Barcode scanning costs nothing, so it stays available even when the
+        // photo allowance is spent.
+        _scanner ??= MobileScannerController(
+          formats: const [
+            BarcodeFormat.ean13,
+            BarcodeFormat.ean8,
+            BarcodeFormat.upcA,
+            BarcodeFormat.upcE,
+          ],
+          detectionSpeed: DetectionSpeed.normal,
+        );
+      }
+    });
+  }
+
+  /// One detection from the scanner. Everything here is free: no model call,
+  /// no `consume_scan`, so the photo allowance is untouched.
+  Future<void> _onBarcode(BarcodeCapture capture) async {
+    if (_barcodeBusy || !mounted) return;
+    final raw = capture.barcodes
+        .map((b) => b.rawValue)
+        .firstWhere((v) => v != null && v.trim().isNotEmpty, orElse: () => null);
+    if (raw == null) return;
+    final code = raw.trim();
+    // The detector fires many times a second on the same label.
+    if (code == _lastBarcode) return;
+
+    setState(() {
+      _barcodeBusy = true;
+      _lastBarcode = code;
+    });
+
+    final result = await BarcodeLookupService.lookup(
+      barcode: code,
+      lang: Localizations.localeOf(context).languageCode,
+    );
+    if (!mounted) return;
+    setState(() => _barcodeBusy = false);
+
+    if (result.isFound) {
+      await _showResultSheet(_fromProduct(result.product!));
+      // Allow the same product to be scanned again afterwards.
+      if (mounted) setState(() => _lastBarcode = null);
+      return;
+    }
+    await _showBarcodeMiss(result.miss!);
+    if (mounted) setState(() => _lastBarcode = null);
+  }
+
+  /// Turns an Open Food Facts product into the same value the photo path
+  /// produces, so both feed one confirmation sheet.
+  _Recognized _fromProduct(BarcodeProduct p) => _Recognized(
+        name: p.displayName,
+        // A label is not a guess; there is nothing to be unsure about.
+        confidence: 100,
+        grams: (p.servingG ?? 100).clamp(1, 2000),
+        kcalPer100: p.kcalPer100,
+        proteinPer100: p.proteinPer100,
+        fatPer100: p.fatPer100,
+        carbsPer100: p.carbsPer100,
+      );
+
   Future<void> _init() async {
     try {
-      final sub = ref.read(subscriptionProvider);
-      final userId = SupabaseService.currentUser?.id ?? '';
-      final can =
-          await PhotoRecognitionService.canUsePhoto(userId, sub.isPro);
+      // The server owns the allowance; this read only decides whether to
+      // open the camera at all. A null answer means "unknown" — open it and
+      // let the server refuse, rather than locking someone out offline.
+      await ref.read(subscriptionProvider.notifier).refreshFromServer();
       if (!mounted) return;
-      if (!can) {
+      if (!ref.read(subscriptionProvider).canTakePhoto) {
         setState(() => _outOfPhotos = true);
         return;
       }
@@ -261,11 +372,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     if (_controller == null || !_initialized) return;
     setState(() => _processing = true);
 
-    final sub = ref.read(subscriptionProvider);
-    final userId = SupabaseService.currentUser?.id ?? '';
-    final can = await PhotoRecognitionService.canUsePhoto(userId, sub.isPro);
-    if (!mounted) return;
-    if (!can) {
+    if (!ref.read(subscriptionProvider).canTakePhoto) {
       setState(() {
         _processing = false;
         _outOfPhotos = true;
@@ -280,16 +387,24 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       //   1. SocketException / connection refused → "No connection"
       //   2. recognizeFood returns null (server/AI error) → "Server unavailable"
       //   3. low confidence or null fields → "Could not recognise the dish"
-      // Quota is consumed ONLY on a confident, valid result — losing your
-      // one free photo to a network blip is a terrible first experience.
+      // Quota is consumed ONLY on a confident, valid result — the free
+      // allowance is three scans for the lifetime of the account, so losing
+      // one to a network blip is a terrible first experience.
       Map<String, dynamic>? json;
       _FailureKind? failure;
+      var quotaExhausted = false;
       try {
         json = await PhotoRecognitionService.recognizeFood(File(xfile.path));
       } on SocketException {
         failure = _FailureKind.network;
       } on HttpException {
         failure = _FailureKind.network;
+      } on LowConfidenceException {
+        // Server says the answer is not good enough to show. No scan was spent.
+        failure = _FailureKind.notRecognised;
+      } on QuotaExhaustedException {
+        // Not an outage: the allowance is gone and there is a screen for that.
+        quotaExhausted = true;
       } catch (e) {
         if (kDebugMode) debugPrint('recognizeFood unexpected error: $e');
         failure = _FailureKind.server;
@@ -297,6 +412,16 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
 
       if (!mounted) return;
       setState(() => _processing = false);
+
+      if (quotaExhausted) {
+        // Re-read the authoritative counts, then offer manual entry first and
+        // the subscription second — never a bare error.
+        await ref.read(subscriptionProvider.notifier).refreshFromServer();
+        if (!mounted) return;
+        setState(() => _outOfPhotos = true);
+        await showPhotoLimitSheet(context);
+        return;
+      }
 
       if (failure != null) {
         _showFailureSnack(failure);
@@ -307,21 +432,24 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         _showFailureSnack(_FailureKind.server);
         return;
       }
-      final conf = (json['confidence'] as num?)?.toDouble() ?? 0.0;
-      if (conf <= 0.5) {
-        _showFailureSnack(_FailureKind.notRecognised);
-        return;
-      }
+      // No confidence check here any more: `recognize-food` applies the
+      // threshold and answers 422 when it is not met, which arrives as
+      // LowConfidenceException above. A second copy of the number here is what
+      // let the two sides disagree and charge the user for a failure.
       final r = _recognizedFromJson(json);
       if (r == null) {
         _showFailureSnack(_FailureKind.notRecognised);
         return;
       }
 
-      // Successful, confident result — only NOW consume the quota.
-      await PhotoRecognitionService.incrementUsage(userId);
-      if (mounted) {
-        ref.read(subscriptionProvider.notifier).usePhoto();
+      // The scan was already consumed server-side, atomically, inside
+      // `recognize-food`. Adopt the counts it returned so the camera button
+      // updates without another round trip.
+      final scan = json['_scan'];
+      if (mounted && scan is Map && scan['used'] is num) {
+        ref.read(subscriptionProvider.notifier).applyServerCounts(
+              used: (scan['used'] as num).toInt(),
+            );
       }
 
       if (!mounted) return;
@@ -335,12 +463,410 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       if (!mounted) return;
       await _showResultSheet(r);
       if (mounted) setState(() => _detected = null);
+
+      // The result comes FIRST, always. Only once the user has seen and
+      // dismissed what they scanned does the app mention a subscription —
+      // never a cold paywall in front of the thing they asked for.
+      if (mounted && ref.read(subscriptionProvider).exhausted) {
+        await _showLastScanOffer();
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _processing = false);
       if (kDebugMode) debugPrint('shutter error: $e');
       _showFailureSnack(_FailureKind.server);
     }
+  }
+
+  /// Confirmation for a spoken phrase: one row per dish, so "shawarma and a
+  /// coke" is two editable lines rather than one merged blob.
+  Future<void> _showVoiceItems(List<VoiceItem> items) async {
+    final loc = AppLocalizations.of(context)!;
+    var slot = _defaultSlotForNow();
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: sc.sheet,
+      barrierColor: sc.scrim,
+      isScrollControlled: true,
+      useSafeArea: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.8,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(SalamatDarkDims.rSheetTop),
+        ),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(loc.voiceItemsTitle,
+                  style: SalamatDarkType.style(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: sc.text)),
+              const SizedBox(height: SalamatDarkDims.gap14),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: SalamatDarkDims.gap8),
+                  itemBuilder: (_, i) => _VoiceItemRow(item: items[i]),
+                ),
+              ),
+              const SizedBox(height: SalamatDarkDims.gap14),
+              Row(
+                children: [
+                  for (final t in MealType.values) ...[
+                    if (t != MealType.values.first)
+                      const SizedBox(width: SalamatDarkDims.gap6),
+                    Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => setSheet(() => slot = t),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: slot == t ? sc.primarySoft : sc.surface2,
+                            borderRadius: BorderRadius.circular(
+                                SalamatDarkDims.rPill),
+                          ),
+                          child: Text(
+                            t.label(loc),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: SalamatDarkType.micro.copyWith(
+                              color: slot == t ? sc.primary : sc.text3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: SalamatDarkDims.gap16),
+              SizedBox(
+                width: double.infinity,
+                child: OnboardingPrimaryButton(
+                  label: loc.voiceAddAll(items.length),
+                  enabled: true,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _saveVoiceItems(items, slot);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  MealType _defaultSlotForNow() {
+    final h = DateTime.now().hour;
+    if (h < 11) return MealType.breakfast;
+    if (h < 16) return MealType.lunch;
+    if (h < 22) return MealType.dinner;
+    return MealType.snack;
+  }
+
+  void _saveVoiceItems(List<VoiceItem> items, MealType slot) {
+    final loc = AppLocalizations.of(context)!;
+    final notifier = ref.read(mealsProvider.notifier);
+    for (final it in items) {
+      notifier.add(
+        slot,
+        MealEntry(
+          id: const Uuid().v4(),
+          name: it.name,
+          grams: it.grams.toDouble(),
+          kcal: it.kcal,
+          // Unreconcilable macros stay zero, which every screen renders as a
+          // dash rather than as measured zeros.
+          protein: it.macrosKnown ? it.protein : 0,
+          fat: it.macrosKnown ? it.fat : 0,
+          carbs: it.macrosKnown ? it.carbs : 0,
+          source: 'voice',
+        ),
+      );
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    if (context.canPop()) context.pop();
+    messenger.showSnackBar(
+      SnackBar(
+        backgroundColor: sc.primaryInk,
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          loc.voiceAddAll(items.length),
+          style: SalamatDarkType.style(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: sc.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Starts or stops dictation.
+  ///
+  /// The microphone is requested HERE, on first use, rather than at app start:
+  /// `VoiceEntryService.prepare` is what raises the OS prompt, and it is only
+  /// called from this tap.
+  Future<void> _toggleVoice() async {
+    if (_voiceListening) {
+      await VoiceEntryService.stop();
+      if (mounted) setState(() => _voiceListening = false);
+      return;
+    }
+    _voiceCtrl.clear();
+    final failure = await VoiceEntryService.listen(
+      lang: Localizations.localeOf(context).languageCode,
+      onText: (text, isFinal) {
+        if (!mounted) return;
+        setState(() {
+          _voiceCtrl.text = text;
+          _voiceCtrl.selection =
+              TextSelection.collapsed(offset: _voiceCtrl.text.length);
+          if (isFinal) _voiceListening = false;
+        });
+      },
+    );
+    if (!mounted) return;
+    if (failure != null) {
+      await _showVoiceFailure(failure);
+      return;
+    }
+    setState(() => _voiceListening = true);
+  }
+
+  /// Sends the (possibly corrected) transcript for parsing.
+  Future<void> _sendVoice() async {
+    final text = _voiceCtrl.text.trim();
+    if (text.isEmpty || _voiceParsing) return;
+    // Read the locale before any await; the context may not survive one.
+    final lang = Localizations.localeOf(context).languageCode;
+    if (_voiceListening) {
+      await VoiceEntryService.stop();
+      if (mounted) setState(() => _voiceListening = false);
+    }
+    setState(() => _voiceParsing = true);
+    final (items, failure) = await VoiceEntryService.parse(
+      text: text,
+      lang: lang,
+    );
+    if (!mounted) return;
+    setState(() => _voiceParsing = false);
+    if (failure != null || items == null) {
+      await _showVoiceFailure(failure ?? VoiceFailure.notUnderstood);
+      return;
+    }
+    await _showVoiceItems(items);
+  }
+
+  /// Three distinct outcomes, three different fixes — never one generic error.
+  Future<void> _showVoiceFailure(VoiceFailure failure) async {
+    final loc = AppLocalizations.of(context)!;
+    final (title, body, offerManual) = switch (failure) {
+      VoiceFailure.micDenied =>
+        (loc.voiceMicDeniedTitle, loc.voiceMicDeniedBody, false),
+      VoiceFailure.unavailable =>
+        (loc.voiceUnavailableTitle, loc.voiceUnavailableBody, true),
+      VoiceFailure.notUnderstood =>
+        (loc.voiceNotUnderstoodTitle, loc.voiceNotUnderstoodBody, true),
+      VoiceFailure.offline =>
+        (loc.voiceOfflineTitle, loc.voiceOfflineBody, false),
+    };
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: sc.sheet,
+      barrierColor: sc.scrim,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(SalamatDarkDims.rSheetTop),
+        ),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: SalamatDarkType.style(
+                    fontSize: 20, fontWeight: FontWeight.w800, color: sc.text)),
+            const SizedBox(height: SalamatDarkDims.gap10),
+            Text(body,
+                style: SalamatDarkType.style(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    height: 1.45,
+                    color: sc.text2)),
+            const SizedBox(height: SalamatDarkDims.gap20),
+            SizedBox(
+              width: double.infinity,
+              child: OnboardingPrimaryButton(
+                label: offerManual ? loc.manualAddButton : loc.retryButton,
+                enabled: true,
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  if (offerManual) showManualEntrySheet(context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Honest end states for a barcode that produced no product.
+  ///
+  /// None of these is an error dialog: "not in the database" is an ordinary
+  /// outcome for a shop in Bishkek, and the useful next step is manual entry,
+  /// so that is the primary button. Only a connection failure offers a retry.
+  Future<void> _showBarcodeMiss(BarcodeMiss miss) async {
+    final loc = AppLocalizations.of(context)!;
+    final (title, body, offerRetry) = switch (miss) {
+      BarcodeMiss.notInDatabase =>
+        (loc.barcodeNotFoundTitle, loc.barcodeNotFoundBody, false),
+      BarcodeMiss.noNutrition =>
+        (loc.barcodeNoNutritionTitle, loc.barcodeNoNutritionBody, false),
+      BarcodeMiss.offline =>
+        (loc.barcodeOfflineTitle, loc.barcodeOfflineBody, true),
+      BarcodeMiss.invalidCode =>
+        (loc.barcodeInvalidTitle, loc.barcodeInvalidBody, false),
+    };
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: sc.sheet,
+      barrierColor: sc.scrim,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(SalamatDarkDims.rSheetTop),
+        ),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: SalamatDarkType.style(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: sc.text,
+              ),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap10),
+            Text(
+              body,
+              style: SalamatDarkType.style(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                height: 1.45,
+                color: sc.text2,
+              ),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap20),
+            SizedBox(
+              width: double.infinity,
+              child: OnboardingPrimaryButton(
+                label: offerRetry ? loc.retryButton : loc.manualAddButton,
+                enabled: true,
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  if (!offerRetry) showManualEntrySheet(context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Shown after the result of the third and final free scan.
+  Future<void> _showLastScanOffer() async {
+    final loc = AppLocalizations.of(context)!;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: sc.sheet,
+      barrierColor: sc.scrim,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(SalamatDarkDims.rSheetTop),
+        ),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              loc.scansExhaustedTitle,
+              style: SalamatDarkType.style(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: sc.text,
+              ),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap10),
+            Text(
+              loc.scansExhaustedBody,
+              style: SalamatDarkType.style(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                height: 1.45,
+                color: sc.text2,
+              ),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap20),
+            SizedBox(
+              width: double.infinity,
+              child: OnboardingPrimaryButton(
+                label: loc.limitGoPro,
+                enabled: true,
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  context.push('/paywall');
+                },
+              ),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap10),
+            Center(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(ctx).pop(),
+                child: Padding(
+                  padding: const EdgeInsets.all(SalamatDarkDims.gap6),
+                  child: Text(
+                    loc.scansLater,
+                    style: SalamatDarkType.captionL
+                        .copyWith(color: sc.text3, height: null),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _showResultSheet(_Recognized r) async {
@@ -398,7 +924,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     ref.read(mealsProvider.notifier).add(
           slot,
           MealEntry(
-            source: 'photo',
+            // Which path produced this entry, so the meal card does not claim
+            // a barcode scan was recognised from a photo.
+            source: _mode == _CaptureMode.barcode ? 'barcode' : 'photo',
             id: const Uuid().v4(),
             name: r.name,
             grams: r.grams.toDouble(),
@@ -454,14 +982,24 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           ),
         ),
         title: Text(
-          loc.navCameraAction.toUpperCase(),
-          textAlign: TextAlign.center,
+          switch (_mode) {
+            _CaptureMode.photo => loc.cameraTitlePhoto,
+            _CaptureMode.barcode => loc.cameraTitleBarcode,
+            _CaptureMode.voice => loc.cameraTitleVoice,
+          }
+              .toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: SalamatDarkType.captionXs.copyWith(
             letterSpacing: 0.1 * 12,
             color: Colors.white.withValues(alpha: 0.75),
           ),
         ),
-        centerTitle: true,
+        // Left-aligned rather than centred: with a centred title Flutter hands
+        // it the full toolbar width and the Russian strings ran underneath the
+        // scans chip. Left-aligned, the AppBar constrains it between the close
+        // button and the actions, so it ellipsizes instead of overlapping.
+        centerTitle: false,
         actions: [
           Padding(
             padding: const EdgeInsets.only(
@@ -470,12 +1008,33 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
               bottom: 8,
             ),
             child: _PhotoCounter(
-              text: loc.cameraCounter(sub.photosUsed, sub.photoLimit),
+              text: sub.isPro
+                  ? loc.scansUnlimited
+                  : loc.scansLeftOf(sub.scansLeft, sub.allowance),
             ),
           ),
         ],
       ),
-      body: _outOfPhotos
+      body: Stack(
+        children: [
+          Positioned.fill(
+            // Barcode mode is never gated on the photo allowance: it costs no
+            // model call, so an out-of-scans user can still scan labels.
+            child: _mode == _CaptureMode.voice
+                ? _VoiceView(
+                    controller: _voiceCtrl,
+                    listening: _voiceListening,
+                    parsing: _voiceParsing,
+                    onMic: _toggleVoice,
+                    onSend: _sendVoice,
+                  )
+                : _mode == _CaptureMode.barcode
+                ? _BarcodeView(
+                    controller: _scanner,
+                    busy: _barcodeBusy,
+                    onDetect: _onBarcode,
+                  )
+                : _outOfPhotos
           ? _OutOfPhotosStub(onUpgrade: () => context.push('/paywall'))
           : _unavailable
               ? _UnavailableStub(
@@ -541,6 +1100,314 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                         ),
                       ],
                     ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            // Only photo mode has a shutter bar to clear; barcode and voice
+            // sit lower. This used to test for barcode alone, which put the
+            // toggle straight on top of the voice screen's send button.
+            bottom: _mode == _CaptureMode.photo ? 132 : 44,
+            child: Center(
+              child: _ModeToggle(mode: _mode, onChanged: _setMode),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One parsed dish in the voice confirmation sheet.
+class _VoiceItemRow extends StatelessWidget {
+  const _VoiceItemRow({required this.item});
+
+  final VoiceItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final macros = item.macrosKnown
+        ? loc.mealsMacros(
+            item.protein.round(), item.fat.round(), item.carbs.round())
+        : loc.mealsMacrosUnknown;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: sc.surface2,
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rTile),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: SalamatDarkType.bodyL.copyWith(color: sc.text),
+                ),
+                const SizedBox(height: SalamatDarkDims.gap2),
+                Text(
+                  '${loc.detailServing(item.grams)} · $macros',
+                  style: SalamatDarkType.micro.copyWith(color: sc.text3),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: SalamatDarkDims.gap8),
+          Text(
+            loc.dashboardKcalWithValue(item.kcal),
+            style: SalamatDarkType.bodyL.copyWith(color: sc.primary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Voice mode: dictate, correct the transcript, send.
+class _VoiceView extends StatelessWidget {
+  const _VoiceView({
+    required this.controller,
+    required this.listening,
+    required this.parsing,
+    required this.onMic,
+    required this.onSend,
+  });
+
+  final TextEditingController controller;
+  final bool listening;
+  final bool parsing;
+  final VoidCallback onMic;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final hasText = controller.text.trim().isNotEmpty;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+        child: Column(
+          children: [
+            const Spacer(),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: parsing ? null : onMic,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 96,
+                height: 96,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: listening ? sc.primary : sc.surface2,
+                ),
+                child: PhosphorIcon(
+                  listening
+                      ? PhosphorIcons.stop(PhosphorIconsStyle.fill)
+                      : PhosphorIcons.microphone(PhosphorIconsStyle.fill),
+                  size: 34,
+                  color: listening ? sc.onPrimary : Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap16),
+            Text(
+              parsing
+                  ? loc.voiceParsing
+                  : listening
+                      ? loc.voiceListening
+                      : loc.voiceTapToSpeak,
+              textAlign: TextAlign.center,
+              style: SalamatDarkType.bodyL.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap8),
+            Text(
+              hasText ? loc.voiceCheckText : loc.voiceExample,
+              textAlign: TextAlign.center,
+              style: SalamatDarkType.micro
+                  .copyWith(color: Colors.white.withValues(alpha: 0.55)),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap20),
+            // The transcript is editable on purpose: recognition mishears, and
+            // a wrong word here becomes a wrong dish in the diary.
+            TextField(
+              controller: controller,
+              maxLines: 3,
+              minLines: 1,
+              enabled: !parsing,
+              textInputAction: TextInputAction.done,
+              style: SalamatDarkType.bodyL.copyWith(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: loc.voiceHint,
+                hintStyle: SalamatDarkType.micro
+                    .copyWith(color: Colors.white.withValues(alpha: 0.4)),
+                filled: true,
+                fillColor: Colors.black.withValues(alpha: 0.45),
+                border: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(SalamatDarkDims.rTile),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
+              ),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap12),
+            SizedBox(
+              width: double.infinity,
+              child: OnboardingPrimaryButton(
+                label: loc.voiceSend,
+                enabled: hasText && !parsing,
+                onTap: onSend,
+              ),
+            ),
+            const SizedBox(height: SalamatDarkDims.gap10),
+            Text(
+              loc.voiceFreeNote,
+              style: SalamatDarkType.micro
+                  .copyWith(color: Colors.white.withValues(alpha: 0.45)),
+            ),
+            // Leaves room for the mode toggle floating below.
+            const SizedBox(height: 112),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Photo / barcode / voice switch, floating over the preview.
+class _ModeToggle extends StatelessWidget {
+  const _ModeToggle({required this.mode, required this.onChanged});
+
+  final _CaptureMode mode;
+  final ValueChanged<_CaptureMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _segment(loc.barcodeModePhoto, _CaptureMode.photo),
+          _segment(loc.barcodeModeCode, _CaptureMode.barcode),
+          _segment(loc.voiceModeVoice, _CaptureMode.voice),
+        ],
+      ),
+    );
+  }
+
+  Widget _segment(String label, _CaptureMode value) {
+    final selected = mode == value;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onChanged(value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: selected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
+        ),
+        child: Text(
+          label,
+          style: SalamatDarkType.style(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.black : Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The barcode viewfinder.
+class _BarcodeView extends StatelessWidget {
+  const _BarcodeView({
+    required this.controller,
+    required this.busy,
+    required this.onDetect,
+  });
+
+  final MobileScannerController? controller;
+  final bool busy;
+  final void Function(BarcodeCapture) onDetect;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final c = controller;
+    if (c == null) {
+      return const Center(child: CircularProgressIndicator(color: Colors.white));
+    }
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: MobileScanner(
+            controller: c,
+            onDetect: onDetect,
+            // The package renders its own English message when there is no
+            // camera. Replaced with ours so the Russian build never shows an
+            // untranslated string.
+            errorBuilder: (context, error) => Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  kDebugMode
+                      ? loc.cameraUnavailable
+                      : loc.cameraUnavailableDevice,
+                  textAlign: TextAlign.center,
+                  style: SalamatDarkType.style(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.75),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned.fill(
+          child: IgnorePointer(child: _ViewfinderFrame(scanning: busy)),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 200,
+          child: _LabelOverlay(
+            text: busy ? loc.barcodeSearching : loc.barcodeHint,
+            dim: !busy,
+          ),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 160,
+          child: IgnorePointer(
+            child: Center(
+              child: Text(
+                loc.barcodeFreeNote,
+                style: SalamatDarkType.micro.copyWith(
+                  color: Colors.white.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

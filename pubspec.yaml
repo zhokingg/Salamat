@@ -2,7 +2,7 @@ name: salamat
 description: "Salamat — nutrition tracker for Kazakhstan, Kyrgyzstan and Uzbekistan."
 publish_to: 'none'
 
-version: 1.0.0+12
+version: 1.0.0+13
 
 environment:
   sdk: ^3.7.2
@@ -18,13 +18,10 @@ dependencies:
   supabase_flutter: ^2.5.0
   google_fonts: ^6.2.1
   flutter_riverpod: ^2.5.0
-  camera: ^0.11.0
-  image_picker: ^1.1.0
-  dio: ^5.4.0
-  http: ^1.2.0
+  camera: ^0.11.4
+  mobile_scanner: ^7.4.0
+  speech_to_text: ^7.4.0
   shared_preferences: ^2.2.3
-  lottie: ^3.1.0
-  shimmer: ^3.0.0
   confetti: ^0.7.0
   lucide_icons: ^0.257.0
   phosphor_flutter: ^2.1.0
@@ -38,6 +35,8 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   flutter_lints: ^5.0.0

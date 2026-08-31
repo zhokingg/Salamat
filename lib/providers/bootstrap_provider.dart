@@ -5,6 +5,33 @@ import '../services/purchases_service.dart';
 import '../services/supabase_service.dart';
 import 'user_provider.dart';
 
+/// What [bootstrapProvider] runs at startup.
+typedef BootstrapRunner = Future<void> Function();
+
+/// Production startup: Supabase, then RevenueCat.
+///
+/// RevenueCat is keyed to the Supabase (anonymous) uid so a purchase survives
+/// reinstalls and stays linked to this account's data.
+Future<void> defaultBootstrap() async {
+  await SupabaseService.init();
+  await PurchasesService.init();
+}
+
+/// Injectable startup seam.
+///
+/// The app must be bootable without a network: `Supabase.initialize` installs
+/// a periodic token-refresh timer that outlives the widget tree, which makes
+/// every widget test fail with "A Timer is still pending". Tests override this
+/// provider with a no-op so the tree can be pumped in isolation; nothing about
+/// how the app talks to Supabase changes, only where startup is entered.
+///
+///     ProviderScope(
+///       overrides: [bootstrapRunnerProvider.overrideWithValue(() async {})],
+///       child: const SalamatApp(),
+///     )
+final bootstrapRunnerProvider =
+    Provider<BootstrapRunner>((ref) => defaultBootstrap);
+
 /// Resolves once Supabase is initialized AND an (anonymous) session exists.
 ///
 /// This is the app's startup gate. The splash screen holds until it settles,
@@ -12,10 +39,7 @@ import 'user_provider.dart';
 /// awaits it in its `build` so calls never fire before `auth.uid()` is ready —
 /// closing the old `unawaited(init())` race.
 final bootstrapProvider = FutureProvider<void>((ref) async {
-  await SupabaseService.init();
-  // RevenueCat is keyed to the Supabase (anonymous) uid so a purchase
-  // survives reinstalls and stays linked to this account's data.
-  await PurchasesService.init();
+  await ref.watch(bootstrapRunnerProvider)();
 });
 
 /// A profile row counts as "onboarded" only when both name and calorie norm

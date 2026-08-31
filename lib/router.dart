@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'providers/meals_provider.dart';
 import 'screens/camera/camera_screen.dart';
+import 'screens/coach/coach_screen.dart';
 import 'screens/cook/cook_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/detail/meal_detail_screen.dart';
@@ -148,6 +149,13 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/camera',
       builder: (context, state) => const CameraScreen(),
+    ),
+    // Outside the shell: the coach is no longer a tab, so it is pushed over
+    // the current one like the camera and the paywall. Inside the shell it
+    // would paint a nav strip with no tab selected.
+    GoRoute(
+      path: '/coach',
+      builder: (context, state) => const CoachScreen(),
     ),
     GoRoute(
       path: '/cook',

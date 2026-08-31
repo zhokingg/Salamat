@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
-import '../../theme/salamat_dark.dart';
 
 class FamiliarityScreen extends ConsumerStatefulWidget {
   const FamiliarityScreen({super.key});
@@ -48,46 +46,10 @@ class _FamiliarityScreenState extends ConsumerState<FamiliarityScreen> {
         children: [
           const SizedBox(height: 16),
           OnboardingHeadline(loc.familiarityTitle),
-          const SizedBox(height: 24),
-          // Soft amber social-proof highlight.
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: sc.warn.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(16.0),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: sc.warn,
-                    shape: BoxShape.circle,
-                  ),
-                  child: PhosphorIcon(
-                    PhosphorIcons.lightbulb(PhosphorIconsStyle.duotone),
-                    size: 16,
-                    color: sc.onPrimary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    loc.familiarityHint,
-                    style: SalamatDarkType.style(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: sc.onPrimary,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ).animate().fadeIn(delay: 180.ms, duration: 320.ms),
-          const SizedBox(height: 24),
+          // The amber "75% answered the same way" card lived here. It was a
+          // statistic about users the app does not have yet, so it is gone
+          // rather than reworded. The question itself carries the screen.
+          const SizedBox(height: 28),
           for (final f in Familiarity.values) ...[
             OnboardingSelectCard(
               title: f.label(loc),

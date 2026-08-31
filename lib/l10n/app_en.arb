@@ -41,10 +41,25 @@
     }
   },
   "manualAddButton": "Add manually",
-  "limitTitle": "Your free scan for today is used",
+  "scansLeftOf": "{left} of {total} left",
+  "@scansLeftOf": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "scansUnlimited": "Unlimited",
+  "scansExhaustedTitle": "That was your last free scan",
+  "scansExhaustedBody": "Manual entry stays free and unlimited. Subscribe to keep scanning by photo.",
+  "scansLater": "Not now",
+  "limitTitle": "You've used all 3 free scans",
   "limitGoPro": "Go Pro",
-  "welcomeFreeLine": "Free · 1 photo scan a day · unlimited manual logging",
-  "welcomeHeadline": "Your weight WILL be reached\nin our app",
+  "welcomeFreeLine": "Free · 3 photo scans in total · unlimited manual logging",
+  "welcomeHeadline": "Photograph your food,\nsee what the day adds up to",
   "welcomeSubtitle": "Let's start with a few questions\nfor your personal plan",
   "nameTitle": "What's your name?",
   "nameSubtitle": "So we can greet you",
@@ -133,6 +148,22 @@
       }
     }
   },
+  "targetConflictLose": "Your goal is to lose weight, so the target has to be below your current {current} kg.",
+  "@targetConflictLose": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      }
+    }
+  },
+  "targetConflictGain": "Your goal is to gain weight, so the target has to be above your current {current} kg.",
+  "@targetConflictGain": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      }
+    }
+  },
   "targetDeltaMaintain": "Maintain weight",
   "underweightWarningTitle": "Weight loss may be unsafe",
   "underweightWarningBody": "Your body mass index is below normal. Losing weight at this level can harm your health. We recommend consulting a doctor before starting.",
@@ -155,15 +186,14 @@
     }
   },
   "celebrationMaintain": "Great choice —\nholding a healthy weight",
-  "celebrationStatLose": "Losing just 5% of your weight\nalready improves health",
-  "celebrationStatGain": "Gaining 0.25–0.5 kg a week\nbuilds muscle, not fat",
-  "celebrationStatMaintain": "A stable weight lowers heart\nand metabolic risks",
+  "celebrationStatLose": "A general medical finding: losing about 5%\nof your weight already improves health",
+  "celebrationStatGain": "A general medical finding: gaining 0.25–0.5 kg\na week builds muscle rather than fat",
+  "celebrationStatMaintain": "A general medical finding: a stable weight\nlowers heart and metabolic risks",
   "longTermTitle": "Salamat builds\nlong-term results",
-  "longTermLegendSalamat": "Salamat plan",
-  "longTermLegendOthers": "Typical diets",
-  "longTermStat": "76% of Salamat users keep their weight\noff for 6+ months",
+  "longTermLegendSalamat": "Gradual changes",
+  "longTermLegendOthers": "Strict diets",
+  "longTermApproach": "Salamat is built on gradual changes\nyou can actually keep, not strict diets",
   "familiarityTitle": "How familiar are you\nwith weight loss?",
-  "familiarityHint": "75% answered the same way.\nSalamat will guide you through it.",
   "familiarityNovice": "Beginner",
   "familiarityNoviceSub": "Just starting to figure it out",
   "familiarityIntermediate": "Intermediate",
@@ -204,7 +234,7 @@
   "planTitle": "Your personal\nplan is ready",
   "planNow": "Now",
   "planTarget": "Goal",
-  "planWeeksToTarget": "About {weeks} weeks to goal",
+  "planWeeksToTarget": "Plan length — about {weeks} weeks",
   "@planWeeksToTarget": {
     "placeholders": {
       "weeks": {
@@ -222,13 +252,18 @@
       }
     }
   },
-  "planReachLine": "You’ll reach {kg} kg around {month}",
-  "@planReachLine": {
+  "planPaceLine": "The plan works to about {pace} kg a week",
+  "@planPaceLine": {
     "placeholders": {
-      "kg": {
-        "type": "int"
-      },
-      "month": {
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "planPaceShort": "{pace} kg/week",
+  "@planPaceShort": {
+    "placeholders": {
+      "pace": {
         "type": "String"
       }
     }
@@ -298,8 +333,9 @@
   "snackIdeaHearty": "There’s room for a proper snack — yogurt with fruit or a sandwich fits.",
   "snackIdeaLight": "You have room for 120–240 kcal — a handful of almonds or an apple fits nicely.",
   "snackIdeaTiny": "Day’s almost complete — water or tea closes it gently.",
-  "mealsEstimatedMacros": "~P{p} F{f} C{c}",
-  "@mealsEstimatedMacros": {
+  "mealsMacros": "P{p} F{f} C{c}",
+  "mealsMacrosUnknown": "—",
+  "@mealsMacros": {
     "placeholders": {
       "p": {
         "type": "int"
@@ -376,6 +412,79 @@
   "cameraUnavailable": "Camera not available on the simulator",
   "cameraUnavailableDevice": "Camera is not available on this device",
   "cameraSimulate": "Simulate recognition",
+  "barcodeModePhoto": "Photo",
+  "barcodeModeCode": "Barcode",
+  "barcodeHint": "POINT AT THE BARCODE",
+  "barcodeSearching": "Looking up the product…",
+  "barcodeFreeNote": "Barcode scans are free",
+  "barcodeNotFoundTitle": "Not in the database",
+  "barcodeNotFoundBody": "Open Food Facts doesn't have this product yet. You can add it by hand in a few seconds.",
+  "barcodeNoNutritionTitle": "No nutrition data",
+  "barcodeNoNutritionBody": "This product is listed but carries no calories, so it can't be logged from the label.",
+  "barcodeOfflineTitle": "No connection",
+  "barcodeOfflineBody": "Couldn't reach the product database. Check your connection and try again.",
+  "barcodeInvalidTitle": "Couldn't read the code",
+  "barcodeInvalidBody": "Hold the phone steady so the whole barcode is inside the frame.",
+  "voiceModeVoice": "Voice",
+  "voiceTapToSpeak": "Tap and say what you ate",
+  "voiceListening": "Listening…",
+  "voiceHint": "SAY WHAT YOU ATE",
+  "voiceExample": "“I ate a shawarma and a coke”",
+  "voiceCheckText": "Check the text before sending — speech gets words wrong.",
+  "voiceParsing": "Working out what that was…",
+  "voiceSend": "Find these dishes",
+  "voiceFreeNote": "Voice entry is free",
+  "voiceItemsTitle": "Add these dishes?",
+  "voiceAddAll": "{n, plural, one{Add 1 dish} other{Add {n} dishes}}",
+  "@voiceAddAll": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "voiceMicDeniedTitle": "Microphone is off",
+  "voiceMicDeniedBody": "Allow microphone access in Settings to log meals by voice.",
+  "voiceUnavailableTitle": "Voice input unavailable",
+  "voiceUnavailableBody": "This device has no speech recogniser available.",
+  "voiceNotUnderstoodTitle": "Didn't catch that",
+  "voiceNotUnderstoodBody": "Say the dishes again, or type them in by hand.",
+  "voiceOfflineTitle": "No connection",
+  "voiceOfflineBody": "Couldn't reach the service to work out the dishes. Check your connection and try again.",
+  "cameraTitlePhoto": "Scan a meal",
+  "cameraTitleBarcode": "Scan a barcode",
+  "cameraTitleVoice": "Say what you ate",
+  "coachTitle": "Coach",
+  "coachCardTitle": "Ask the coach",
+  "coachCardBody": "Why the weight stalls, what fits the calories you have left — answered from your own diary.",
+  "coachCardBadge": "PRO",
+  "coachIntro": "Ask about your food — what to cook, whether today adds up, how to hit your protein.",
+  "coachPlaceholder": "Ask about your food…",
+  "coachSendLabel": "Send message",
+  "coachThinking": "Thinking…",
+  "coachRemaining": "{left} of {total} messages left this month",
+  "@coachRemaining": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "coachDisclaimer": "Not medical advice. For anything health-related, see a doctor.",
+  "coachSuggest1": "Is today on track?",
+  "coachSuggest2": "What should I cook tonight?",
+  "coachSuggest3": "How do I hit my protein?",
+  "coachNotSubscribedTitle": "Coach is part of Pro",
+  "coachNotSubscribedBody": "Unlimited scans, weight forecast and the coach come together in one subscription.",
+  "coachLimitTitle": "That's this month's messages",
+  "coachLimitBody": "Your coach messages reset at the start of next month. Logging and everything else keeps working.",
+  "coachOfflineTitle": "No connection",
+  "coachOfflineBody": "Couldn't reach the coach. Check your connection and try again.",
+  "coachUnavailableTitle": "Coach isn't switched on yet",
+  "coachUnavailableBody": "This feature isn't available in your build yet. Everything else keeps working.",
   "cameraHint": "POINT AT THE DISH",
   "cameraLoading": "Recognising dish...",
   "cameraNotRecognized": "Could not recognise the dish",
@@ -402,7 +511,7 @@
   "cameraMacroCarbs": "Carbs",
   "cameraAddButton": "Add to diary",
   "cameraRetake": "Retake",
-  "cameraOutOfPhotos": "Your free scan for today is used",
+  "cameraOutOfPhotos": "You've used all 3 free scans",
   "cameraTryPro": "Try Pro",
   "cameraAddedSnack": "Added ✓",
   "cameraCounter": "{used} of {limit}",
@@ -419,12 +528,12 @@
   "cameraDialogCancel": "Cancel",
   "paywallTitleLine1": "Eat smarter",
   "paywallTitleLine2": "with Salamat Pro",
-  "paywallSubtitle": "1 free scan a day.\nWith Pro — 10 scans a day + forecast + analysis.",
+  "paywallSubtitle": "That's the whole free allowance.\nWith Pro — unlimited scans + forecast + analysis.",
   "paywallLimitBadge": "Photo limit reached",
-  "paywallFeature1Title": "10 photo scans a day",
+  "paywallFeature1Title": "Unlimited photo scans",
   "paywallFeature1Sub": "Snap every meal",
   "paywallFeature2Title": "Weight forecast",
-  "paywallFeature2Sub": "See when you reach your goal",
+  "paywallFeature2Sub": "Your trend and pace, week by week",
   "paywallFeature3Title": "Full history & trends",
   "paywallFeature3Sub": "Your whole food diary",
   "paywallPopular": "Best value",
@@ -434,21 +543,30 @@
   "paywallPurchaseError": "Purchase failed — please try again",
   "paywallRestoreFound": "Pro restored",
   "paywallRestoreNotFound": "No purchases found",
-  "paywallOfferingsError": "Couldn’t load prices from Google Play.\nCheck your connection and retry.",
+  "paywallOfferingsError": "Couldn’t load subscription prices.\nCheck your connection and retry.",
   "paywallHeroHeadlineLose": "Get full access to\nyour weight-loss plan",
   "paywallHeroHeadlineGain": "Get full access to\nyour weight-gain plan",
   "paywallHeroHeadlineMaintain": "Get full access to\nyour balance plan",
-  "paywallUrgencyLine": "Reach {weight} kg by {date}",
-  "@paywallUrgencyLine": {
+  "paywallGoalPaceLine": "Goal {weight} kg. The plan assumes about {pace} kg a week.",
+  "@paywallGoalPaceLine": {
     "placeholders": {
       "weight": {
         "type": "int"
       },
-      "date": {
+      "pace": {
         "type": "String"
       }
     }
   },
+  "paywallGoalHoldLine": "Goal: hold steady at {weight} kg.",
+  "@paywallGoalHoldLine": {
+    "placeholders": {
+      "weight": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallGoalGenericLine": "Built around your goal and your day.",
   "paywallScanEyebrow": "Recognized",
   "paywallScanMeal": "Pilaf",
   "paywallScanKcal": "{kcal} kcal",
@@ -986,6 +1104,8 @@
       }
     }
   },
+  "detailSourceBarcode": "From the barcode",
+  "detailSourceVoice": "Said out loud",
   "detailSourcePhoto": "Recognised from a photo",
   "@detailSourcePhoto": {
     "description": "Chip on the hero when the entry came from the camera. NEEDS RU TRANSLATION."

@@ -10,8 +10,9 @@ import 'supabase_service.dart';
 ///
 /// Configured once at bootstrap, AFTER the Supabase anonymous session
 /// exists: the Supabase user id becomes the RevenueCat app user id, so a
-/// subscription survives reinstalls and stays linked to the same account
-/// the meals/profile live under.
+/// subscription survives reinstalls, stays linked to the same account the
+/// meals/profile live under, and — critically — is the id
+/// `revenuecat-webhook` uses to find the buyer's profile row.
 class PurchasesService {
   PurchasesService._();
 
@@ -21,19 +22,47 @@ class PurchasesService {
 
   static Future<void> init() async {
     if (_configured) return;
-    if (!RevenueCatConfig.isConfigured) {
+
+    // Null on platforms RevenueCat has no SDK for (desktop, web) — those
+    // builds run without purchases rather than crashing on configure.
+    final key = RevenueCatConfig.platformKey;
+    if (key == null) {
       if (kDebugMode) {
-        debugPrint('[PurchasesService] RevenueCat key not set — IAP disabled');
+        debugPrint(
+          '[PurchasesService] no RevenueCat key for ${Platform.operatingSystem}'
+          ' — IAP disabled',
+        );
       }
       return;
     }
-    // Android-only for now; the iOS key can join when that build ships.
-    if (!Platform.isAndroid) return;
+
     try {
-      final config = PurchasesConfiguration(RevenueCatConfig.androidKey)
-        ..appUserID = SupabaseService.currentUser?.id;
+      // The webhook finds the buyer by `app_user_id`, so this MUST be the
+      // Supabase uid on every platform. Bootstrap runs SupabaseService.init()
+      // first precisely so the session exists by the time we get here; if it
+      // somehow does not, RevenueCat mints an anonymous id and the webhook can
+      // never match the purchase to a profile.
+      final uid = SupabaseService.currentUser?.id;
+      if (kDebugMode && uid == null) {
+        debugPrint(
+          '[PurchasesService] WARNING: no Supabase session yet — RevenueCat '
+          'will use an anonymous app user id and the webhook cannot match it',
+        );
+      }
+      if (kDebugMode) {
+        // Full SDK logs, debug builds only. This is how offering and product
+        // failures become readable instead of a bare "offerings error".
+        await Purchases.setLogLevel(LogLevel.debug);
+      }
+      final config = PurchasesConfiguration(key)..appUserID = uid;
       await Purchases.configure(config);
       _configured = true;
+      if (kDebugMode) {
+        debugPrint(
+          '[PurchasesService] configured on ${Platform.operatingSystem} '
+          'as appUserID=$uid',
+        );
+      }
     } catch (e) {
       if (kDebugMode) debugPrint('[PurchasesService] configure failed: $e');
     }

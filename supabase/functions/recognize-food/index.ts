@@ -47,6 +47,16 @@ const corsHeaders = {
 const DEFAULT_MODEL = "claude-sonnet-4-6";
 const MODEL = Deno.env.get("RECOGNIZE_MODEL") || DEFAULT_MODEL;
 const ANTHROPIC_VERSION = "2023-06-01";
+
+/// THE confidence threshold. A result at or below this is not shown to the
+/// user as a dish, and therefore must not cost a scan.
+///
+/// This is the only place it is defined. The client used to carry its own copy
+/// and check `confidence <= 0.5` itself, which is exactly how the two drifted
+/// apart: the server charged for anything parseable while the client told the
+/// user it had failed. The client now trusts the 200 / 422 answer and does not
+/// know the number at all.
+const MIN_CONFIDENCE = 0.5;
 const SYSTEM_PROMPT = [
   "Ты эксперт по центральноазиатской кухне.",
   "Пользователь сфотографировал еду.",
@@ -138,6 +148,47 @@ interface UsageRow {
 /// Best-effort by design: a missing table (migration 0005 not applied yet), a
 /// missing service key, or any REST failure degrades to a console line. The
 /// caller never awaits a failure path that could surface to the user.
+/// Calls a Postgres function AS THE CALLER, forwarding their JWT so
+/// `auth.uid()` inside the function is the signed-in user. The service role is
+/// deliberately not used here: the allowance is per-user, and a service-role
+/// call would have no user to attribute it to.
+///
+/// Returns null when the call could not be made or the function is absent
+/// (migration 0006 not applied yet). Callers treat null as "no opinion" and
+/// fail open, exactly like `recordUsage` does for its table.
+async function rpc(
+  authHeader: string | null,
+  fn: string,
+  body: Record<string, unknown>,
+): Promise<any | null> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const anon = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!url || !anon || !authHeader) return null;
+  try {
+    const res = await fetch(`${url}/rest/v1/rpc/${fn}`, {
+      method: "POST",
+      headers: {
+        apikey: anon,
+        Authorization: authHeader,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      // 404 = function absent (migration pending). Log the rest.
+      if (res.status !== 404) {
+        console.warn(`rpc ${fn} ${res.status}`, await res.text());
+      }
+      return null;
+    }
+    const out = await res.json();
+    return Array.isArray(out) ? (out[0] ?? null) : out;
+  } catch (e) {
+    console.error(`rpc ${fn} failed`, e);
+    return null;
+  }
+}
+
 async function recordUsage(row: UsageRow): Promise<void> {
   // Always log — this is the fallback that works with no migration at all.
   console.log("recognition_usage", JSON.stringify(row));
@@ -252,6 +303,24 @@ serve(async (req: Request) => {
       duration_ms: Date.now() - startedAt,
     });
 
+  // ── allowance gate ──────────────────────────────────────────────────
+  // Free accounts get three scans for the lifetime of the account. The check
+  // is here, on the server, because the client counter is only a render cache
+  // and a reinstall wipes it.
+  //
+  // Fails OPEN when the RPC is unavailable (migration 0006 not applied): a
+  // missing table must not make the camera unusable.
+  const authHeader = req.headers.get("Authorization");
+  const status = await rpc(authHeader, "scan_status", {});
+  if (status && status.is_pro === false && (status.remaining ?? 0) <= 0) {
+    await telemetry(false, "quota_exhausted");
+    return jsonResponse(402, {
+      error: "scan_quota_exhausted",
+      used: status.used ?? null,
+      allowance: status.allowance ?? null,
+    });
+  }
+
   let upstream: Response;
   try {
     upstream = await fetch("https://api.anthropic.com/v1/messages", {
@@ -329,12 +398,58 @@ serve(async (req: Request) => {
 
   try {
     const parsed = JSON.parse(cleaned);
+
+    // Confidence gate comes BEFORE the charge. Parseable JSON is not the same
+    // as a usable answer: the model happily returns a well-formed guess with
+    // confidence 0.3, which the app shows as "couldn't recognise the dish".
+    // Charging for that means the user pays a scan for an error message.
+    const rawConfidence = parsed?.confidence;
+    const confidence = typeof rawConfidence === "number" &&
+        Number.isFinite(rawConfidence)
+      ? rawConfidence
+      : 0;
+    if (!(confidence > MIN_CONFIDENCE)) {
+      await telemetry(false, "low_confidence", usage);
+      return jsonResponse(422, {
+        error: "low_confidence",
+        confidence,
+        min_confidence: MIN_CONFIDENCE,
+        // Reported so the caller can show the count unchanged rather than
+        // guessing whether anything was spent. Nothing was.
+        _usage: {
+          input_tokens: usage.input_tokens ?? null,
+          output_tokens: usage.output_tokens ?? null,
+        },
+      });
+    }
+
+    // Quota is spent ONLY here: past the confidence gate, i.e. only for a
+    // result the user is actually given. Atomic in Postgres, so two concurrent
+    // scans cannot both take the last one.
+    const consumed = await rpc(authHeader, "consume_scan", {
+      p_request_id: requestId,
+    });
+    if (consumed && consumed.allowed === false) {
+      await telemetry(false, "quota_exhausted", usage);
+      return jsonResponse(402, {
+        error: "scan_quota_exhausted",
+        used: consumed.used ?? null,
+        remaining: 0,
+      });
+    }
+
     await telemetry(true, "ok", usage);
     // `_usage` and `_meta` are additive: the mobile client reads named
     // nutrition fields and ignores the rest. The resolution experiment in
     // scripts/ reads them to attribute cost per run.
     return jsonResponse(200, {
       ...parsed,
+      // What the client renders on the camera button. Null when the
+      // allowance RPC was unavailable, in which case the client keeps
+      // whatever it last knew.
+      _scan: consumed
+        ? { used: consumed.used ?? null, remaining: consumed.remaining ?? null }
+        : null,
       _usage: {
         input_tokens: usage.input_tokens ?? null,
         output_tokens: usage.output_tokens ?? null,

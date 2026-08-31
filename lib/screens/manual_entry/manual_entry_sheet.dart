@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,21 +95,27 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
     final loc = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     final portion = double.tryParse(_portionCtrl.text.trim());
-    ref.read(mealsProvider.notifier).add(
-          _mealType,
-          MealEntry(
-            id: const Uuid().v4(),
-            name: _nameCtrl.text.trim(),
-            grams: (portion == null || portion <= 0)
-                ? _defaultPortionG
-                : portion,
-            kcal: _kcal!,
-            protein: _macro(_proteinCtrl),
-            fat: _macro(_fatCtrl),
-            carbs: _macro(_carbsCtrl),
-            source: 'manual',
+    final entry = MealEntry(
+      id: const Uuid().v4(),
+      name: _nameCtrl.text.trim(),
+      grams: (portion == null || portion <= 0) ? _defaultPortionG : portion,
+      kcal: _kcal!,
+      protein: _macro(_proteinCtrl),
+      fat: _macro(_fatCtrl),
+      carbs: _macro(_carbsCtrl),
+      source: 'manual',
+    );
+    // Fire-and-forget: the entry is saved and the sheet closes immediately.
+    // When the macro fields were left empty the breakdown is looked up in the
+    // background and written to the same row once it arrives; until then the
+    // entry simply shows a dash instead of macros.
+    unawaited(
+      ref.read(mealsProvider.notifier).addWithMacroBackfill(
+            _mealType,
+            entry,
+            Localizations.localeOf(context).languageCode,
           ),
-        );
+    );
     Navigator.of(context).pop();
     messenger.showSnackBar(
       SnackBar(

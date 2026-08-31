@@ -1,0 +1,10 @@
+/* Salamat — iOS permission prompts, English.
+   These override the NSxUsageDescription values in Info.plist when the device
+   is running in English. The Info.plist copies stay as the last-resort
+   fallback for any locale that has no .lproj here. */
+
+"NSCameraUsageDescription" = "Salamat needs camera access to photograph your meals and recognise dishes for your food diary.";
+
+"NSMicrophoneUsageDescription" = "Salamat needs the microphone so you can say what you ate instead of typing it.";
+
+"NSSpeechRecognitionUsageDescription" = "Salamat turns what you say into text on this device to add the dishes to your food diary.";

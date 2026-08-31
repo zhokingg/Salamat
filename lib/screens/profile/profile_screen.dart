@@ -174,6 +174,15 @@ class ProfileScreen extends ConsumerWidget {
                 onTap: () => showUpdateWeightDialog(context, ref),
               ),
               _SettingsItem(
+                icon: PhosphorIcons.chatCircleDots(),
+                label: loc.coachTitle,
+                // Same rule as the Home card: free accounts get the paywall,
+                // not the chat and not an error.
+                onTap: () => context.push(
+                  sub.loaded && sub.isPro ? '/coach' : '/paywall',
+                ),
+              ),
+              _SettingsItem(
                 icon: PhosphorIcons.crown(),
                 label: loc.profileSettingPro,
                 onTap: () => context.push('/paywall'),

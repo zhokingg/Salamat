@@ -141,6 +141,12 @@ class SupabaseService {
   // -------- meals (food logs) --------
 
   static Future<void> logFood({
+    /// Client-generated row id. Passed through so the local entry and the DB
+    /// row share one identity: without it Postgres minted its own uuid and
+    /// every later `updateFoodLog(id: entry.id)` matched zero rows, so edits
+    /// to an entry created this session (portion changes, the macro backfill)
+    /// updated local state and silently never reached the database.
+    required String id,
     required String foodName,
     required int calories,
     required double proteinG,
@@ -153,6 +159,7 @@ class SupabaseService {
     if (uid == null) return;
     try {
       await client.from('meals').insert({
+        'id': id,
         'user_id': uid,
         'name': foodName,
         'meal_type': mealType,

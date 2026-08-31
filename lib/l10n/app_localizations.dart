@@ -62,7 +62,8 @@ import 'app_localizations_ru.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,17 +84,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('ru')
+    Locale('ru'),
   ];
 
   /// App name shown on splash and in stores.
@@ -221,10 +224,40 @@ abstract class AppLocalizations {
   /// **'Add manually'**
   String get manualAddButton;
 
+  /// No description provided for @scansLeftOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} of {total} left'**
+  String scansLeftOf(int left, int total);
+
+  /// No description provided for @scansUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get scansUnlimited;
+
+  /// No description provided for @scansExhaustedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That was your last free scan'**
+  String get scansExhaustedTitle;
+
+  /// No description provided for @scansExhaustedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual entry stays free and unlimited. Subscribe to keep scanning by photo.'**
+  String get scansExhaustedBody;
+
+  /// No description provided for @scansLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get scansLater;
+
   /// No description provided for @limitTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your free scan for today is used'**
+  /// **'You\'ve used all 3 free scans'**
   String get limitTitle;
 
   /// No description provided for @limitGoPro.
@@ -236,13 +269,13 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeFreeLine.
   ///
   /// In en, this message translates to:
-  /// **'Free · 1 photo scan a day · unlimited manual logging'**
+  /// **'Free · 3 photo scans in total · unlimited manual logging'**
   String get welcomeFreeLine;
 
   /// No description provided for @welcomeHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Your weight WILL be reached\nin our app'**
+  /// **'Photograph your food,\nsee what the day adds up to'**
   String get welcomeHeadline;
 
   /// No description provided for @welcomeSubtitle.
@@ -521,6 +554,18 @@ abstract class AppLocalizations {
   /// **'Gain {kg} kg'**
   String targetDeltaGain(int kg);
 
+  /// No description provided for @targetConflictLose.
+  ///
+  /// In en, this message translates to:
+  /// **'Your goal is to lose weight, so the target has to be below your current {current} kg.'**
+  String targetConflictLose(int current);
+
+  /// No description provided for @targetConflictGain.
+  ///
+  /// In en, this message translates to:
+  /// **'Your goal is to gain weight, so the target has to be above your current {current} kg.'**
+  String targetConflictGain(int current);
+
   /// No description provided for @targetDeltaMaintain.
   ///
   /// In en, this message translates to:
@@ -572,19 +617,19 @@ abstract class AppLocalizations {
   /// No description provided for @celebrationStatLose.
   ///
   /// In en, this message translates to:
-  /// **'Losing just 5% of your weight\nalready improves health'**
+  /// **'A general medical finding: losing about 5%\nof your weight already improves health'**
   String get celebrationStatLose;
 
   /// No description provided for @celebrationStatGain.
   ///
   /// In en, this message translates to:
-  /// **'Gaining 0.25–0.5 kg a week\nbuilds muscle, not fat'**
+  /// **'A general medical finding: gaining 0.25–0.5 kg\na week builds muscle rather than fat'**
   String get celebrationStatGain;
 
   /// No description provided for @celebrationStatMaintain.
   ///
   /// In en, this message translates to:
-  /// **'A stable weight lowers heart\nand metabolic risks'**
+  /// **'A general medical finding: a stable weight\nlowers heart and metabolic risks'**
   String get celebrationStatMaintain;
 
   /// No description provided for @longTermTitle.
@@ -596,32 +641,26 @@ abstract class AppLocalizations {
   /// No description provided for @longTermLegendSalamat.
   ///
   /// In en, this message translates to:
-  /// **'Salamat plan'**
+  /// **'Gradual changes'**
   String get longTermLegendSalamat;
 
   /// No description provided for @longTermLegendOthers.
   ///
   /// In en, this message translates to:
-  /// **'Typical diets'**
+  /// **'Strict diets'**
   String get longTermLegendOthers;
 
-  /// No description provided for @longTermStat.
+  /// No description provided for @longTermApproach.
   ///
   /// In en, this message translates to:
-  /// **'76% of Salamat users keep their weight\noff for 6+ months'**
-  String get longTermStat;
+  /// **'Salamat is built on gradual changes\nyou can actually keep, not strict diets'**
+  String get longTermApproach;
 
   /// No description provided for @familiarityTitle.
   ///
   /// In en, this message translates to:
   /// **'How familiar are you\nwith weight loss?'**
   String get familiarityTitle;
-
-  /// No description provided for @familiarityHint.
-  ///
-  /// In en, this message translates to:
-  /// **'75% answered the same way.\nSalamat will guide you through it.'**
-  String get familiarityHint;
 
   /// No description provided for @familiarityNovice.
   ///
@@ -866,7 +905,7 @@ abstract class AppLocalizations {
   /// No description provided for @planWeeksToTarget.
   ///
   /// In en, this message translates to:
-  /// **'About {weeks} weeks to goal'**
+  /// **'Plan length — about {weeks} weeks'**
   String planWeeksToTarget(int weeks);
 
   /// No description provided for @planMaintain.
@@ -887,11 +926,17 @@ abstract class AppLocalizations {
   /// **'{kcal} kcal / day'**
   String planCaloriesValue(int kcal);
 
-  /// No description provided for @planReachLine.
+  /// No description provided for @planPaceLine.
   ///
   /// In en, this message translates to:
-  /// **'You’ll reach {kg} kg around {month}'**
-  String planReachLine(int kg, String month);
+  /// **'The plan works to about {pace} kg a week'**
+  String planPaceLine(String pace);
+
+  /// No description provided for @planPaceShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{pace} kg/week'**
+  String planPaceShort(String pace);
 
   /// No description provided for @planStartTracking.
   ///
@@ -1031,11 +1076,17 @@ abstract class AppLocalizations {
   /// **'Day’s almost complete — water or tea closes it gently.'**
   String get snackIdeaTiny;
 
-  /// No description provided for @mealsEstimatedMacros.
+  /// No description provided for @mealsMacros.
   ///
   /// In en, this message translates to:
-  /// **'~P{p} F{f} C{c}'**
-  String mealsEstimatedMacros(int p, int f, int c);
+  /// **'P{p} F{f} C{c}'**
+  String mealsMacros(int p, int f, int c);
+
+  /// No description provided for @mealsMacrosUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get mealsMacrosUnknown;
 
   /// No description provided for @dashboardOffline.
   ///
@@ -1235,6 +1286,342 @@ abstract class AppLocalizations {
   /// **'Simulate recognition'**
   String get cameraSimulate;
 
+  /// No description provided for @barcodeModePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get barcodeModePhoto;
+
+  /// No description provided for @barcodeModeCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get barcodeModeCode;
+
+  /// No description provided for @barcodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'POINT AT THE BARCODE'**
+  String get barcodeHint;
+
+  /// No description provided for @barcodeSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking up the product…'**
+  String get barcodeSearching;
+
+  /// No description provided for @barcodeFreeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode scans are free'**
+  String get barcodeFreeNote;
+
+  /// No description provided for @barcodeNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in the database'**
+  String get barcodeNotFoundTitle;
+
+  /// No description provided for @barcodeNotFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts doesn\'t have this product yet. You can add it by hand in a few seconds.'**
+  String get barcodeNotFoundBody;
+
+  /// No description provided for @barcodeNoNutritionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No nutrition data'**
+  String get barcodeNoNutritionTitle;
+
+  /// No description provided for @barcodeNoNutritionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This product is listed but carries no calories, so it can\'t be logged from the label.'**
+  String get barcodeNoNutritionBody;
+
+  /// No description provided for @barcodeOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get barcodeOfflineTitle;
+
+  /// No description provided for @barcodeOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the product database. Check your connection and try again.'**
+  String get barcodeOfflineBody;
+
+  /// No description provided for @barcodeInvalidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the code'**
+  String get barcodeInvalidTitle;
+
+  /// No description provided for @barcodeInvalidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the phone steady so the whole barcode is inside the frame.'**
+  String get barcodeInvalidBody;
+
+  /// No description provided for @voiceModeVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get voiceModeVoice;
+
+  /// No description provided for @voiceTapToSpeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap and say what you ate'**
+  String get voiceTapToSpeak;
+
+  /// No description provided for @voiceListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get voiceListening;
+
+  /// No description provided for @voiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'SAY WHAT YOU ATE'**
+  String get voiceHint;
+
+  /// No description provided for @voiceExample.
+  ///
+  /// In en, this message translates to:
+  /// **'“I ate a shawarma and a coke”'**
+  String get voiceExample;
+
+  /// No description provided for @voiceCheckText.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the text before sending — speech gets words wrong.'**
+  String get voiceCheckText;
+
+  /// No description provided for @voiceParsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Working out what that was…'**
+  String get voiceParsing;
+
+  /// No description provided for @voiceSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Find these dishes'**
+  String get voiceSend;
+
+  /// No description provided for @voiceFreeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice entry is free'**
+  String get voiceFreeNote;
+
+  /// No description provided for @voiceItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add these dishes?'**
+  String get voiceItemsTitle;
+
+  /// No description provided for @voiceAddAll.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, one{Add 1 dish} other{Add {n} dishes}}'**
+  String voiceAddAll(int n);
+
+  /// No description provided for @voiceMicDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone is off'**
+  String get voiceMicDeniedTitle;
+
+  /// No description provided for @voiceMicDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow microphone access in Settings to log meals by voice.'**
+  String get voiceMicDeniedBody;
+
+  /// No description provided for @voiceUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input unavailable'**
+  String get voiceUnavailableTitle;
+
+  /// No description provided for @voiceUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no speech recogniser available.'**
+  String get voiceUnavailableBody;
+
+  /// No description provided for @voiceNotUnderstoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t catch that'**
+  String get voiceNotUnderstoodTitle;
+
+  /// No description provided for @voiceNotUnderstoodBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Say the dishes again, or type them in by hand.'**
+  String get voiceNotUnderstoodBody;
+
+  /// No description provided for @voiceOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get voiceOfflineTitle;
+
+  /// No description provided for @voiceOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the service to work out the dishes. Check your connection and try again.'**
+  String get voiceOfflineBody;
+
+  /// No description provided for @cameraTitlePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a meal'**
+  String get cameraTitlePhoto;
+
+  /// No description provided for @cameraTitleBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a barcode'**
+  String get cameraTitleBarcode;
+
+  /// No description provided for @cameraTitleVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what you ate'**
+  String get cameraTitleVoice;
+
+  /// No description provided for @coachTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach'**
+  String get coachTitle;
+
+  /// No description provided for @coachCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the coach'**
+  String get coachCardTitle;
+
+  /// No description provided for @coachCardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Why the weight stalls, what fits the calories you have left — answered from your own diary.'**
+  String get coachCardBody;
+
+  /// No description provided for @coachCardBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'PRO'**
+  String get coachCardBadge;
+
+  /// No description provided for @coachIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about your food — what to cook, whether today adds up, how to hit your protein.'**
+  String get coachIntro;
+
+  /// No description provided for @coachPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about your food…'**
+  String get coachPlaceholder;
+
+  /// No description provided for @coachSendLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get coachSendLabel;
+
+  /// No description provided for @coachThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking…'**
+  String get coachThinking;
+
+  /// No description provided for @coachRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} of {total} messages left this month'**
+  String coachRemaining(int left, int total);
+
+  /// No description provided for @coachDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Not medical advice. For anything health-related, see a doctor.'**
+  String get coachDisclaimer;
+
+  /// No description provided for @coachSuggest1.
+  ///
+  /// In en, this message translates to:
+  /// **'Is today on track?'**
+  String get coachSuggest1;
+
+  /// No description provided for @coachSuggest2.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I cook tonight?'**
+  String get coachSuggest2;
+
+  /// No description provided for @coachSuggest3.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I hit my protein?'**
+  String get coachSuggest3;
+
+  /// No description provided for @coachNotSubscribedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach is part of Pro'**
+  String get coachNotSubscribedTitle;
+
+  /// No description provided for @coachNotSubscribedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited scans, weight forecast and the coach come together in one subscription.'**
+  String get coachNotSubscribedBody;
+
+  /// No description provided for @coachLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s this month\'s messages'**
+  String get coachLimitTitle;
+
+  /// No description provided for @coachLimitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your coach messages reset at the start of next month. Logging and everything else keeps working.'**
+  String get coachLimitBody;
+
+  /// No description provided for @coachOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get coachOfflineTitle;
+
+  /// No description provided for @coachOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the coach. Check your connection and try again.'**
+  String get coachOfflineBody;
+
+  /// No description provided for @coachUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach isn\'t switched on yet'**
+  String get coachUnavailableTitle;
+
+  /// No description provided for @coachUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature isn\'t available in your build yet. Everything else keeps working.'**
+  String get coachUnavailableBody;
+
   /// No description provided for @cameraHint.
   ///
   /// In en, this message translates to:
@@ -1310,7 +1697,7 @@ abstract class AppLocalizations {
   /// No description provided for @cameraOutOfPhotos.
   ///
   /// In en, this message translates to:
-  /// **'Your free scan for today is used'**
+  /// **'You\'ve used all 3 free scans'**
   String get cameraOutOfPhotos;
 
   /// No description provided for @cameraTryPro.
@@ -1352,7 +1739,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'1 free scan a day.\nWith Pro — 10 scans a day + forecast + analysis.'**
+  /// **'That\'s the whole free allowance.\nWith Pro — unlimited scans + forecast + analysis.'**
   String get paywallSubtitle;
 
   /// No description provided for @paywallLimitBadge.
@@ -1364,7 +1751,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallFeature1Title.
   ///
   /// In en, this message translates to:
-  /// **'10 photo scans a day'**
+  /// **'Unlimited photo scans'**
   String get paywallFeature1Title;
 
   /// No description provided for @paywallFeature1Sub.
@@ -1382,7 +1769,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallFeature2Sub.
   ///
   /// In en, this message translates to:
-  /// **'See when you reach your goal'**
+  /// **'Your trend and pace, week by week'**
   String get paywallFeature2Sub;
 
   /// No description provided for @paywallFeature3Title.
@@ -1442,7 +1829,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallOfferingsError.
   ///
   /// In en, this message translates to:
-  /// **'Couldn’t load prices from Google Play.\nCheck your connection and retry.'**
+  /// **'Couldn’t load subscription prices.\nCheck your connection and retry.'**
   String get paywallOfferingsError;
 
   /// No description provided for @paywallHeroHeadlineLose.
@@ -1463,11 +1850,23 @@ abstract class AppLocalizations {
   /// **'Get full access to\nyour balance plan'**
   String get paywallHeroHeadlineMaintain;
 
-  /// No description provided for @paywallUrgencyLine.
+  /// No description provided for @paywallGoalPaceLine.
   ///
   /// In en, this message translates to:
-  /// **'Reach {weight} kg by {date}'**
-  String paywallUrgencyLine(int weight, String date);
+  /// **'Goal {weight} kg. The plan assumes about {pace} kg a week.'**
+  String paywallGoalPaceLine(int weight, String pace);
+
+  /// No description provided for @paywallGoalHoldLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal: hold steady at {weight} kg.'**
+  String paywallGoalHoldLine(int weight);
+
+  /// No description provided for @paywallGoalGenericLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Built around your goal and your day.'**
+  String get paywallGoalGenericLine;
 
   /// No description provided for @paywallScanEyebrow.
   ///
@@ -2321,6 +2720,18 @@ abstract class AppLocalizations {
   /// **'{grams} g serving'**
   String detailServing(int grams);
 
+  /// No description provided for @detailSourceBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'From the barcode'**
+  String get detailSourceBarcode;
+
+  /// No description provided for @detailSourceVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Said out loud'**
+  String get detailSourceVoice;
+
   /// Chip on the hero when the entry came from the camera. NEEDS RU TRANSLATION.
   ///
   /// In en, this message translates to:
@@ -2412,7 +2823,8 @@ abstract class AppLocalizations {
   String get waterNotSynced;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -2421,25 +2833,26 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'ru'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'ru'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'ru': return AppLocalizationsRu();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'ru':
+      return AppLocalizationsRu();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

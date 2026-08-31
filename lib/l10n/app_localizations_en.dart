@@ -76,19 +76,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualAddButton => 'Add manually';
 
   @override
-  String get limitTitle => 'Your free scan for today is used';
+  String scansLeftOf(int left, int total) {
+    return '$left of $total left';
+  }
+
+  @override
+  String get scansUnlimited => 'Unlimited';
+
+  @override
+  String get scansExhaustedTitle => 'That was your last free scan';
+
+  @override
+  String get scansExhaustedBody =>
+      'Manual entry stays free and unlimited. Subscribe to keep scanning by photo.';
+
+  @override
+  String get scansLater => 'Not now';
+
+  @override
+  String get limitTitle => 'You\'ve used all 3 free scans';
 
   @override
   String get limitGoPro => 'Go Pro';
 
   @override
-  String get welcomeFreeLine => 'Free · 1 photo scan a day · unlimited manual logging';
+  String get welcomeFreeLine =>
+      'Free · 3 photo scans in total · unlimited manual logging';
 
   @override
-  String get welcomeHeadline => 'Your weight WILL be reached\nin our app';
+  String get welcomeHeadline =>
+      'Photograph your food,\nsee what the day adds up to';
 
   @override
-  String get welcomeSubtitle => 'Let\'s start with a few questions\nfor your personal plan';
+  String get welcomeSubtitle =>
+      'Let\'s start with a few questions\nfor your personal plan';
 
   @override
   String get nameTitle => 'What\'s your name?';
@@ -238,13 +259,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String targetConflictLose(int current) {
+    return 'Your goal is to lose weight, so the target has to be below your current $current kg.';
+  }
+
+  @override
+  String targetConflictGain(int current) {
+    return 'Your goal is to gain weight, so the target has to be above your current $current kg.';
+  }
+
+  @override
   String get targetDeltaMaintain => 'Maintain weight';
 
   @override
   String get underweightWarningTitle => 'Weight loss may be unsafe';
 
   @override
-  String get underweightWarningBody => 'Your body mass index is below normal. Losing weight at this level can harm your health. We recommend consulting a doctor before starting.';
+  String get underweightWarningBody =>
+      'Your body mass index is below normal. Losing weight at this level can harm your health. We recommend consulting a doctor before starting.';
 
   @override
   String get underweightWarningChangeGoal => 'Choose another goal';
@@ -266,31 +298,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get celebrationMaintain => 'Great choice —\nholding a healthy weight';
 
   @override
-  String get celebrationStatLose => 'Losing just 5% of your weight\nalready improves health';
+  String get celebrationStatLose =>
+      'A general medical finding: losing about 5%\nof your weight already improves health';
 
   @override
-  String get celebrationStatGain => 'Gaining 0.25–0.5 kg a week\nbuilds muscle, not fat';
+  String get celebrationStatGain =>
+      'A general medical finding: gaining 0.25–0.5 kg\na week builds muscle rather than fat';
 
   @override
-  String get celebrationStatMaintain => 'A stable weight lowers heart\nand metabolic risks';
+  String get celebrationStatMaintain =>
+      'A general medical finding: a stable weight\nlowers heart and metabolic risks';
 
   @override
   String get longTermTitle => 'Salamat builds\nlong-term results';
 
   @override
-  String get longTermLegendSalamat => 'Salamat plan';
+  String get longTermLegendSalamat => 'Gradual changes';
 
   @override
-  String get longTermLegendOthers => 'Typical diets';
+  String get longTermLegendOthers => 'Strict diets';
 
   @override
-  String get longTermStat => '76% of Salamat users keep their weight\noff for 6+ months';
+  String get longTermApproach =>
+      'Salamat is built on gradual changes\nyou can actually keep, not strict diets';
 
   @override
   String get familiarityTitle => 'How familiar are you\nwith weight loss?';
-
-  @override
-  String get familiarityHint => '75% answered the same way.\nSalamat will guide you through it.';
 
   @override
   String get familiarityNovice => 'Beginner';
@@ -386,7 +419,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get comparisonFeatureNumbers => 'See your habits in clear numbers';
 
   @override
-  String get comparisonFeatureOneScreen => 'Everything on one screen — no manual database search';
+  String get comparisonFeatureOneScreen =>
+      'Everything on one screen — no manual database search';
 
   @override
   String get socialTitle => 'Salamat is built\nfor people\nlike you!';
@@ -414,7 +448,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String planWeeksToTarget(int weeks) {
-    return 'About $weeks weeks to goal';
+    return 'Plan length — about $weeks weeks';
   }
 
   @override
@@ -429,8 +463,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String planReachLine(int kg, String month) {
-    return 'You’ll reach $kg kg around $month';
+  String planPaceLine(String pace) {
+    return 'The plan works to about $pace kg a week';
+  }
+
+  @override
+  String planPaceShort(String pace) {
+    return '$pace kg/week';
   }
 
   @override
@@ -506,18 +545,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardWeightFirstLog => 'Log your first weigh-in';
 
   @override
-  String get snackIdeaHearty => 'There’s room for a proper snack — yogurt with fruit or a sandwich fits.';
+  String get snackIdeaHearty =>
+      'There’s room for a proper snack — yogurt with fruit or a sandwich fits.';
 
   @override
-  String get snackIdeaLight => 'You have room for 120–240 kcal — a handful of almonds or an apple fits nicely.';
+  String get snackIdeaLight =>
+      'You have room for 120–240 kcal — a handful of almonds or an apple fits nicely.';
 
   @override
-  String get snackIdeaTiny => 'Day’s almost complete — water or tea closes it gently.';
+  String get snackIdeaTiny =>
+      'Day’s almost complete — water or tea closes it gently.';
 
   @override
-  String mealsEstimatedMacros(int p, int f, int c) {
-    return '~P$p F$f C$c';
+  String mealsMacros(int p, int f, int c) {
+    return 'P$p F$f C$c';
   }
+
+  @override
+  String get mealsMacrosUnknown => '—';
 
   @override
   String get dashboardOffline => 'Offline — showing local data';
@@ -618,7 +663,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraPermissionTitle => 'Camera access needed';
 
   @override
-  String get cameraPermissionBody => 'Allow camera access in Settings to recognise dishes from photos.';
+  String get cameraPermissionBody =>
+      'Allow camera access in Settings to recognise dishes from photos.';
 
   @override
   String get cameraOpenSettings => 'Open Settings';
@@ -627,10 +673,205 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraUnavailable => 'Camera not available on the simulator';
 
   @override
-  String get cameraUnavailableDevice => 'Camera is not available on this device';
+  String get cameraUnavailableDevice =>
+      'Camera is not available on this device';
 
   @override
   String get cameraSimulate => 'Simulate recognition';
+
+  @override
+  String get barcodeModePhoto => 'Photo';
+
+  @override
+  String get barcodeModeCode => 'Barcode';
+
+  @override
+  String get barcodeHint => 'POINT AT THE BARCODE';
+
+  @override
+  String get barcodeSearching => 'Looking up the product…';
+
+  @override
+  String get barcodeFreeNote => 'Barcode scans are free';
+
+  @override
+  String get barcodeNotFoundTitle => 'Not in the database';
+
+  @override
+  String get barcodeNotFoundBody =>
+      'Open Food Facts doesn\'t have this product yet. You can add it by hand in a few seconds.';
+
+  @override
+  String get barcodeNoNutritionTitle => 'No nutrition data';
+
+  @override
+  String get barcodeNoNutritionBody =>
+      'This product is listed but carries no calories, so it can\'t be logged from the label.';
+
+  @override
+  String get barcodeOfflineTitle => 'No connection';
+
+  @override
+  String get barcodeOfflineBody =>
+      'Couldn\'t reach the product database. Check your connection and try again.';
+
+  @override
+  String get barcodeInvalidTitle => 'Couldn\'t read the code';
+
+  @override
+  String get barcodeInvalidBody =>
+      'Hold the phone steady so the whole barcode is inside the frame.';
+
+  @override
+  String get voiceModeVoice => 'Voice';
+
+  @override
+  String get voiceTapToSpeak => 'Tap and say what you ate';
+
+  @override
+  String get voiceListening => 'Listening…';
+
+  @override
+  String get voiceHint => 'SAY WHAT YOU ATE';
+
+  @override
+  String get voiceExample => '“I ate a shawarma and a coke”';
+
+  @override
+  String get voiceCheckText =>
+      'Check the text before sending — speech gets words wrong.';
+
+  @override
+  String get voiceParsing => 'Working out what that was…';
+
+  @override
+  String get voiceSend => 'Find these dishes';
+
+  @override
+  String get voiceFreeNote => 'Voice entry is free';
+
+  @override
+  String get voiceItemsTitle => 'Add these dishes?';
+
+  @override
+  String voiceAddAll(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Add $n dishes',
+      one: 'Add 1 dish',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceMicDeniedTitle => 'Microphone is off';
+
+  @override
+  String get voiceMicDeniedBody =>
+      'Allow microphone access in Settings to log meals by voice.';
+
+  @override
+  String get voiceUnavailableTitle => 'Voice input unavailable';
+
+  @override
+  String get voiceUnavailableBody =>
+      'This device has no speech recogniser available.';
+
+  @override
+  String get voiceNotUnderstoodTitle => 'Didn\'t catch that';
+
+  @override
+  String get voiceNotUnderstoodBody =>
+      'Say the dishes again, or type them in by hand.';
+
+  @override
+  String get voiceOfflineTitle => 'No connection';
+
+  @override
+  String get voiceOfflineBody =>
+      'Couldn\'t reach the service to work out the dishes. Check your connection and try again.';
+
+  @override
+  String get cameraTitlePhoto => 'Scan a meal';
+
+  @override
+  String get cameraTitleBarcode => 'Scan a barcode';
+
+  @override
+  String get cameraTitleVoice => 'Say what you ate';
+
+  @override
+  String get coachTitle => 'Coach';
+
+  @override
+  String get coachCardTitle => 'Ask the coach';
+
+  @override
+  String get coachCardBody =>
+      'Why the weight stalls, what fits the calories you have left — answered from your own diary.';
+
+  @override
+  String get coachCardBadge => 'PRO';
+
+  @override
+  String get coachIntro =>
+      'Ask about your food — what to cook, whether today adds up, how to hit your protein.';
+
+  @override
+  String get coachPlaceholder => 'Ask about your food…';
+
+  @override
+  String get coachSendLabel => 'Send message';
+
+  @override
+  String get coachThinking => 'Thinking…';
+
+  @override
+  String coachRemaining(int left, int total) {
+    return '$left of $total messages left this month';
+  }
+
+  @override
+  String get coachDisclaimer =>
+      'Not medical advice. For anything health-related, see a doctor.';
+
+  @override
+  String get coachSuggest1 => 'Is today on track?';
+
+  @override
+  String get coachSuggest2 => 'What should I cook tonight?';
+
+  @override
+  String get coachSuggest3 => 'How do I hit my protein?';
+
+  @override
+  String get coachNotSubscribedTitle => 'Coach is part of Pro';
+
+  @override
+  String get coachNotSubscribedBody =>
+      'Unlimited scans, weight forecast and the coach come together in one subscription.';
+
+  @override
+  String get coachLimitTitle => 'That\'s this month\'s messages';
+
+  @override
+  String get coachLimitBody =>
+      'Your coach messages reset at the start of next month. Logging and everything else keeps working.';
+
+  @override
+  String get coachOfflineTitle => 'No connection';
+
+  @override
+  String get coachOfflineBody =>
+      'Couldn\'t reach the coach. Check your connection and try again.';
+
+  @override
+  String get coachUnavailableTitle => 'Coach isn\'t switched on yet';
+
+  @override
+  String get coachUnavailableBody =>
+      'This feature isn\'t available in your build yet. Everything else keeps working.';
 
   @override
   String get cameraHint => 'POINT AT THE DISH';
@@ -673,7 +914,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraRetake => 'Retake';
 
   @override
-  String get cameraOutOfPhotos => 'Your free scan for today is used';
+  String get cameraOutOfPhotos => 'You\'ve used all 3 free scans';
 
   @override
   String get cameraTryPro => 'Try Pro';
@@ -696,13 +937,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTitleLine2 => 'with Salamat Pro';
 
   @override
-  String get paywallSubtitle => '1 free scan a day.\nWith Pro — 10 scans a day + forecast + analysis.';
+  String get paywallSubtitle =>
+      'That\'s the whole free allowance.\nWith Pro — unlimited scans + forecast + analysis.';
 
   @override
   String get paywallLimitBadge => 'Photo limit reached';
 
   @override
-  String get paywallFeature1Title => '10 photo scans a day';
+  String get paywallFeature1Title => 'Unlimited photo scans';
 
   @override
   String get paywallFeature1Sub => 'Snap every meal';
@@ -711,7 +953,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallFeature2Title => 'Weight forecast';
 
   @override
-  String get paywallFeature2Sub => 'See when you reach your goal';
+  String get paywallFeature2Sub => 'Your trend and pace, week by week';
 
   @override
   String get paywallFeature3Title => 'Full history & trends';
@@ -741,21 +983,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallRestoreNotFound => 'No purchases found';
 
   @override
-  String get paywallOfferingsError => 'Couldn’t load prices from Google Play.\nCheck your connection and retry.';
+  String get paywallOfferingsError =>
+      'Couldn’t load subscription prices.\nCheck your connection and retry.';
 
   @override
-  String get paywallHeroHeadlineLose => 'Get full access to\nyour weight-loss plan';
+  String get paywallHeroHeadlineLose =>
+      'Get full access to\nyour weight-loss plan';
 
   @override
-  String get paywallHeroHeadlineGain => 'Get full access to\nyour weight-gain plan';
+  String get paywallHeroHeadlineGain =>
+      'Get full access to\nyour weight-gain plan';
 
   @override
-  String get paywallHeroHeadlineMaintain => 'Get full access to\nyour balance plan';
+  String get paywallHeroHeadlineMaintain =>
+      'Get full access to\nyour balance plan';
 
   @override
-  String paywallUrgencyLine(int weight, String date) {
-    return 'Reach $weight kg by $date';
+  String paywallGoalPaceLine(int weight, String pace) {
+    return 'Goal $weight kg. The plan assumes about $pace kg a week.';
   }
+
+  @override
+  String paywallGoalHoldLine(int weight) {
+    return 'Goal: hold steady at $weight kg.';
+  }
+
+  @override
+  String get paywallGoalGenericLine => 'Built around your goal and your day.';
 
   @override
   String get paywallScanEyebrow => 'Recognized';
@@ -788,7 +1042,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get paywallFinePrint => 'Subscription renews automatically at the end of each period. Cancel anytime in your store account. Terms and Privacy apply.';
+  String get paywallFinePrint =>
+      'Subscription renews automatically at the end of each period. Cancel anytime in your store account. Terms and Privacy apply.';
 
   @override
   String get profileTitle => 'Profile';
@@ -883,13 +1138,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileDeleteDialogTitle => 'Delete account?';
 
   @override
-  String get profileDeleteDialogBody => 'All your data — profile, food history and weight — will be permanently deleted. This cannot be undone.';
+  String get profileDeleteDialogBody =>
+      'All your data — profile, food history and weight — will be permanently deleted. This cannot be undone.';
 
   @override
   String get profileDeleteConfirm => 'Delete';
 
   @override
-  String get profileDeleteError => 'Couldn\'t delete account. Please try again later.';
+  String get profileDeleteError =>
+      'Couldn\'t delete account. Please try again later.';
 
   @override
   String get paywallFinePrintPrivacy => 'Privacy Policy';
@@ -943,7 +1200,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get progressStreakStartHint => 'Log your first meal to start a streak';
 
   @override
-  String get progressHistoryEmpty => 'No data yet. Add meals and your history will appear here.';
+  String get progressHistoryEmpty =>
+      'No data yet. Add meals and your history will appear here.';
 
   @override
   String get progressToday => 'Today';
@@ -1120,19 +1378,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cookEmptyPantryTitle => 'Add what you have';
 
   @override
-  String get cookEmptyPantryBody => 'List the products in your fridge and Salamat will pick three dishes that fit the rest of your day.';
+  String get cookEmptyPantryBody =>
+      'List the products in your fridge and Salamat will pick three dishes that fit the rest of your day.';
 
   @override
   String get cookNoBudgetTitle => 'Today\'s target is used up';
 
   @override
-  String get cookNoBudgetBody => 'Nothing fits the remainder right now. Come back tomorrow, or adjust your goal.';
+  String get cookNoBudgetBody =>
+      'Nothing fits the remainder right now. Come back tomorrow, or adjust your goal.';
 
   @override
   String get cookFailedTitle => 'Couldn\'t pick a dish';
 
   @override
-  String get cookFailedBody => 'The service didn\'t respond. Check your connection and try again.';
+  String get cookFailedBody =>
+      'The service didn\'t respond. Check your connection and try again.';
 
   @override
   String get cookLoading => 'Picking dishes…';
@@ -1162,7 +1423,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cookOver => 'Over the remainder';
 
   @override
-  String get cookWhyRange => 'Estimate — the range widens when portion or cooking method is unclear';
+  String get cookWhyRange =>
+      'Estimate — the range widens when portion or cooking method is unclear';
 
   @override
   String get cookIngredientsHeader => 'Ingredients';
@@ -1270,6 +1532,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String detailServing(int grams) {
     return '$grams g serving';
   }
+
+  @override
+  String get detailSourceBarcode => 'From the barcode';
+
+  @override
+  String get detailSourceVoice => 'Said out loud';
 
   @override
   String get detailSourcePhoto => 'Recognised from a photo';

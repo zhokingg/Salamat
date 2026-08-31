@@ -1,6 +1,7 @@
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/macro_lookup_service.dart';
 import '../services/supabase_service.dart';
 import 'bootstrap_provider.dart';
 
@@ -61,15 +62,31 @@ class MealEntry {
   /// entries created this session carry null until reloaded.
   final DateTime? eatenAt;
 
-  /// Entry has calories but no macros at all — typical of quick manual
-  /// logging. Such entries get a 30/30/40 kcal-split estimate (protein and
-  /// carbs 4 kcal/g, fat 9 kcal/g), shown with a "~" prefix in the diary.
-  bool get isMacroEstimated =>
-      kcal > 0 && protein == 0 && fat == 0 && carbs == 0;
+  /// Same entry with a macro breakdown filled in. Used only by the
+  /// background lookup; id, grams, kcal and `eatenAt` are untouched.
+  MealEntry withMacros({
+    required double protein,
+    required double fat,
+    required double carbs,
+  }) =>
+      MealEntry(
+        id: id,
+        name: name,
+        grams: grams,
+        kcal: kcal,
+        protein: protein,
+        fat: fat,
+        carbs: carbs,
+        source: source,
+        eatenAt: eatenAt,
+      );
 
-  double get estimatedProtein => kcal * 0.30 / 4;
-  double get estimatedFat => kcal * 0.30 / 9;
-  double get estimatedCarbs => kcal * 0.40 / 4;
+  /// Whether this entry carries a real macro breakdown.
+  ///
+  /// There is no longer any kcal-split estimate: a row either has macros that
+  /// were entered or looked up, or it has none and every screen renders a dash.
+  /// Rows written before the lookup existed carry 0/0/0 and read as unknown.
+  bool get hasMacros => protein > 0 || fat > 0 || carbs > 0;
 }
 
 class MealsState {
@@ -122,6 +139,7 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
     final current = state.valueOrNull ?? const MealsState();
     state = AsyncData(current.copyWithAdded(type, entry));
     await SupabaseService.logFood(
+      id: entry.id,
       foodName: entry.name,
       calories: entry.kcal,
       proteinG: entry.protein,
@@ -129,6 +147,51 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
       fatG: entry.fat,
       portionG: entry.grams,
       mealType: type.name,
+    );
+  }
+
+  /// Adds a meal and, when no macros were typed in, fills them in afterwards
+  /// from [MacroLookupService].
+  ///
+  /// The save is never blocked on the lookup: [add] completes (and the sheet
+  /// closes) first, the entry appears immediately, and the macros land later
+  /// via [updateEntry], which keeps the row id and `eaten_at`. If the lookup
+  /// fails the entry simply stays without macros and the UI shows a dash —
+  /// nothing is invented and no zeros are written as if measured.
+  ///
+  /// Manual logging remains free; this path never touches the photo quota.
+  Future<void> addWithMacroBackfill(
+    MealType type,
+    MealEntry entry,
+    String lang,
+  ) async {
+    await add(type, entry);
+    if (entry.hasMacros) return;
+
+    final macros = await MacroLookupService.lookup(
+      dish: entry.name,
+      kcal: entry.kcal,
+      lang: lang,
+    );
+    if (macros == null) return;
+
+    // The row may have been deleted or edited while the lookup was in flight.
+    final current = state.valueOrNull;
+    if (current == null) return;
+    final live = current
+        .forType(type)
+        .where((e) => e.id == entry.id)
+        .cast<MealEntry?>()
+        .firstWhere((e) => true, orElse: () => null);
+    if (live == null || live.hasMacros) return;
+
+    await updateEntry(
+      type,
+      live.withMacros(
+        protein: macros.protein,
+        fat: macros.fat,
+        carbs: macros.carbs,
+      ),
     );
   }
 

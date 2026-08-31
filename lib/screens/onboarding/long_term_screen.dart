@@ -69,7 +69,7 @@ class LongTermScreen extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    loc.longTermStat,
+                    loc.longTermApproach,
                     style: SalamatDarkType.style(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,

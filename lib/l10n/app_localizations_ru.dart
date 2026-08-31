@@ -45,7 +45,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get manualKcalLabel => 'Калории (ккал)';
 
   @override
-  String get manualKcalError => 'Введите 1–5000 ккал';
+  String get manualKcalError => 'Введи 1–5000 ккал';
 
   @override
   String get manualAddDetails => 'Добавить детали';
@@ -76,34 +76,55 @@ class AppLocalizationsRu extends AppLocalizations {
   String get manualAddButton => 'Добавить вручную';
 
   @override
-  String get limitTitle => 'Бесплатный скан на сегодня использован';
+  String scansLeftOf(int left, int total) {
+    return 'Осталось $left из $total';
+  }
+
+  @override
+  String get scansUnlimited => 'Без ограничений';
+
+  @override
+  String get scansExhaustedTitle => 'Это был последний бесплатный скан';
+
+  @override
+  String get scansExhaustedBody =>
+      'Ручной ввод остаётся бесплатным и безлимитным. Оформи подписку, чтобы сканировать по фото дальше.';
+
+  @override
+  String get scansLater => 'Не сейчас';
+
+  @override
+  String get limitTitle => 'Три бесплатных скана использованы';
 
   @override
   String get limitGoPro => 'Перейти на Pro';
 
   @override
-  String get welcomeFreeLine => 'Бесплатно · 1 фото-скан в день · ручной ввод без ограничений';
+  String get welcomeFreeLine =>
+      'Бесплатно · 3 фото-скана за всё время · ручной ввод без ограничений';
 
   @override
-  String get welcomeHeadline => 'Ваш вес БУДЕТ\nдостигнут в нашем\nприложении';
+  String get welcomeHeadline =>
+      'Фотографируй еду —\nи видишь, из чего\nскладывается день';
 
   @override
-  String get welcomeSubtitle => 'Начнём с нескольких вопросов\nдля вашего персонального плана';
+  String get welcomeSubtitle =>
+      'Начнём с нескольких вопросов\nдля твоего персонального плана';
 
   @override
-  String get nameTitle => 'Как вас зовут?';
+  String get nameTitle => 'Как тебя зовут?';
 
   @override
-  String get nameSubtitle => 'Чтобы обращаться к вам';
+  String get nameSubtitle => 'Чтобы обращаться к тебе';
 
   @override
-  String get nameFieldHint => 'Ваше имя';
+  String get nameFieldHint => 'Твоё имя';
 
   @override
-  String get countryTitle => 'Откуда вы?';
+  String get countryTitle => 'Откуда ты?';
 
   @override
-  String get countrySubtitle => 'Чтобы показывать цены в вашей валюте';
+  String get countrySubtitle => 'Чтобы показывать цены в твоей валюте';
 
   @override
   String get countryKZ => 'Казахстан';
@@ -127,10 +148,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get countryOther => 'Другая';
 
   @override
-  String get goalTitle => 'Какая ваша\nглавная цель?';
+  String get goalTitle => 'Какая твоя\nглавная цель?';
 
   @override
-  String get goalSubtitle => 'Выберите одну — под неё подберём план';
+  String get goalSubtitle => 'Выбери одну — под неё подберём план';
 
   @override
   String get goalLose => 'Похудеть';
@@ -157,7 +178,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get goalHealthySub => 'Контроль БЖУ, осознанность';
 
   @override
-  String get genderTitle => 'Ваш пол?';
+  String get genderTitle => 'Твой пол?';
 
   @override
   String get genderSubtitle => 'Нужно для точного расчёта нормы калорий';
@@ -169,14 +190,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get genderMale => 'Мужчина';
 
   @override
-  String get yearTitle => 'В каком году\nвы родились?';
+  String get yearTitle => 'Твой год\nрождения?';
 
   @override
   String get yearSubtitle => 'Возраст влияет на расчёт нормы калорий';
 
   @override
   String yearAgeLabel(int age) {
-    return 'Вам $age';
+    return 'Тебе $age';
   }
 
   @override
@@ -185,7 +206,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get weightTitle => 'Ваш рост и\nтекущий вес?';
+  String get weightTitle => 'Твой рост и\nтекущий вес?';
 
   @override
   String get weightSubtitle => 'От этого зависит точность плана';
@@ -222,7 +243,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bmiBandObese => 'Ожирение';
 
   @override
-  String get targetTitle => 'Какой ваш\nцелевой вес?';
+  String get targetTitle => 'Какой твой\nцелевой вес?';
 
   @override
   String get targetSubtitle => 'Реалистичная цель — главный фактор успеха';
@@ -238,13 +259,24 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String targetConflictLose(int current) {
+    return 'Цель — похудеть, поэтому целевой вес должен быть ниже текущего: $current кг.';
+  }
+
+  @override
+  String targetConflictGain(int current) {
+    return 'Цель — набрать, поэтому целевой вес должен быть выше текущего: $current кг.';
+  }
+
+  @override
   String get targetDeltaMaintain => 'Удерживать вес';
 
   @override
   String get underweightWarningTitle => 'Снижение веса может быть небезопасно';
 
   @override
-  String get underweightWarningBody => 'Ваш индекс массы тела ниже нормы. Снижение веса при таком показателе может навредить здоровью. Рекомендуем проконсультироваться с врачом перед началом.';
+  String get underweightWarningBody =>
+      'Твой индекс массы тела ниже нормы. Снижение веса при таком показателе может навредить здоровью. Рекомендуем проконсультироваться с врачом перед началом.';
 
   @override
   String get underweightWarningChangeGoal => 'Выбрать другую цель';
@@ -266,31 +298,32 @@ class AppLocalizationsRu extends AppLocalizations {
   String get celebrationMaintain => 'Отличный выбор —\nудерживать здоровый вес';
 
   @override
-  String get celebrationStatLose => 'Снижение веса на 5%\nуже улучшает здоровье';
+  String get celebrationStatLose =>
+      'Общее наблюдение медицины: снижение веса\nна 5% уже улучшает здоровье';
 
   @override
-  String get celebrationStatGain => 'Постепенный набор 0,25–0,5 кг в неделю\nпомогает набирать мышцы, а не жир';
+  String get celebrationStatGain =>
+      'Общее наблюдение медицины: набор 0,25–0,5 кг\nв неделю даёт мышцы, а не жир';
 
   @override
-  String get celebrationStatMaintain => 'Стабильный вес снижает риски\nдля сердца и обмена веществ';
+  String get celebrationStatMaintain =>
+      'Общее наблюдение медицины: стабильный вес\nснижает риски для сердца и обмена веществ';
 
   @override
   String get longTermTitle => 'Salamat создаёт\nдолгосрочный\nрезультат';
 
   @override
-  String get longTermLegendSalamat => 'План Salamat';
+  String get longTermLegendSalamat => 'Постепенные изменения';
 
   @override
-  String get longTermLegendOthers => 'Обычные диеты';
+  String get longTermLegendOthers => 'Строгие диеты';
 
   @override
-  String get longTermStat => '76% пользователей Salamat удерживают вес\nболее 6 месяцев';
+  String get longTermApproach =>
+      'Salamat делает ставку на постепенные\nизменения, а не на строгие диеты';
 
   @override
-  String get familiarityTitle => 'Насколько вы знакомы\nс темой похудения?';
-
-  @override
-  String get familiarityHint => '75% ответили так же.\nSalamat проведёт вас по пути похудения.';
+  String get familiarityTitle => 'Твой опыт\nв похудении?';
 
   @override
   String get familiarityNovice => 'Новичок';
@@ -311,7 +344,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get familiarityExpertSub => 'Хорошо разбираюсь в теме';
 
   @override
-  String get activityTitle => 'Какой у вас\nуровень активности?';
+  String get activityTitle => 'Какой у тебя\nуровень активности?';
 
   @override
   String get activitySubtitle => 'Чем выше активность, тем больше можно есть';
@@ -341,7 +374,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get activityVerySub => '6–7 тренировок в неделю';
 
   @override
-  String get summaryTitle => 'Ваш персональный\nплан';
+  String get summaryTitle => 'Твой персональный\nплан';
 
   @override
   String get summaryStatBmi => 'ИМТ';
@@ -356,19 +389,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get summaryStatActivity => 'Активность';
 
   @override
-  String get yesLoseQuestion => 'Хотите похудеть?';
+  String get yesLoseQuestion => 'Хочешь похудеть?';
 
   @override
-  String get yesGainQuestion => 'Хотите набрать вес\nбез вреда для здоровья?';
+  String get yesGainQuestion => 'Хочешь набрать вес\nбез вреда для здоровья?';
 
   @override
-  String get yesMaintainQuestion => 'Хотите удерживать\nкомфортный вес?';
+  String get yesMaintainQuestion => 'Хочешь удерживать\nкомфортный вес?';
 
   @override
-  String get yesOrderQuestion => 'Хотите навести\nпорядок в питании?';
+  String get yesOrderQuestion => 'Хочешь навести\nпорядок в питании?';
 
   @override
-  String get yesHealthQuestion => 'Хотите попрощаться\nс проблемами здоровья?';
+  String get yesHealthQuestion => 'Хочешь попрощаться\nс проблемами здоровья?';
 
   @override
   String get yesCaptionBefore => 'Сейчас';
@@ -377,22 +410,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get yesCaptionAfter => 'С Salamat';
 
   @override
-  String get comparisonTitle => 'Что даёт вам\nSalamat';
+  String get comparisonTitle => 'Что даёт тебе\nSalamat';
 
   @override
-  String get comparisonFeaturePhoto => 'Логируйте еду по фото за секунды';
+  String get comparisonFeaturePhoto => 'Логируй еду по фото за секунды';
 
   @override
-  String get comparisonFeatureNumbers => 'Ваши привычки — в наглядных цифрах';
+  String get comparisonFeatureNumbers => 'Твои привычки — в наглядных цифрах';
 
   @override
-  String get comparisonFeatureOneScreen => 'Всё на одном экране — без ручного поиска по базам';
+  String get comparisonFeatureOneScreen =>
+      'Всё на одном экране — без ручного поиска по базам';
 
   @override
-  String get socialTitle => 'Salamat создан\nдля таких людей,\nкак вы!';
+  String get socialTitle => 'Salamat создан\nдля таких людей,\nкак ты!';
 
   @override
-  String get buildingTitle => 'Создаём вашу\nпрограмму...';
+  String get buildingTitle => 'Создаём твою\nпрограмму...';
 
   @override
   String get buildingStep1 => 'Анализ профиля';
@@ -404,7 +438,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get buildingStep3 => 'Создание плана питания';
 
   @override
-  String get planTitle => 'Ваш персональный\nплан готов';
+  String get planTitle => 'Твой персональный\nплан готов';
 
   @override
   String get planNow => 'Сейчас';
@@ -414,14 +448,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String planWeeksToTarget(int weeks) {
-    return 'Около $weeks нед. до цели';
+    return 'Длительность плана — около $weeks нед.';
   }
 
   @override
   String get planMaintain => 'Удерживать вес';
 
   @override
-  String get planCaloriesLabel => 'Ваша норма калорий';
+  String get planCaloriesLabel => 'Твоя норма калорий';
 
   @override
   String planCaloriesValue(int kcal) {
@@ -429,8 +463,13 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String planReachLine(int kg, String month) {
-    return 'Примерно в $month вы достигнете $kg кг';
+  String planPaceLine(String pace) {
+    return 'План рассчитан примерно на $pace кг в неделю';
+  }
+
+  @override
+  String planPaceShort(String pace) {
+    return '$pace кг/нед';
   }
 
   @override
@@ -503,21 +542,27 @@ class AppLocalizationsRu extends AppLocalizations {
   String get snackIdeaTitle => 'Идея перекуса';
 
   @override
-  String get dashboardWeightFirstLog => 'Запишите первое взвешивание';
+  String get dashboardWeightFirstLog => 'Запиши первое взвешивание';
 
   @override
-  String get snackIdeaHearty => 'Ещё есть запас на полноценный перекус — йогурт с фруктами или сэндвич отлично впишутся.';
+  String get snackIdeaHearty =>
+      'Ещё есть запас на полноценный перекус — йогурт с фруктами или сэндвич отлично впишутся.';
 
   @override
-  String get snackIdeaLight => 'Есть запас на 120–240 ккал — горсть миндаля или яблоко впишутся отлично.';
+  String get snackIdeaLight =>
+      'Есть запас на 120–240 ккал — горсть миндаля или яблоко впишутся отлично.';
 
   @override
-  String get snackIdeaTiny => 'День почти закрыт — вода или чай мягко его завершат.';
+  String get snackIdeaTiny =>
+      'День почти закрыт — вода или чай мягко его завершат.';
 
   @override
-  String mealsEstimatedMacros(int p, int f, int c) {
-    return '~Б$p Ж$f У$c';
+  String mealsMacros(int p, int f, int c) {
+    return 'Б$p Ж$f У$c';
   }
+
+  @override
+  String get mealsMacrosUnknown => '—';
 
   @override
   String get dashboardOffline => 'Офлайн — показаны локальные данные';
@@ -620,7 +665,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cameraPermissionTitle => 'Нужен доступ к камере';
 
   @override
-  String get cameraPermissionBody => 'Разреши доступ к камере в настройках, чтобы распознавать блюда на фото.';
+  String get cameraPermissionBody =>
+      'Разреши доступ к камере в настройках, чтобы распознавать блюда на фото.';
 
   @override
   String get cameraOpenSettings => 'Открыть настройки';
@@ -633,6 +679,202 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cameraSimulate => 'Симулировать распознавание';
+
+  @override
+  String get barcodeModePhoto => 'Фото';
+
+  @override
+  String get barcodeModeCode => 'Штрихкод';
+
+  @override
+  String get barcodeHint => 'НАВЕДИ НА ШТРИХКОД';
+
+  @override
+  String get barcodeSearching => 'Ищем товар…';
+
+  @override
+  String get barcodeFreeNote => 'Сканы штрихкодов бесплатны';
+
+  @override
+  String get barcodeNotFoundTitle => 'Товара нет в базе';
+
+  @override
+  String get barcodeNotFoundBody =>
+      'Open Food Facts пока не знает этот товар. Добавь его вручную — это займёт пару секунд.';
+
+  @override
+  String get barcodeNoNutritionTitle => 'Нет данных о составе';
+
+  @override
+  String get barcodeNoNutritionBody =>
+      'Товар есть в базе, но без калорий — записать его по этикетке не получится.';
+
+  @override
+  String get barcodeOfflineTitle => 'Нет связи';
+
+  @override
+  String get barcodeOfflineBody =>
+      'Не удалось получить данные о товаре. Проверь связь и попробуй ещё раз.';
+
+  @override
+  String get barcodeInvalidTitle => 'Не удалось прочитать код';
+
+  @override
+  String get barcodeInvalidBody =>
+      'Держи телефон ровно, чтобы штрихкод целиком попал в рамку.';
+
+  @override
+  String get voiceModeVoice => 'Голос';
+
+  @override
+  String get voiceTapToSpeak => 'Нажми и скажи, что ты съел';
+
+  @override
+  String get voiceListening => 'Слушаю…';
+
+  @override
+  String get voiceHint => 'СКАЖИ, ЧТО ТЫ СЪЕЛ';
+
+  @override
+  String get voiceExample => '«Съел шаурму и колу»';
+
+  @override
+  String get voiceCheckText =>
+      'Проверь текст перед отправкой — распознавание ошибается.';
+
+  @override
+  String get voiceParsing => 'Разбираем, что это было…';
+
+  @override
+  String get voiceSend => 'Найти эти блюда';
+
+  @override
+  String get voiceFreeNote => 'Голосовой ввод бесплатный';
+
+  @override
+  String get voiceItemsTitle => 'Добавить эти блюда?';
+
+  @override
+  String voiceAddAll(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Добавить $n блюда',
+      many: 'Добавить $n блюд',
+      few: 'Добавить $n блюда',
+      one: 'Добавить 1 блюдо',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get voiceMicDeniedTitle => 'Микрофон выключен';
+
+  @override
+  String get voiceMicDeniedBody =>
+      'Разреши доступ к микрофону в настройках, чтобы записывать еду голосом.';
+
+  @override
+  String get voiceUnavailableTitle => 'Голосовой ввод недоступен';
+
+  @override
+  String get voiceUnavailableBody =>
+      'На этом устройстве нет распознавания речи.';
+
+  @override
+  String get voiceNotUnderstoodTitle => 'Не расслышал';
+
+  @override
+  String get voiceNotUnderstoodBody =>
+      'Скажи блюда ещё раз или введи их вручную.';
+
+  @override
+  String get voiceOfflineTitle => 'Нет связи';
+
+  @override
+  String get voiceOfflineBody =>
+      'Не удалось связаться с сервисом, чтобы разобрать блюда. Проверь связь и попробуй ещё раз.';
+
+  @override
+  String get cameraTitlePhoto => 'Сканировать блюдо';
+
+  @override
+  String get cameraTitleBarcode => 'Сканировать штрихкод';
+
+  @override
+  String get cameraTitleVoice => 'Скажи, что ты съел';
+
+  @override
+  String get coachTitle => 'Коуч';
+
+  @override
+  String get coachCardTitle => 'Спроси коуча';
+
+  @override
+  String get coachCardBody =>
+      'Почему вес встал и что съесть на оставшиеся калории — с опорой на твой дневник.';
+
+  @override
+  String get coachCardBadge => 'PRO';
+
+  @override
+  String get coachIntro =>
+      'Спроси про питание — что приготовить, сходится ли день, как добрать белок.';
+
+  @override
+  String get coachPlaceholder => 'Спроси про питание…';
+
+  @override
+  String get coachSendLabel => 'Отправить сообщение';
+
+  @override
+  String get coachThinking => 'Думаю…';
+
+  @override
+  String coachRemaining(int left, int total) {
+    return 'Осталось $left из $total сообщений в этом месяце';
+  }
+
+  @override
+  String get coachDisclaimer =>
+      'Это не медицинская консультация. По вопросам здоровья — к врачу.';
+
+  @override
+  String get coachSuggest1 => 'Сходится ли сегодняшний день?';
+
+  @override
+  String get coachSuggest2 => 'Что приготовить на ужин?';
+
+  @override
+  String get coachSuggest3 => 'Как добрать белок?';
+
+  @override
+  String get coachNotSubscribedTitle => 'Коуч входит в Pro';
+
+  @override
+  String get coachNotSubscribedBody =>
+      'Сканы без ограничений, прогноз веса и коуч — всё в одной подписке.';
+
+  @override
+  String get coachLimitTitle => 'Сообщения на этот месяц закончились';
+
+  @override
+  String get coachLimitBody =>
+      'Лимит обновится в начале следующего месяца. Дневник и всё остальное работают как обычно.';
+
+  @override
+  String get coachOfflineTitle => 'Нет связи';
+
+  @override
+  String get coachOfflineBody =>
+      'Не удалось связаться с коучем. Проверь связь и попробуй ещё раз.';
+
+  @override
+  String get coachUnavailableTitle => 'Коуч ещё не включён';
+
+  @override
+  String get coachUnavailableBody =>
+      'В этой сборке функция пока недоступна. Всё остальное работает.';
 
   @override
   String get cameraHint => 'НАВЕДИ НА БЛЮДО';
@@ -675,7 +917,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cameraRetake => 'Переснять';
 
   @override
-  String get cameraOutOfPhotos => 'Бесплатный скан на сегодня использован';
+  String get cameraOutOfPhotos => 'Три бесплатных скана использованы';
 
   @override
   String get cameraTryPro => 'Попробовать Pro';
@@ -698,13 +940,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallTitleLine2 => 'с Salamat Pro';
 
   @override
-  String get paywallSubtitle => '1 бесплатный скан в день.\nС Pro — 10 сканов в день + прогноз + анализ.';
+  String get paywallSubtitle =>
+      'Это весь бесплатный лимит.\nС Pro — сканы без ограничений + прогноз + анализ.';
 
   @override
   String get paywallLimitBadge => 'Лимит фото исчерпан';
 
   @override
-  String get paywallFeature1Title => '10 фото-сканов в день';
+  String get paywallFeature1Title => 'Фото-сканы без ограничений';
 
   @override
   String get paywallFeature1Sub => 'Фотай каждый приём пищи';
@@ -713,7 +956,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallFeature2Title => 'Прогноз веса';
 
   @override
-  String get paywallFeature2Sub => 'Видишь когда достигнешь цели';
+  String get paywallFeature2Sub => 'Динамика и темп, неделя за неделей';
 
   @override
   String get paywallFeature3Title => 'Полная история и тренды';
@@ -734,7 +977,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallWelcomePro => 'Добро пожаловать в Pro';
 
   @override
-  String get paywallPurchaseError => 'Оплата не прошла — попробуйте ещё раз';
+  String get paywallPurchaseError => 'Оплата не прошла — попробуй ещё раз';
 
   @override
   String get paywallRestoreFound => 'Pro восстановлен';
@@ -743,21 +986,33 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallRestoreNotFound => 'Покупки не найдены';
 
   @override
-  String get paywallOfferingsError => 'Не удалось загрузить цены из Google Play.\nПроверьте связь и повторите.';
+  String get paywallOfferingsError =>
+      'Не удалось загрузить цены подписки.\nПроверь связь и повтори.';
 
   @override
-  String get paywallHeroHeadlineLose => 'Полный доступ к вашему\nплану похудения';
+  String get paywallHeroHeadlineLose =>
+      'Полный доступ к твоему\nплану похудения';
 
   @override
-  String get paywallHeroHeadlineGain => 'Полный доступ к вашему\nплану набора веса';
+  String get paywallHeroHeadlineGain =>
+      'Полный доступ к твоему\nплану набора веса';
 
   @override
-  String get paywallHeroHeadlineMaintain => 'Полный доступ к вашему\nплану баланса';
+  String get paywallHeroHeadlineMaintain =>
+      'Полный доступ к твоему\nплану баланса';
 
   @override
-  String paywallUrgencyLine(int weight, String date) {
-    return 'Достигнете $weight кг к $date';
+  String paywallGoalPaceLine(int weight, String pace) {
+    return 'Цель — $weight кг. План рассчитан примерно на $pace кг в неделю.';
   }
+
+  @override
+  String paywallGoalHoldLine(int weight) {
+    return 'Цель — удержаться на $weight кг.';
+  }
+
+  @override
+  String get paywallGoalGenericLine => 'Под твою цель и твой день.';
 
   @override
   String get paywallScanEyebrow => 'Распознано';
@@ -790,7 +1045,8 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get paywallFinePrint => 'Подписка продлевается автоматически в конце каждого периода. Отмените в любой момент в аккаунте магазина. Действуют Условия и Политика конфиденциальности.';
+  String get paywallFinePrint =>
+      'Подписка продлевается автоматически в конце каждого периода. Отмени в любой момент в аккаунте магазина. Действуют Условия и Политика конфиденциальности.';
 
   @override
   String get profileTitle => 'Профиль';
@@ -885,13 +1141,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileDeleteDialogTitle => 'Удалить аккаунт?';
 
   @override
-  String get profileDeleteDialogBody => 'Все ваши данные — профиль, история питания и вес — будут удалены безвозвратно. Это действие нельзя отменить.';
+  String get profileDeleteDialogBody =>
+      'Все твои данные — профиль, история питания и вес — будут удалены безвозвратно. Это действие нельзя отменить.';
 
   @override
   String get profileDeleteConfirm => 'Удалить';
 
   @override
-  String get profileDeleteError => 'Не удалось удалить аккаунт. Попробуйте позже.';
+  String get profileDeleteError =>
+      'Не удалось удалить аккаунт. Попробуй позже.';
 
   @override
   String get paywallFinePrintPrivacy => 'Политика конфиденциальности';
@@ -915,7 +1173,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String profileWeightRangeError(int min, int max) {
-    return 'Введите вес от $min до $max кг';
+    return 'Введи вес от $min до $max кг';
   }
 
   @override
@@ -944,10 +1202,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get progressStreakStart => 'Начни сегодня';
 
   @override
-  String get progressStreakStartHint => 'Отметь первый приём пищи — серия начнётся';
+  String get progressStreakStartHint =>
+      'Отметь первый приём пищи — серия начнётся';
 
   @override
-  String get progressHistoryEmpty => 'Пока нет данных. Добавляй блюда — история появится здесь.';
+  String get progressHistoryEmpty =>
+      'Пока нет данных. Добавляй блюда — история появится здесь.';
 
   @override
   String get progressToday => 'Сегодня';
@@ -1018,18 +1278,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dashboardScanAction => 'Снять';
 
   @override
-  String get cameraConfirmTitle => 'Confirm your plate';
+  String get cameraConfirmTitle => 'Проверь тарелку';
 
   @override
   String cameraLogKcal(int kcal) {
-    return 'Log $kcal kcal';
+    return 'Записать $kcal ккал';
   }
 
   @override
-  String get cameraDetectedOne => '1 item detected';
+  String get cameraDetectedOne => 'Найден 1 продукт';
 
   @override
-  String get cameraMealSlotHint => 'Add to';
+  String get cameraMealSlotHint => 'Добавить в';
 
   @override
   String cameraDetectedBoxLabel(String name, int percent) {
@@ -1037,177 +1297,183 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get progressRangeDay => 'Day';
+  String get progressRangeDay => 'День';
 
   @override
-  String get progressRangeWeek => 'Week';
+  String get progressRangeWeek => 'Неделя';
 
   @override
-  String get progressRangeMonth => 'Month';
+  String get progressRangeMonth => 'Месяц';
 
   @override
-  String get progressRangeYear => 'Year';
+  String get progressRangeYear => 'Год';
 
   @override
-  String get progressCalorieTrend => 'Calorie trend';
+  String get progressCalorieTrend => 'Динамика калорий';
 
   @override
   String progressDailyAvg(int kcal) {
-    return 'daily avg $kcal';
+    return 'в среднем $kcal';
   }
 
   @override
   String progressGoalLine(int kcal) {
-    return '$kcal goal';
+    return 'цель $kcal';
   }
 
   @override
-  String get progressProteinScore => 'Protein score';
+  String get progressProteinScore => 'Белковый счёт';
 
   @override
   String progressProteinScoreSub(int hit, int total) {
-    return '$hit of $total days on target';
+    return '$hit из $total дней в норме';
   }
 
   @override
-  String get progressConsistencyLabel => 'Consistency';
+  String get progressConsistencyLabel => 'Регулярность';
 
   @override
-  String get progressConsistencySub => 'days logged in a row';
+  String get progressConsistencySub => 'дней подряд';
 
   @override
-  String get progressNoRangeData => 'Nothing logged in this period yet';
+  String get progressNoRangeData => 'За этот период пока ничего не записано';
 
   @override
-  String get progressWeeklyMilestones => 'Weekly milestones';
+  String get progressWeeklyMilestones => 'Цели по неделям';
 
   @override
   String progressMilestoneWeek(int n) {
-    return 'W$n';
+    return 'Н$n';
   }
 
   @override
-  String get cookTitle => 'What to cook';
+  String get cookTitle => 'Что приготовить';
 
   @override
-  String get cookSubtitle => 'From what you have, within what\'s left of today';
+  String get cookSubtitle => 'Из того, что есть, в рамках остатка на сегодня';
 
   @override
-  String get cookPantryHeader => 'Your ingredients';
+  String get cookPantryHeader => 'Твои продукты';
 
   @override
-  String get cookAddHint => 'Add an ingredient';
+  String get cookAddHint => 'Добавить продукт';
 
   @override
-  String get cookAddButton => 'Add';
+  String get cookAddButton => 'Добавить';
 
   @override
-  String get cookClearAll => 'Clear all';
+  String get cookClearAll => 'Очистить';
 
   @override
   String cookRemoveItem(String item) {
-    return 'Remove $item';
+    return 'Убрать $item';
   }
 
   @override
   String cookPantryFull(int max) {
-    return 'Up to $max ingredients';
+    return 'До $max продуктов';
   }
 
   @override
-  String get cookSuggestButton => 'Suggest 3 dishes';
+  String get cookSuggestButton => 'Подобрать 3 блюда';
 
   @override
-  String get cookRemainingLabel => 'Left today';
+  String get cookRemainingLabel => 'Осталось сегодня';
 
   @override
-  String get cookEmptyPantryTitle => 'Add what you have';
+  String get cookEmptyPantryTitle => 'Добавь, что есть';
 
   @override
-  String get cookEmptyPantryBody => 'List the products in your fridge and Salamat will pick three dishes that fit the rest of your day.';
+  String get cookEmptyPantryBody =>
+      'Перечисли продукты из холодильника, и Salamat подберёт три блюда под остаток дня.';
 
   @override
-  String get cookNoBudgetTitle => 'Today\'s target is used up';
+  String get cookNoBudgetTitle => 'Норма на сегодня исчерпана';
 
   @override
-  String get cookNoBudgetBody => 'Nothing fits the remainder right now. Come back tomorrow, or adjust your goal.';
+  String get cookNoBudgetBody =>
+      'Под остаток сейчас ничего не подходит. Загляни завтра или измени цель.';
 
   @override
-  String get cookFailedTitle => 'Couldn\'t pick a dish';
+  String get cookFailedTitle => 'Не удалось подобрать блюдо';
 
   @override
-  String get cookFailedBody => 'The service didn\'t respond. Check your connection and try again.';
+  String get cookFailedBody =>
+      'Сервис не ответил. Проверь связь и попробуй ещё раз.';
 
   @override
-  String get cookLoading => 'Picking dishes…';
+  String get cookLoading => 'Подбираем блюда…';
 
   @override
   String cookRangeKcal(int min, int max) {
-    return '$min–$max kcal';
+    return '$min–$max ккал';
   }
 
   @override
   String cookRangeG(int min, int max) {
-    return '$min–$max g';
+    return '$min–$max г';
   }
 
   @override
   String cookTimeMinutes(int n) {
-    return '$n min';
+    return '$n мин';
   }
 
   @override
-  String get cookFits => 'Fits';
+  String get cookFits => 'Подходит';
 
   @override
-  String get cookBorderline => 'Might not fit';
+  String get cookBorderline => 'Может не влезть';
 
   @override
-  String get cookOver => 'Over the remainder';
+  String get cookOver => 'Больше остатка';
 
   @override
-  String get cookWhyRange => 'Estimate — the range widens when portion or cooking method is unclear';
+  String get cookWhyRange =>
+      'Оценка — диапазон шире, когда порция или способ готовки неясны';
 
   @override
-  String get cookIngredientsHeader => 'Ingredients';
+  String get cookIngredientsHeader => 'Ингредиенты';
 
   @override
-  String get cookStepsHeader => 'How to cook';
+  String get cookStepsHeader => 'Как готовить';
 
   @override
-  String get cookAddToDiary => 'Add to diary';
+  String get cookAddToDiary => 'Добавить в дневник';
 
   @override
   String cookAddedToDiary(String dish, int kcal) {
-    return '$dish added — $kcal kcal';
+    return '$dish добавлено — $kcal ккал';
   }
 
   @override
-  String get cookMidpointNote => 'Logged at the middle of the range';
+  String get cookMidpointNote => 'Записано по середине диапазона';
 
   @override
-  String get cookRetry => 'Try again';
+  String get cookRetry => 'Ещё раз';
 
   @override
   String paywallTrialCta(String period) {
-    return 'Start $period free';
+    return 'Начать $period бесплатно';
   }
 
   @override
   String paywallTrialThen(String price, String date) {
-    return 'Then $price, charged $date';
+    return 'Затем $price, списание $date';
   }
 
   @override
-  String get paywallSubscribeCta => 'Subscribe';
+  String get paywallSubscribeCta => 'Оформить подписку';
 
   @override
   String paywallPeriodDays(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: '$n days',
-      one: '1 day',
+      other: '$n дня',
+      many: '$n дней',
+      few: '$n дня',
+      one: '1 день',
     );
     return '$_temp0';
   }
@@ -1217,8 +1483,10 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: '$n weeks',
-      one: '1 week',
+      other: '$n недели',
+      many: '$n недель',
+      few: '$n недели',
+      one: '1 неделя',
     );
     return '$_temp0';
   }
@@ -1228,8 +1496,10 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: '$n months',
-      one: '1 month',
+      other: '$n месяца',
+      many: '$n месяцев',
+      few: '$n месяца',
+      one: '1 месяц',
     );
     return '$_temp0';
   }
@@ -1239,76 +1509,85 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: '$n years',
-      one: '1 year',
+      other: '$n года',
+      many: '$n лет',
+      few: '$n года',
+      one: '1 год',
     );
     return '$_temp0';
   }
 
   @override
   String paywallPerMonthShort(String price) {
-    return '$price / mo';
+    return '$price / мес';
   }
 
   @override
-  String get settingsTitle => 'Settings';
+  String get settingsTitle => 'Настройки';
 
   @override
-  String get settingsSectionPlan => 'Plan and goals';
+  String get settingsSectionPlan => 'План и цели';
 
   @override
-  String get settingsSectionAbout => 'About';
+  String get settingsSectionAbout => 'О приложении';
 
   @override
-  String get settingsAppearanceUnavailable => 'Theme follows the app build';
+  String get settingsAppearanceUnavailable =>
+      'Тема задаётся сборкой приложения';
 
   @override
-  String get detailTitle => 'Meal';
+  String get detailTitle => 'Блюдо';
 
   @override
   String detailLoggedAt(String time) {
-    return 'Logged at $time';
+    return 'Записано в $time';
   }
 
   @override
   String detailServing(int grams) {
-    return '$grams g serving';
+    return 'порция $grams г';
   }
 
   @override
-  String get detailSourcePhoto => 'Recognised from a photo';
+  String get detailSourceBarcode => 'По штрихкоду';
 
   @override
-  String get detailSourceManual => 'Entered by hand';
+  String get detailSourceVoice => 'Сказано голосом';
 
   @override
-  String get detailSourceSuggested => 'From a suggestion';
+  String get detailSourcePhoto => 'Распознано по фото';
 
   @override
-  String get detailDuplicate => 'Duplicate';
+  String get detailSourceManual => 'Добавлено вручную';
 
   @override
-  String get detailSave => 'Save';
+  String get detailSourceSuggested => 'Из подборки';
+
+  @override
+  String get detailDuplicate => 'Дублировать';
+
+  @override
+  String get detailSave => 'Сохранить';
 
   @override
   String detailDeleted(String dish) {
-    return '$dish removed';
+    return '$dish удалено';
   }
 
   @override
   String detailDuplicated(String dish) {
-    return '$dish logged again';
+    return '$dish записано ещё раз';
   }
 
   @override
-  String get detailDeleteTitle => 'Remove this meal?';
+  String get detailDeleteTitle => 'Удалить это блюдо?';
 
   @override
-  String get detailDeleteBody => 'It will be taken out of today\'s diary.';
+  String get detailDeleteBody => 'Оно исчезнет из сегодняшнего дневника.';
 
   @override
   String detailShareOfDay(int percent) {
-    return '$percent% of target';
+    return '$percent% от нормы';
   }
 
   @override
@@ -1322,13 +1601,13 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get waterUndo => 'Undo';
+  String get waterUndo => 'Отменить';
 
   @override
   String waterOfGoal(String liters) {
-    return 'of $liters L';
+    return 'из $liters л';
   }
 
   @override
-  String get waterNotSynced => 'Saved on this device only';
+  String get waterNotSynced => 'Сохранено только на этом устройстве';
 }

@@ -14,6 +14,11 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ru</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>salamat</string>
 	<key>CFBundlePackageType</key>
@@ -28,6 +33,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Salamat needs camera access to photograph your meals and recognise dishes for your food diary.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Salamat needs the microphone so you can say what you ate instead of typing it.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Salamat turns what you say into text on this device to add the dishes to your food diary.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

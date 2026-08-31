@@ -51,7 +51,7 @@ class DashboardShell extends ConsumerWidget {
     if (sub.canTakePhoto) {
       context.push('/camera');
     } else {
-      // Free daily scan spent: offer manual logging first, Pro second.
+      // Lifetime free allowance spent: offer manual logging first, Pro second.
       showPhotoLimitSheet(context);
     }
   }
@@ -60,6 +60,8 @@ class DashboardShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).uri.toString();
     final index = _currentIndex(location);
+    final loc = AppLocalizations.of(context)!;
+    final sub = ref.watch(subscriptionProvider);
 
     return Scaffold(
       backgroundColor: sc.bg,
@@ -67,6 +69,13 @@ class DashboardShell extends ConsumerWidget {
       bottomNavigationBar: _TabBar(
         index: index,
         tabs: _tabs,
+        // Remaining free scans, readable from the very first screen. Null for
+        // Pro, and until the server has answered once.
+        counter:
+            (sub.loaded && !sub.isPro)
+                ? loc.scansLeftOf(sub.scansLeft, sub.allowance)
+                : null,
+        counterSpent: sub.scansLeft == 0,
         onCamera: () => _onCameraPressed(context, ref),
       ),
     );
@@ -102,11 +111,17 @@ class _TabBar extends StatelessWidget {
     required this.index,
     required this.tabs,
     required this.onCamera,
+    this.counter,
+    this.counterSpent = false,
   });
 
   final int index;
   final List<_TabItem> tabs;
   final VoidCallback onCamera;
+
+  /// "2 of 3 left", or null when there is nothing to count.
+  final String? counter;
+  final bool counterSpent;
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +156,11 @@ class _TabBar extends StatelessWidget {
                 _tabButton(context, 1),
                 // Camera is an ACTION slot, not a tab: geometrically centered,
                 // opens over the current tab and never becomes "selected".
-                _CameraFab(onTap: onCamera),
+                _CameraFab(
+                  onTap: onCamera,
+                  counter: counter,
+                  counterSpent: counterSpent,
+                ),
                 _tabButton(context, 2),
                 _tabButton(context, 3),
               ],
@@ -184,15 +203,25 @@ class _TabBar extends StatelessWidget {
 /// 58px circular FAB on a `primary -> accent` gradient, lifted 18px above the
 /// nav strip, carrying `--shadow-2`.
 class _CameraFab extends StatelessWidget {
-  const _CameraFab({required this.onTap});
+  const _CameraFab({
+    required this.onTap,
+    this.counter,
+    this.counterSpent = false,
+  });
 
   final VoidCallback onTap;
+
+  /// "2 of 3 left" — rendered where the other tabs put their label, so the
+  /// remaining scans read from the first screen without covering any content
+  /// and without colliding with the button itself.
+  final String? counter;
+  final bool counterSpent;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     final loc = AppLocalizations.of(context)!;
-    return Transform.translate(
+    final button = Transform.translate(
       offset: const Offset(0, -SalamatDarkDims.fabOverlap),
       child: Semantics(
         button: true,
@@ -222,6 +251,30 @@ class _CameraFab extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    if (counter == null) return button;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        button,
+        // Pulled up by the same overlap the button was pushed by, so the label
+        // lands on the tab-label baseline instead of below the strip.
+        Transform.translate(
+          offset: const Offset(0, -SalamatDarkDims.fabOverlap + 2),
+          child: Text(
+            counter!,
+            maxLines: 1,
+            overflow: TextOverflow.visible,
+            softWrap: false,
+            style: SalamatDarkType.style(
+              fontSize: 9.5,
+              fontWeight: FontWeight.w600,
+              color: counterSpent ? c.err : c.text3,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

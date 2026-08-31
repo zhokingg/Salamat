@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/meals_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/water_provider.dart';
 import '../../providers/weight_provider.dart';
@@ -37,6 +38,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     );
     _ringAnim = CurvedAnimation(parent: _ringCtrl, curve: Curves.easeOutCubic);
     _ringCtrl.forward();
+    // Pull the authoritative scan counts once the tree is up, so the counter
+    // above the camera button is real rather than a client guess.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(subscriptionProvider.notifier).refreshFromServer();
+    });
   }
 
   @override
@@ -88,20 +94,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         MealType.values.expand((t) => meals.forType(t)).toList();
     final lastEntry = allEntries.isEmpty ? null : allEntries.last;
 
-    // Macro totals for the bars. Manual entries logged without macros get a
-    // 30/30/40 estimate from their kcal (marked "~" in the diary) so the
-    // bars don't understate the day.
+    // Macro totals for the bars: stored values only, never an estimate, so
+    // this agrees with `MealsState.totalProtein` (which the cook budget uses)
+    // and with the protein score in Progress. An entry whose macros are not
+    // known yet contributes nothing rather than a guess.
     var protein = 0.0, fat = 0.0, carbs = 0.0;
     for (final e in allEntries) {
-      if (e.isMacroEstimated) {
-        protein += e.estimatedProtein;
-        fat += e.estimatedFat;
-        carbs += e.estimatedCarbs;
-      } else {
-        protein += e.protein;
-        fat += e.fat;
-        carbs += e.carbs;
-      }
+      protein += e.protein;
+      fat += e.fat;
+      carbs += e.carbs;
     }
 
     // A day only counts toward the streak with at least one logged meal.
@@ -190,6 +191,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               ],
             ),
           ),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SalamatDarkDims.screenPadH,
+          ),
+          child: const _CoachCard(),
         ),
         const SizedBox(height: 12),
         Padding(
@@ -1057,6 +1065,124 @@ class _SparklinePainter extends CustomPainter {
       oldDelegate.values != values;
 }
 
+/// Entry point to the coach, in the Home feed rather than the tab bar.
+///
+/// Visible to everyone, including free accounts: a paid feature nobody can see
+/// is a feature nobody buys. What differs is where the tap lands — Pro opens
+/// the chat, free opens the existing paywall. The badge says which it will be
+/// BEFORE the tap, so the paywall is an answer to a question the user already
+/// asked rather than a wall they walked into.
+class _CoachCard extends ConsumerWidget {
+  const _CoachCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context)!;
+    final c = context.c;
+    final sub = ref.watch(subscriptionProvider);
+    // Until the server has answered, assume free: showing the badge and then
+    // removing it is honest, while promising the chat and then charging is not.
+    final isPro = sub.loaded && sub.isPro;
+
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => context.push(isPro ? '/coach' : '/paywall'),
+        child: SalamatCard(
+          radius: SalamatDarkDims.rCard,
+          padding: const EdgeInsets.all(SalamatDarkDims.padCardSmall),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SalamatIcon(
+                PhosphorIcons.chatCircleDots(PhosphorIconsStyle.duotone),
+                size: 20,
+                color: c.primary,
+                bubbleColor: c.primarySoft,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            loc.coachCardTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: SalamatDarkType.style(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: c.text,
+                            ),
+                          ),
+                        ),
+                        if (!isPro) ...[
+                          const SizedBox(width: 8),
+                          const _ProBadge(),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      loc.coachCardBody,
+                      style: SalamatDarkType.style(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: c.text2,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: PhosphorIcon(
+                  PhosphorIcons.caretRight(),
+                  size: 16,
+                  color: c.text3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The "part of Pro" mark. Deliberately quiet — it is a label, not an advert.
+class _ProBadge extends StatelessWidget {
+  const _ProBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final loc = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: c.primarySoft,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        loc.coachCardBadge,
+        style: SalamatDarkType.style(
+          fontSize: 9.5,
+          fontWeight: FontWeight.w700,
+          color: c.primary,
+          letterSpacing: 0.4,
+        ),
+      ),
+    );
+  }
+}
+
 /// White supportive-tone snack suggestion, rule-based on the calories left
 /// today. Hidden entirely by the caller once the budget is spent.
 class _SnackIdeaCard extends StatelessWidget {
@@ -1197,13 +1323,21 @@ class _WaterCard extends ConsumerWidget {
             children: [
               Text(
                 loc.dashboardWaterLiters(
-                  (water.totalMl / 1000).toStringAsFixed(2),
+                  NumberFormat.decimalPatternDigits(
+                    locale: Localizations.localeOf(context).toString(),
+                    decimalDigits: 2,
+                  ).format(water.totalMl / 1000),
                 ),
                 style: SalamatDarkType.numTitle.copyWith(color: c.text),
               ),
               const SizedBox(width: SalamatDarkDims.gap6),
               Text(
-                loc.waterOfGoal((kWaterGoalMl / 1000).toStringAsFixed(1)),
+                loc.waterOfGoal(
+                  NumberFormat.decimalPatternDigits(
+                    locale: Localizations.localeOf(context).toString(),
+                    decimalDigits: 1,
+                  ).format(kWaterGoalMl / 1000),
+                ),
                 style: SalamatDarkType.micro.copyWith(color: c.text3),
               ),
             ],

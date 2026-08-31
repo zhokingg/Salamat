@@ -52,6 +52,24 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
   int get _target => _min + _idx;
   int get _delta => _current - _target;
 
+  /// A target that contradicts the chosen goal.
+  ///
+  /// The wheel spans the full 40-200 kg range regardless of the goal, so
+  /// "lose" with a target above the current weight (or "gain" with one below)
+  /// was previously accepted and still produced a -500/+500 kcal plan. The
+  /// funnel now refuses to continue and says why, instead of silently
+  /// building a plan that argues with itself.
+  String? _conflict(AppLocalizations loc) {
+    final goal = ref.read(userProvider).goal;
+    if (goal == Goal.lose && _target >= _current) {
+      return loc.targetConflictLose(_current);
+    }
+    if (goal == Goal.gain && _target <= _current) {
+      return loc.targetConflictGain(_current);
+    }
+    return null;
+  }
+
   String _deltaLabel(AppLocalizations loc) {
     if (_delta > 0) return loc.targetDeltaLose(_delta);
     if (_delta < 0) return loc.targetDeltaGain(-_delta);
@@ -60,6 +78,10 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
 
   Future<void> _next() async {
     final u = ref.read(userProvider);
+
+    // Goal/target coherence comes first: an incoherent target must not reach
+    // the BMI gate or the plan.
+    if (_conflict(AppLocalizations.of(context)!) != null) return;
 
     // Safety gate: weight loss is not safe at BMI < 18.5. Show a
     // dismissable warning that requires explicit acknowledgement before
@@ -143,6 +165,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final conflict = _conflict(loc);
     return OnboardingShell(
       step: 7,
       body: Column(
@@ -166,7 +189,7 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: sc.primarySoft,
+                color: conflict == null ? sc.primarySoft : sc.surface2,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -174,15 +197,29 @@ class _TargetWeightScreenState extends ConsumerState<TargetWeightScreen> {
                 style: SalamatDarkType.style(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: sc.primary,
+                  color: conflict == null ? sc.primary : sc.text3,
                 ),
               ),
             ),
           ),
+          if (conflict != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              conflict,
+              textAlign: TextAlign.center,
+              style: SalamatDarkType.style(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+                height: 1.4,
+                color: sc.err,
+              ),
+            ),
+          ],
           const Spacer(),
         ],
       ),
       buttonLabel: loc.buttonNext,
+      buttonEnabled: conflict == null,
       onContinue: _next,
     );
   }

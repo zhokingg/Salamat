@@ -155,6 +155,8 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
         'photo' => loc.detailSourcePhoto,
         'manual' => loc.detailSourceManual,
         'suggested' => loc.detailSourceSuggested,
+        'barcode' => loc.detailSourceBarcode,
+        'voice' => loc.detailSourceVoice,
         // Rows reloaded from Supabase carry no source — `meals` has no such
         // column — so the chip is simply not drawn.
         _ => null,
@@ -187,15 +189,12 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
 
     final grams = _grams ?? entry.grams;
     final kcal = _scaled(entry.kcal.toDouble(), entry).round();
-    // An entry logged without macros carries the same 30/30/40 estimate the
-    // meal list shows, so the two screens never disagree about the same row.
-    // `estimated` drives the "~" marker.
-    final estimated = entry.isMacroEstimated;
-    final protein =
-        _scaled(estimated ? entry.estimatedProtein : entry.protein, entry);
-    final fat = _scaled(estimated ? entry.estimatedFat : entry.fat, entry);
-    final carbs =
-        _scaled(estimated ? entry.estimatedCarbs : entry.carbs, entry);
+    // Stored macros only. While a lookup has not landed the entry has none,
+    // and every macro readout on this screen renders a dash instead.
+    final known = entry.hasMacros;
+    final protein = _scaled(entry.protein, entry);
+    final fat = _scaled(entry.fat, entry);
+    final carbs = _scaled(entry.carbs, entry);
     final norm = ref.watch(userProvider).calorieNorm ?? 2000;
     final changed = _grams != null && _grams != entry.grams;
     final source = _sourceLabel(loc, entry.source);
@@ -373,21 +372,21 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
                       children: [
                         Expanded(
                           child: _MacroTile(
-                            value: '${estimated ? "~" : ""}${protein.round()}',
+                            value: known ? '${protein.round()}' : loc.mealsMacrosUnknown,
                             label: loc.dashboardMacroProtein,
                           ),
                         ),
                         const SizedBox(width: SalamatDarkDims.gap8),
                         Expanded(
                           child: _MacroTile(
-                            value: '${estimated ? "~" : ""}${carbs.round()}',
+                            value: known ? '${carbs.round()}' : loc.mealsMacrosUnknown,
                             label: loc.dashboardMacroCarbs,
                           ),
                         ),
                         const SizedBox(width: SalamatDarkDims.gap8),
                         Expanded(
                           child: _MacroTile(
-                            value: '${estimated ? "~" : ""}${fat.round()}',
+                            value: known ? '${fat.round()}' : loc.mealsMacrosUnknown,
                             label: loc.dashboardMacroFat,
                           ),
                         ),

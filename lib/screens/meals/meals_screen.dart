@@ -275,13 +275,14 @@ class _EntryRow extends StatelessWidget {
         : null;
     final parts = <String>[
       loc.dashboardKcalWithValue(entry.kcal),
-      // Macros estimated from kcal (30/30/40) — the "~" keeps it honest.
-      if (entry.isMacroEstimated)
-        loc.mealsEstimatedMacros(
-          entry.estimatedProtein.round(),
-          entry.estimatedFat.round(),
-          entry.estimatedCarbs.round(),
-        ),
+      // Stored macros, or a dash while they are unknown — never a guess.
+      entry.hasMacros
+          ? loc.mealsMacros(
+              entry.protein.round(),
+              entry.fat.round(),
+              entry.carbs.round(),
+            )
+          : loc.mealsMacrosUnknown,
       if (time != null) time,
     ];
     final detail = parts.join(' · ');

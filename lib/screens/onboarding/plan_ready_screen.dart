@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +21,6 @@ class PlanReadyScreen extends ConsumerStatefulWidget {
 class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
   int _calories = 0;
   int _weeksToTarget = 0;
-  DateTime _targetDate = DateTime.now();
 
   /// The in-flight profile write started by [_commit]. The Continue button
   /// awaits this so the row is guaranteed persisted before the user can leave
@@ -51,12 +51,10 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
 
     final delta = u.weightDelta.abs();
     final weeks = delta <= 0 ? 8 : (delta * 2).round().clamp(4, 52);
-    final target = DateTime.now().add(Duration(days: weeks * 7));
 
     setState(() {
       _calories = kcal;
       _weeksToTarget = weeks;
-      _targetDate = target;
     });
 
     // Local flag FIRST — a dead network must never bounce this user back
@@ -94,19 +92,16 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
     return '${d.day} $m';
   }
 
-  /// Month of the projected target date, in a form that reads naturally in
-  /// the sentence ("in September" / «в сентябре» — prepositional case).
-  String _reachMonth(AppLocalizations loc) {
-    const ru = [
-      'январе', 'феврале', 'марте', 'апреле', 'мае', 'июне',
-      'июле', 'августе', 'сентябре', 'октябре', 'ноябре', 'декабре',
-    ];
-    const en = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    final m = _targetDate.month - 1;
-    return loc.localeName == 'ru' ? ru[m] : en[m];
+  /// The rate the plan is built from, e.g. "0.5".
+  ///
+  /// Replaces the projected calendar month this screen used to print. The app
+  /// knows what rate the plan assumes; it does not know when anybody will
+  /// arrive, and saying so on the screen that ends onboarding was a promise it
+  /// could not keep.
+  String _paceText(UserState u, AppLocalizations loc) {
+    final delta = u.weightDelta.abs();
+    final weeks = _weeksToTarget > 0 ? _weeksToTarget : 1;
+    return NumberFormat('0.#', loc.localeName).format(delta / weeks);
   }
 
   @override
@@ -154,7 +149,11 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
                     _Endpoint(
                       title: loc.planTarget,
                       value: loc.weightWeightValue(target),
-                      date: _formatDate(_targetDate, loc),
+                      // Deliberately NOT a projected date: the plan's rate is
+                      // something the app actually knows.
+                      date: current != target
+                          ? loc.planPaceShort(_paceText(u, loc))
+                          : loc.planMaintain,
                       highlighted: true,
                     ),
                   ],
@@ -263,7 +262,7 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
                 if (current != target) ...[
                   const SizedBox(height: 14),
                   Text(
-                    loc.planReachLine(target, _reachMonth(loc)),
+                    loc.planPaceLine(_paceText(u, loc)),
                     style: SalamatDarkType.style(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

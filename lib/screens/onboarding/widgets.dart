@@ -63,22 +63,29 @@ class OnboardingShell extends StatelessWidget {
                 )
               else
                 const SizedBox(height: SalamatDarkDims.gap16),
-              // The body keeps the height it would have with no keyboard, so
-              // `Spacer`/`Expanded` inside the step layouts still resolve, and
-              // a soft-keyboard inset scrolls the frame instead of overflowing
-              // it. The prototype's own onboarding body scrolls too
+              // The body fills the viewport when there is room and scrolls when
+              // there is not.
+              //
+              // It must NOT be pinned to `maxHeight + inset`: that rebuilds the
+              // no-keyboard height inside a box the keyboard already shrank,
+              // while the progress bar and the CTA below keep theirs, so the
+              // step body overflowed by ~34px whenever the keyboard was up.
+              //
+              // `minHeight` + `IntrinsicHeight` is the standard recipe for a
+              // scrollable column that still contains `Spacer`/`Expanded`: a
+              // Spacer contributes nothing to the intrinsic height, so short
+              // steps stretch to fill and tall ones scroll instead of overflow.
+              // The prototype's own onboarding body scrolls too
               // (`overflow-y: auto` on the plan step).
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final inset = MediaQuery.viewInsetsOf(context).bottom;
                     return SingleChildScrollView(
-                      physics: inset > 0
-                          ? const ClampingScrollPhysics()
-                          : const NeverScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: constraints.maxHeight + inset,
-                        child: body,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: IntrinsicHeight(child: body),
                       ),
                     );
                   },

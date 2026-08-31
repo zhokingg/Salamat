@@ -2,59 +2,62 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../services/photo_recognition_service.dart';
 import '../services/purchases_service.dart';
 
-/// Free tier: 1 photo scan PER DAY, reset at local midnight. Manual logging
-/// is free and unlimited. The server-side `photo_usage` table (per-day rows)
-/// backs this up in [PhotoRecognitionService.canUsePhoto].
-const int kFreeDailyPhotoLimit = 1;
-
-/// Pro tier: 10 photo scans per day. The limit itself stays client-side;
-/// the isPro GATE comes from the RevenueCat "pro" entitlement.
-const int kProDailyPhotoLimit = 10;
+/// Free tier: THREE photo scans for the LIFETIME of the account; Pro is
+/// unlimited. Manual logging is free and unlimited and never touches this.
+///
+/// The count is owned by the server (`scan_events`, migration 0006) and spent
+/// inside the `recognize-food` Edge Function. Everything in this file is a
+/// render cache: it makes "2 of 3 left" paint instantly, and it is corrected
+/// by the server on every read and after every scan. A reinstall clears the
+/// cache but not the count.
 
 class SubscriptionState {
   const SubscriptionState({
     this.isPro = false,
-    this.photosUsed = 0,
-    this.usageDay,
+    this.scansUsed = 0,
+    this.allowance = kFreeScanAllowance,
+    this.loaded = false,
   });
 
   /// Driven exclusively by the RevenueCat customer info — there is no
   /// client-side switch to flip this.
   final bool isPro;
 
-  /// Photo scans consumed on [usageDay].
-  final int photosUsed;
+  /// Scans consumed over the account's lifetime, as last reported by the
+  /// server.
+  final int scansUsed;
 
-  /// Local calendar day the counter belongs to. A new local date means the
-  /// counter is stale and the quota is fresh again.
-  final DateTime? usageDay;
+  /// Free allowance, mirrored from the server so a policy change needs no
+  /// client release.
+  final int allowance;
 
-  int get photoLimit => isPro ? kProDailyPhotoLimit : kFreeDailyPhotoLimit;
+  /// Whether the server has answered at least once. Until it has, the UI
+  /// shows no counter rather than a number that might be wrong.
+  final bool loaded;
 
-  /// Photos used TODAY (local date) — 0 if the stored counter is from a
-  /// previous day.
-  int get photosUsedToday {
-    final day = usageDay;
-    if (day == null) return 0;
-    final now = DateTime.now();
-    final sameDay =
-        day.year == now.year && day.month == now.month && day.day == now.day;
-    return sameDay ? photosUsed : 0;
-  }
+  int get scansLeft =>
+      isPro ? 1 << 30 : (allowance - scansUsed).clamp(0, allowance);
 
-  bool get canTakePhoto => photosUsedToday < photoLimit;
+  bool get canTakePhoto => isPro || scansLeft > 0;
+
+  /// True once the free allowance is spent — the point at which the app
+  /// offers a subscription (after showing the result, never before it).
+  bool get exhausted => loaded && !isPro && scansLeft == 0;
 
   SubscriptionState copyWith({
     bool? isPro,
-    int? photosUsed,
-    DateTime? usageDay,
+    int? scansUsed,
+    int? allowance,
+    bool? loaded,
   }) {
     return SubscriptionState(
       isPro: isPro ?? this.isPro,
-      photosUsed: photosUsed ?? this.photosUsed,
-      usageDay: usageDay ?? this.usageDay,
+      scansUsed: scansUsed ?? this.scansUsed,
+      allowance: allowance ?? this.allowance,
+      loaded: loaded ?? this.loaded,
     );
   }
 }
@@ -106,7 +109,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
       });
     } else {
       // No store SDK: nothing will ever call in, but keep the flag honest so
-      // `usePhoto`/`resetDaily` behave identically either way.
+      // the server refresh behaves identically either way.
       Future.microtask(_markReady);
     }
     return const SubscriptionState();
@@ -135,22 +138,31 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
     }
   }
 
-  void usePhoto() {
-    // Only reachable from a user-driven scan, i.e. long after [_markReady];
-    // the guard exists so a pre-init call can never throw.
-    if (!_ready) return;
-    final now = DateTime.now();
+  /// Pulls the authoritative counts from the server.
+  ///
+  /// Safe to call on every app start and whenever the camera surface appears.
+  /// A null answer (offline, or migration 0006 not applied) leaves the cache
+  /// untouched rather than inventing a number.
+  Future<void> refreshFromServer() async {
+    final status = await PhotoRecognitionService.scanStatus();
+    if (!_ready || _disposed || status == null) return;
     state = state.copyWith(
-      photosUsed: state.photosUsedToday + 1,
-      usageDay: DateTime(now.year, now.month, now.day),
+      isPro: status.isPro || state.isPro,
+      scansUsed: status.used,
+      allowance: status.allowance,
+      loaded: true,
     );
   }
 
-  /// Explicit counter reset (the local-date check in [SubscriptionState]
-  /// already makes stale counters read as 0).
-  void resetDaily() {
-    if (!_ready) return;
-    state = state.copyWith(photosUsed: 0);
+  /// Applies the counts the Edge Function returned alongside a scan result,
+  /// so the button updates without a second round trip.
+  void applyServerCounts({required int used, int? allowance}) {
+    if (!_ready || _disposed) return;
+    state = state.copyWith(
+      scansUsed: used,
+      allowance: allowance ?? state.allowance,
+      loaded: true,
+    );
   }
 }
 

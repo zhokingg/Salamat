@@ -20,7 +20,17 @@
   <string>????</string>
   <key>CFBundleVersion</key>
   <string>1.0</string>
-  <key>MinimumOSVersion</key>
-  <string>13.0</string>
+  <!-- Restored by hand because Flutter's iOS migration deletes it on every
+       `flutter build ios/ipa` ("Upgrading AppFrameworkInfo.plist").
+
+       MEASURED, 3.41.9: it makes no difference. A release device build with
+       this key ABSENT still produced
+           build/ios/iphoneos/Runner.app/Frameworks/App.framework
+       carrying MinimumOSVersion 13.0 — Flutter injects it from
+       IPHONEOS_DEPLOYMENT_TARGET at build time. The real sources of truth are
+       IPHONEOS_DEPLOYMENT_TARGET = 13.0 in project.pbxproj and
+       `platform :ios, '13.0'` in the Podfile; both are set.
+
+       So if it disappears again, check the built framework before chasing it. -->
 </dict>
 </plist>

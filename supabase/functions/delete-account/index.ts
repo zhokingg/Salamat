@@ -5,8 +5,8 @@
 //   their account and data. The client cannot delete an auth user (the anon
 //   key has no admin rights), so this function does it server-side with the
 //   service-role key. Every user table (profiles, meals, weight_logs,
-//   photo_usage) references auth.users(id) ON DELETE CASCADE, so removing the
-//   auth user wipes all of their data in one shot.
+//   water_logs, scan_events, coach_events) references auth.users(id) ON DELETE
+//   CASCADE, so removing the auth user wipes all of their data in one shot.
 //
 // Security:
 //   The user id is NEVER taken from the request body. It is derived from the
