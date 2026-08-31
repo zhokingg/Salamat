@@ -3622,3 +3622,261 @@ Release device build succeeds. Nothing committed.
 
 The bundle also dropped from 39.9 MB to 32.0 MB, which is the `flutter clean`
 clearing stale slices from earlier builds, not an effect of this change.
+
+
+---
+
+# Four fixes from the on-device test (2026-08-30)
+
+## 1. Photo compression — measured, before and after
+
+**The fix.** `lib/services/image_prep_service.dart`: long edge 1568, JPEG 85,
+EXIF dropped, never upscales. `flutter_image_compress` does the work natively —
+resizing a 12 MP frame in Dart would cost seconds on the main isolate, which is
+the opposite of the point. It also applies the EXIF orientation to the pixels
+before discarding the metadata, so stripping EXIF cannot leave the model
+looking at a sideways plate.
+
+**Measured against the deployed function**, same photo both times, 3840x2160:
+
+| | Before | After | |
+|---|---|---|---|
+| JPEG bytes | 2 381 512 | **347 127** | −85% |
+| `request_bytes` (base64) | 3 175 352 | **462 836** | **6.9x smaller** |
+| `input_tokens` | 1766 | **1766** | **unchanged** |
+| client wall time, send → response, run 1 | 18 954 ms | **9 621 ms** | |
+| client wall time, send → response, run 2 | 6 427 ms | **4 830 ms** | |
+| compression cost | — | 207–211 ms | |
+
+**Tokens did not move, which is what you predicted.** 1766 in both columns, and
+1766 is the number your device reported too — because the count depends on the
+dimensions the model sees, not on the bytes we send. It downscales anything
+over its long-edge limit before counting, so the extra 2.7 MB bought nothing
+and cost the whole upload.
+
+**Two honest caveats on those numbers.**
+
+* The test photo is a 4K landscape, not a dish. A landscape is the *harder*
+  case for compression (more detail per pixel), and the token count is
+  dimension-driven, so the comparison holds — but the model answers
+  `low_confidence`, which is why running this twice cost no scans.
+* **Wall times are from the simulator on wifi, and the variance is large**
+  (18.9 s vs 6.4 s for identical payloads). They are not your 13 s on a phone.
+  What is reproducible is the byte count and the token count. Both runs agree
+  on the direction: roughly half the time, from removing 85% of the upload.
+* 347 KB is above the 200–300 KB you expected. On a plate of food it will
+  usually land lower; a detailed landscape at 1568x882 is close to the worst
+  case for JPEG 85.
+
+**The size guard — your premise was right to check, but the number is wrong.**
+docs.claude.com, Vision → Image limits and costs:
+
+> "The maximum size per image is: 10 MB (base64-encoded) when using the Claude
+> API directly. 5 MB (base64-encoded) on Amazon Bedrock and Google Cloud."
+
+5 MB is the Bedrock/Vertex figure. `recognize-food` calls api.anthropic.com
+directly, so the ceiling is **10 MB of base64**, and our guard at 8 000 000
+base64 characters is *below* it, not above. It is conservative in the safe
+direction, so I left the value alone and corrected the comment, which had
+recorded the wrong number. Function redeployed.
+
+**One thing the docs turned up that is worth knowing.** Token cost is no longer
+`w*h/750`; it is `⌈width/28⌉ × ⌈height/28⌉` visual tokens, with two tiers.
+`claude-sonnet-4-6`, which this function uses, is standard tier: long edge
+1568 **and** a 1568 visual-token cap. A 1568x882 image is 56x32 = 1792 visual
+tokens, over that cap, so the server still downsizes it to about 1456x819
+(1560 tokens). In other words the last few pixels above ~1456 are discarded on
+arrival. I did not go below 1568 because you said not to, and the cost is zero
+either way — but if you ever want to shave another 15% off the upload for
+free, 1456 is the number that actually survives.
+
+## 2. Scan indicator
+
+`lib/widgets/scan_progress.dart` — three stages, current one spinning,
+completed ones ticked, nothing else. Extracted from the camera screen so it can
+be rendered and screenshotted on its own.
+
+| Stage | Starts when | ru / en |
+|---|---|---|
+| 1 | the shutter fires | Готовлю фото / Preparing the photo |
+| 2 | compression returns | Распознаю блюдо / Recognising the dish |
+| 3 | the response arrives | Считаю калории / Working out the calories |
+
+**No percentage, and no fourth stage.** You asked for "отправка, распознавание,
+подсчёт" — three labels. I could give you two of those boundaries honestly and
+not the third: `functions.invoke` reports nothing when the request body has
+finished going out, so a line between "sending" and "recognising" would have to
+be drawn by a timer. Upload and recognition are therefore one stage, and the
+third boundary is the response landing, which is real. Every transition is an
+event that happened.
+
+`fix_scanstage_{preparing,recognising,calculating}_{en,ru}.png`. Rendered
+directly rather than through the camera: the simulator has no camera, so
+`CameraScreen` shows its unavailable stub there and the overlay never appears.
+Same widget, same three states.
+
+## 3. Tab state
+
+`ShellRoute` → `StatefulShellRoute.indexedStack`, four branches, each with its
+own Navigator inside an IndexedStack. Both symptoms follow from that one
+change:
+
+* **the ring no longer replays.** `DashboardScreen` is not rebuilt, so
+  `initState` — and `_ringCtrl.forward()` — runs once. `fix_tabs_3_back_*.png`
+  is taken **400 ms** after returning from Progress, deliberately too soon for
+  an entrance animation to have finished: the ring reads its final 2000 with
+  nothing in flight.
+* **no two headers at once.** Branch switching swaps the visible index instead
+  of pushing a route, so there is no transition for the outgoing and incoming
+  headers to overlap during.
+
+Data stays live: every screen reads Riverpod providers, which outlive the
+widgets, so logging a meal rebuilds the visible tab as before. Re-tapping the
+active tab pops that branch to its root, which is what a tab bar is expected to
+do.
+
+## 4. The "personal plan" screen
+
+The 96x200 green panel holding a person pictogram is gone — a third of the
+screen carrying no information.
+
+In its place: the four answers as a 2x2 grid using the full width, **two more
+tiles** echoing the current weight and height the BMI is computed from, and a
+BMI scale — four bands, the user's own band picked out, a marker at their
+value, and a line saying what the number does not know.
+
+Deliberate choices, since this is a stranger's second screen after telling an
+app their weight:
+
+* **«Ожирение» is gone.** `bmiBandObese` now reads «Заметно выше нормы» /
+  "Well above normal", and the band label on the scale is «Намного выше» /
+  "Well over".
+* **The highlight is grey, not green.** Green would read as approval in the
+  normal band and as a bizarre congratulation in the top one. It marks where
+  you are and says nothing about it. The only coloured element is the small
+  marker.
+* **A note under the scale**: «Это грубый ориентир, а не диагноз: ИМТ ничего не
+  знает про мышцы и телосложение.»
+
+`fix_summary_bmi_{en,ru}.png` (BMI 24.4, the value from your recording) and
+`fix_summary_bmi_high_{en,ru}.png` (BMI 32.9, to check the top band still reads
+as a reference).
+
+**Two bugs of my own, caught in the screenshots and fixed:**
+
+* `LayoutBuilder` inside `OnboardingShell`'s `IntrinsicHeight` threw
+  *"LayoutBuilder does not support returning intrinsic dimensions"*. Replaced
+  with `Align`, which maps the BMI onto [-1,1] and insets by the marker width.
+* The band label beside the value squeezed "32.9" down to "3...". The label now
+  sits under the number.
+
+## Verification
+
+`fvm flutter analyze` — 2 pre-existing infos. `fvm flutter test` — green.
+`recognize-food` redeployed (comment only; no behaviour change). Nothing
+committed.
+
+New dependency: `flutter_image_compress ^2.5.1`.
+
+
+---
+
+# Pre-build pass: 1456 px, dependency audit, build 16
+
+## 1. Down to 1456 — and it uncovered a bug in yesterday's fix
+
+Lowering the number was supposed to be a two-character change. Reading the
+dimensions out of the uploaded JPEG instead of assuming them showed that
+**yesterday's compression was never producing what I said it was.**
+
+`flutter_image_compress`'s `minWidth`/`minHeight` are **minimums, not a
+bounding box**: it scales until BOTH are satisfied. Passing 1456/1456 to a 16:9
+frame gave **2588x1456** — a long edge of 2588, not 1456. Yesterday's 1568/1568
+gave 2787x1568.
+
+**The token count never betrayed it**, because the server downscales to its own
+cap either way and reported 1766 in every case. Only the pixel dimensions did.
+That is the whole argument for measuring the artefact rather than the outcome.
+
+Fixed: the source dimensions are read first (`ui.ImageDescriptor.encoded`, no
+full decode), the target is computed from the long edge, and the exact pair is
+passed. Same 3840x2160 photo, through the deployed function:
+
+| | Original | Yesterday, as shipped | **Now** |
+|---|---|---|---|
+| dimensions uploaded | 3840x2160 | 2588x1456 *(intended 1456x819)* | **1456x819** |
+| JPEG bytes | 2 381 512 | 306 703 | **123 701** |
+| `request_bytes` (base64) | 3 175 352 | 408 940 | **164 936** |
+| `input_tokens` | 1766 | 1766 | **1766** |
+| shrink vs original | — | 7.8x | **19.3x** |
+| prepare cost | — | ~199 ms | **133–149 ms** |
+| send → response, run A | 11 073 ms | — | **3 825 ms** |
+| send → response, run B | 11 309 ms | — | **7 836 ms** |
+
+**Tokens unchanged at 1766 across every variant**, which is the confirmation
+you asked for: the model sees the same image, we just stop paying to ship the
+pixels it discards.
+
+The upload is now **165 KB of base64**, below the 200–300 KB you predicted, and
+2.5x smaller than what I reported yesterday. Wall-clock still swings (3.8 s and
+7.8 s for identical payloads on simulator wifi), so treat the byte counts as
+the measurement and the timings as the direction.
+
+## 2. `flutter_image_compress` audit
+
+| | |
+|---|---|
+| Version | 2.5.1, published **2026-07-25** (five weeks old) |
+| Declared support | `sdk >=2.12.0 <4.0.0`, `flutter >=2.0.0` |
+| Against 3.41.9 | fine — the constraint is a floor, and it builds, runs and is measured working above |
+| Locked here | `flutter_image_compress 2.5.1`, `_common 1.1.1`, `_platform_interface 1.1.0`, plus `_macos` and `_ohos` (never compiled on iOS) |
+
+Compare with the `mobile_scanner` check: 7.4.0, published 2026-07-20, and it
+declares `flutter >=3.29.0`. The compress package is the looser of the two.
+
+**What it drags into the iOS build — this is the part worth your attention.**
+`flutter_image_compress_common` depends on SDWebImage:
+
+| Framework | Size in the built app |
+|---|---|
+| `SDWebImage.framework` | 824 KB |
+| `libwebp.framework` | 600 KB |
+| `SDWebImageWebPCoder.framework` | 100 KB |
+| `flutter_image_compress_common.framework` | 108 KB |
+| **total** | **~1.6 MB** |
+
+App bundle: **32.0 MB → 33.7 MB**. So about 1.6 MB, 5%, for a JPEG resize.
+
+**My honest read: keep it, but know what you are paying for.** SDWebImage and
+libwebp are there so the plugin can read and write WebP and animated formats,
+none of which we use — we hand it a JPEG and ask for a JPEG. It is dead weight
+in the sense that it serves no path this app takes.
+
+**The alternative, if 1.6 MB matters:** decode with `dart:ui`
+(`instantiateImageCodec` with `targetWidth`, which resizes natively during
+decode) and JPEG-encode the result with the pure-Dart `image` package. Zero
+pods, nothing added to the iOS build. The cost is that JPEG encoding moves into
+Dart — I would expect a few hundred milliseconds for a 1456x819 frame against
+the 133–149 ms the native path takes now, and it would need an isolate to keep
+that off the UI thread. That is a real piece of work, not a swap, so I have not
+done it on my own judgement. Say the word.
+
+Two smaller notes: the plugin applies EXIF orientation before dropping the
+metadata, which is why stripping EXIF is safe here; and `_macos` / `_ohos`
+appear in `pubspec.lock` but compile into nothing on an iOS build.
+
+## 3. Build number
+
+`pubspec.yaml` → `1.0.0+16`. Confirmed in the built bundle:
+
+```
+CFBundleShortVersionString => 1.0.0
+CFBundleVersion            => 16
+MinimumOSVersion           => 15.0
+```
+
+## Verification
+
+`fvm flutter analyze` — 2 pre-existing infos. `fvm flutter test` — green.
+`fvm flutter build ios --release --no-codesign` — succeeds, 33.7 MB. Nothing
+committed.

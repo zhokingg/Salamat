@@ -259,8 +259,19 @@ serve(async (req: Request) => {
   if (!imageBase64 || typeof imageBase64 !== "string") {
     return jsonResponse(400, { error: "missing_image" });
   }
-  // Guard against absurdly large payloads. Anthropic accepts up to 5MB
-  // images base64-encoded; 8MB of base64 ≈ 6MB binary — generous ceiling.
+  // Guard against absurdly large payloads.
+  //
+  // CHECKED against docs.claude.com (Vision -> Image limits and costs,
+  // 2026-08-30). The old comment here said the limit was 5 MB; that number is
+  // the Amazon Bedrock / Google Cloud one. Calling the Claude API directly, as
+  // this function does, the documented ceiling is:
+  //     "The maximum size per image is: 10 MB (base64-encoded) when using the
+  //      Claude API directly."
+  // So 8,000,000 base64 characters is BELOW the real limit, not above it — the
+  // guard is conservative, which is the right direction, and it stays.
+  //
+  // Note it is measured on the base64 string, which is what the documented
+  // limit is measured on too. No conversion needed.
   if (imageBase64.length > 8_000_000) {
     return jsonResponse(413, { error: "image_too_large" });
   }

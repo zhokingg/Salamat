@@ -115,7 +115,13 @@ class PhotoRecognitionService {
   /// `confidence` (0..1). Returns null on any failure (network, upstream,
   /// model returned non-JSON). Caller is responsible for checking
   /// `confidence` before showing a result.
-  static Future<Map<String, dynamic>?> recognizeFood(File imageFile) async {
+  /// [prepared] lets the caller pass bytes it has already shrunk (and time
+  /// that step separately for the progress indicator). When it is null the
+  /// file is read as-is — no silent second compression pass.
+  static Future<Map<String, dynamic>?> recognizeFood(
+    File imageFile, {
+    Uint8List? prepared,
+  }) async {
     if (!SupabaseService.isReady) {
       if (kDebugMode) {
         debugPrint('recognizeFood: SupabaseService not initialised');
@@ -123,10 +129,16 @@ class PhotoRecognitionService {
       return null;
     }
     try {
-      final bytes = await imageFile.readAsBytes();
+      final bytes = prepared ?? await imageFile.readAsBytes();
       final b64 = base64Encode(bytes);
+      // Prepared bytes are always JPEG; only an un-prepared file can be a PNG.
       final ext = imageFile.path.split('.').last.toLowerCase();
-      final mediaType = (ext == 'png') ? 'image/png' : 'image/jpeg';
+      final mediaType =
+          (prepared == null && ext == 'png') ? 'image/png' : 'image/jpeg';
+      if (kDebugMode) {
+        debugPrint('recognizeFood: uploading ${b64.length} base64 chars '
+            '(${bytes.length ~/ 1024} KB of JPEG)');
+      }
 
       final res = await SupabaseService.client.functions.invoke(
         _kFunctionName,

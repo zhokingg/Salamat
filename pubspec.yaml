@@ -2,7 +2,7 @@ name: salamat
 description: "Salamat — nutrition tracker for Kazakhstan, Kyrgyzstan and Uzbekistan."
 publish_to: 'none'
 
-version: 1.0.0+15
+version: 1.0.0+16
 
 environment:
   sdk: ^3.7.2
@@ -19,6 +19,10 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_riverpod: ^2.5.0
   camera: ^0.11.4
+  # Native JPEG resize/re-encode before upload. Pure-Dart resizing of a
+  # 12 MP frame costs seconds on the main isolate; this is milliseconds, and
+  # it applies EXIF orientation while dropping the metadata.
+  flutter_image_compress: ^2.5.1
   mobile_scanner: ^7.4.0
   speech_to_text: ^7.4.0
   shared_preferences: ^2.2.3

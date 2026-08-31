@@ -9,9 +9,13 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../theme/salamat_dark.dart';
 
 class DashboardShell extends ConsumerWidget {
-  const DashboardShell({super.key, required this.child});
+  const DashboardShell({super.key, required this.navigationShell});
 
-  final Widget child;
+  /// The four tab branches, kept alive in an IndexedStack by
+  /// `StatefulShellRoute.indexedStack`. Switching tabs goes through
+  /// [StatefulNavigationShell.goBranch], which swaps the visible index instead
+  /// of pushing a route — no rebuild, no transition, no two headers at once.
+  final StatefulNavigationShell navigationShell;
 
   // Tabs carry the icon + path as data; the label is resolved per-locale
   // from AppLocalizations at render time (was previously hardcoded English).
@@ -39,13 +43,6 @@ class DashboardShell extends ConsumerWidget {
     ),
   ];
 
-  int _currentIndex(String location) {
-    for (var i = 0; i < _tabs.length; i++) {
-      if (location.startsWith(_tabs[i].path)) return i;
-    }
-    return 0;
-  }
-
   void _onCameraPressed(BuildContext context, WidgetRef ref) {
     final sub = ref.read(subscriptionProvider);
     if (sub.canTakePhoto) {
@@ -58,17 +55,19 @@ class DashboardShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final location = GoRouterState.of(context).uri.toString();
-    final index = _currentIndex(location);
+    final index = navigationShell.currentIndex;
     final loc = AppLocalizations.of(context)!;
     final sub = ref.watch(subscriptionProvider);
 
     return Scaffold(
       backgroundColor: sc.bg,
-      body: child,
+      body: navigationShell,
       bottomNavigationBar: _TabBar(
         index: index,
         tabs: _tabs,
+        // `initialLocation: true` on a re-tap pops that branch back to its
+        // root, which is the behaviour people expect from a tab bar.
+        onTab: (i) => navigationShell.goBranch(i, initialLocation: i == index),
         // Remaining free scans, readable from the very first screen. Null for
         // Pro, and until the server has answered once.
         counter:
@@ -110,6 +109,7 @@ class _TabBar extends StatelessWidget {
   const _TabBar({
     required this.index,
     required this.tabs,
+    required this.onTab,
     required this.onCamera,
     this.counter,
     this.counterSpent = false,
@@ -117,6 +117,7 @@ class _TabBar extends StatelessWidget {
 
   final int index;
   final List<_TabItem> tabs;
+  final void Function(int) onTab;
   final VoidCallback onCamera;
 
   /// "2 of 3 left", or null when there is nothing to count.
@@ -181,7 +182,7 @@ class _TabBar extends StatelessWidget {
       width: SalamatDarkDims.navTabWidth,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => context.go(tab.path),
+        onTap: () => onTab(i),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

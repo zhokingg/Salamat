@@ -240,7 +240,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bmiBandOver => 'Slightly above normal';
 
   @override
-  String get bmiBandObese => 'Obese';
+  String get bmiBandObese => 'Well above normal';
+
+  @override
+  String get bmiScaleTitle => 'Where your BMI sits';
+
+  @override
+  String get bmiScaleZoneUnder => 'Under';
+
+  @override
+  String get bmiScaleZoneNormal => 'Normal';
+
+  @override
+  String get bmiScaleZoneOver => 'Over';
+
+  @override
+  String get bmiScaleZoneHigh => 'Well over';
+
+  @override
+  String get bmiScaleNote =>
+      'A rough reference, not a diagnosis — BMI knows nothing about muscle or build.';
 
   @override
   String get targetTitle => 'What is your\ntarget weight?';
@@ -378,6 +397,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get summaryStatBmi => 'BMI';
+
+  @override
+  String get summaryStatNow => 'Now';
 
   @override
   String get summaryStatTarget => 'Target weight';
@@ -878,6 +900,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cameraLoading => 'Recognising dish...';
+
+  @override
+  String get scanStagePrepare => 'Preparing the photo';
+
+  @override
+  String get scanStageRecognise => 'Recognising the dish';
+
+  @override
+  String get scanStageCalculate => 'Working out the calories';
 
   @override
   String get cameraNotRecognized => 'Could not recognise the dish';

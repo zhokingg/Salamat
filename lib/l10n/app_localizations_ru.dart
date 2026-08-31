@@ -240,7 +240,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bmiBandOver => 'Чуть выше нормы';
 
   @override
-  String get bmiBandObese => 'Ожирение';
+  String get bmiBandObese => 'Заметно выше нормы';
+
+  @override
+  String get bmiScaleTitle => 'Где твой ИМТ';
+
+  @override
+  String get bmiScaleZoneUnder => 'Ниже';
+
+  @override
+  String get bmiScaleZoneNormal => 'Норма';
+
+  @override
+  String get bmiScaleZoneOver => 'Выше';
+
+  @override
+  String get bmiScaleZoneHigh => 'Намного выше';
+
+  @override
+  String get bmiScaleNote =>
+      'Это грубый ориентир, а не диагноз: ИМТ ничего не знает про мышцы и телосложение.';
 
   @override
   String get targetTitle => 'Какой твой\nцелевой вес?';
@@ -378,6 +397,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get summaryStatBmi => 'ИМТ';
+
+  @override
+  String get summaryStatNow => 'Сейчас';
 
   @override
   String get summaryStatTarget => 'Целевой вес';
@@ -881,6 +903,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cameraLoading => 'Определяю блюдо...';
+
+  @override
+  String get scanStagePrepare => 'Готовлю фото';
+
+  @override
+  String get scanStageRecognise => 'Распознаю блюдо';
+
+  @override
+  String get scanStageCalculate => 'Считаю калории';
 
   @override
   String get cameraNotRecognized => 'Не удалось определить блюдо';

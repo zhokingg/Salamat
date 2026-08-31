@@ -527,8 +527,44 @@ abstract class AppLocalizations {
   /// No description provided for @bmiBandObese.
   ///
   /// In en, this message translates to:
-  /// **'Obese'**
+  /// **'Well above normal'**
   String get bmiBandObese;
+
+  /// No description provided for @bmiScaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where your BMI sits'**
+  String get bmiScaleTitle;
+
+  /// No description provided for @bmiScaleZoneUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'Under'**
+  String get bmiScaleZoneUnder;
+
+  /// No description provided for @bmiScaleZoneNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get bmiScaleZoneNormal;
+
+  /// No description provided for @bmiScaleZoneOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Over'**
+  String get bmiScaleZoneOver;
+
+  /// No description provided for @bmiScaleZoneHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Well over'**
+  String get bmiScaleZoneHigh;
+
+  /// No description provided for @bmiScaleNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A rough reference, not a diagnosis — BMI knows nothing about muscle or build.'**
+  String get bmiScaleNote;
 
   /// No description provided for @targetTitle.
   ///
@@ -769,6 +805,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'BMI'**
   String get summaryStatBmi;
+
+  /// No description provided for @summaryStatNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get summaryStatNow;
 
   /// No description provided for @summaryStatTarget.
   ///
@@ -1633,6 +1675,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recognising dish...'**
   String get cameraLoading;
+
+  /// No description provided for @scanStagePrepare.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the photo'**
+  String get scanStagePrepare;
+
+  /// No description provided for @scanStageRecognise.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognising the dish'**
+  String get scanStageRecognise;
+
+  /// No description provided for @scanStageCalculate.
+  ///
+  /// In en, this message translates to:
+  /// **'Working out the calories'**
+  String get scanStageCalculate;
 
   /// No description provided for @cameraNotRecognized.
   ///

@@ -121,24 +121,51 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const PlanReadyScreen(),
     ),
     // ---- Main app ----
-    ShellRoute(
-      builder: (context, state, child) => DashboardShell(child: child),
-      routes: [
-        GoRoute(
-          path: '/dashboard',
-          builder: (context, state) => const DashboardScreen(),
+    // StatefulShellRoute, not ShellRoute: each tab keeps its own Navigator and
+    // the four live inside an IndexedStack, so switching tabs shows a screen
+    // that is still there rather than building a new one. Two things that were
+    // wrong before follow from that:
+    //   * the calories ring replayed its entrance animation on every return,
+    //     because DashboardScreen was recreated and initState ran again;
+    //   * the branch swap is instantaneous, so two headers can no longer be
+    //     on screen at once mid-slide.
+    // Data stays live regardless — every screen reads Riverpod providers, which
+    // outlive the widgets and rebuild the visible tab when a meal is logged.
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          DashboardShell(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/dashboard',
+              builder: (context, state) => const DashboardScreen(),
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/meals',
-          builder: (context, state) => const MealsScreen(),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/meals',
+              builder: (context, state) => const MealsScreen(),
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/progress',
-          builder: (context, state) => const ProgressScreen(),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/progress',
+              builder: (context, state) => const ProgressScreen(),
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/profile',
+              builder: (context, state) => const ProfileScreen(),
+            ),
+          ],
         ),
       ],
     ),

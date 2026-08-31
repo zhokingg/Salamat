@@ -20,8 +20,10 @@ import '../manual_entry/photo_limit_sheet.dart';
 import '../onboarding/widgets.dart' show OnboardingPrimaryButton;
 import '../../services/barcode_lookup_service.dart';
 import '../../services/voice_entry_service.dart';
+import '../../services/image_prep_service.dart';
 import '../../services/photo_recognition_service.dart';
 import '../../theme/salamat_dark.dart';
+import '../../widgets/scan_progress.dart';
 
 /// Prototype camera canvas (`#07090C`), darker than `--bg` in light mode
 /// and identical in both themes.
@@ -139,7 +141,13 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   final TextEditingController _voiceCtrl = TextEditingController();
   bool _voiceListening = false;
   bool _voiceParsing = false;
-  bool _processing = false;
+  /// Where the scan is right now. Every transition below is driven by an
+  /// event that actually happened — never by a timer, and never by a
+  /// percentage, because the API reports no progress and any number drawn here
+  /// would be invented.
+  ScanStage _stage = ScanStage.idle;
+
+  bool get _processing => _stage != ScanStage.idle;
   late final AnimationController _pulseCtrl;
   late final Animation<double> _pulse;
 
@@ -370,11 +378,11 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   Future<void> _shutter() async {
     if (_processing) return;
     if (_controller == null || !_initialized) return;
-    setState(() => _processing = true);
+    setState(() => _stage = ScanStage.preparing);
 
     if (!ref.read(subscriptionProvider).canTakePhoto) {
       setState(() {
-        _processing = false;
+        _stage = ScanStage.idle;
         _outOfPhotos = true;
       });
       return;
@@ -382,6 +390,13 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
 
     try {
       final xfile = await _controller!.takePicture();
+
+      // Shrink before uploading. The camera hands back the full sensor frame
+      // (~2 MB at 3840x2160); the model downscales anything over 1568 px on
+      // arrival, so those bytes only ever cost upload time.
+      final prepared = await ImagePrepService.prepare(File(xfile.path));
+      if (!mounted) return;
+      setState(() => _stage = ScanStage.recognising);
 
       // Three failure modes are distinguished here:
       //   1. SocketException / connection refused → "No connection"
@@ -394,7 +409,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       _FailureKind? failure;
       var quotaExhausted = false;
       try {
-        json = await PhotoRecognitionService.recognizeFood(File(xfile.path));
+        json = await PhotoRecognitionService.recognizeFood(
+          File(xfile.path),
+          prepared: prepared.bytes,
+        );
       } on SocketException {
         failure = _FailureKind.network;
       } on HttpException {
@@ -411,7 +429,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       }
 
       if (!mounted) return;
-      setState(() => _processing = false);
+      // Everything below is local work on a response we already have, so the
+      // last stage starts here and nowhere else.
+      setState(() => _stage =
+          (failure != null || quotaExhausted || json == null)
+              ? ScanStage.idle
+              : ScanStage.calculating);
 
       if (quotaExhausted) {
         // Re-read the authoritative counts, then offer manual entry first and
@@ -456,7 +479,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       // Prototype `camDone`: the frame turns neon and the dish is labelled
       // before the confirmation sheet appears.
       setState(() {
-        _processing = false;
+        _stage = ScanStage.idle;
         _detected = r;
       });
       await Future<void>.delayed(const Duration(milliseconds: 700));
@@ -472,7 +495,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _processing = false);
+      setState(() => _stage = ScanStage.idle);
       if (kDebugMode) debugPrint('shutter error: $e');
       _showFailureSnack(_FailureKind.server);
     }
@@ -1083,7 +1106,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                             right: 0,
                             bottom: 200,
                             child: _processing
-                                ? _LabelOverlay(text: loc.cameraLoading)
+                                ? ScanProgress(stage: _stage)
                                 : _LabelOverlay(
                                     text: loc.cameraHint,
                                     dim: true,
