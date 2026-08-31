@@ -2,7 +2,7 @@ name: salamat
 description: "Salamat — nutrition tracker for Kazakhstan, Kyrgyzstan and Uzbekistan."
 publish_to: 'none'
 
-version: 1.0.0+14
+version: 1.0.0+15
 
 environment:
   sdk: ^3.7.2

@@ -20,17 +20,28 @@
   <string>????</string>
   <key>CFBundleVersion</key>
   <string>1.0</string>
-  <!-- Restored by hand because Flutter's iOS migration deletes it on every
-       `flutter build ios/ipa` ("Upgrading AppFrameworkInfo.plist").
+  <!-- MinimumOSVersion for App.framework.
 
-       MEASURED, 3.41.9: it makes no difference. A release device build with
-       this key ABSENT still produced
-           build/ios/iphoneos/Runner.app/Frameworks/App.framework
-       carrying MinimumOSVersion 13.0 — Flutter injects it from
-       IPHONEOS_DEPLOYMENT_TARGET at build time. The real sources of truth are
-       IPHONEOS_DEPLOYMENT_TARGET = 13.0 in project.pbxproj and
-       `platform :ios, '13.0'` in the Podfile; both are set.
+       Raised 13.0 -> 15.0 for ITMS-90068: from spring 2027 Apple stops
+       accepting builds whose minimum is below 15.0.
 
-       So if it disappears again, check the built framework before chasing it. -->
+       MEASURED, 3.41.9: this key does NOT control the built framework.
+       With 15.0 here and IPHONEOS_DEPLOYMENT_TARGET = 15.0, the produced
+       build/ios/iphoneos/Runner.app/Frameworks/App.framework still reports
+       MinimumOSVersion 13.0, because the tool compiles it with
+       -miphoneos-version-min=FlutterDarwinPlatform.ios.deploymentTarget(),
+       hardcoded to Version(13, 0) in
+       packages/flutter_tools/lib/src/darwin/darwin.dart:62. The prebuilt
+       Flutter.framework is 13.0 for the same reason.
+
+       What Apple reads for the app's minimum is the APP bundle's Info.plist
+       and the binary's LC_BUILD_VERSION, both of which are 15.0. Embedded
+       frameworks declaring a LOWER minimum than the host app are normal.
+
+       The real sources of truth are IPHONEOS_DEPLOYMENT_TARGET = 15.0 in
+       project.pbxproj and `platform :ios, '15.0'` in the Podfile. Flutter's
+       migration deletes this key on some builds; that is not a regression. -->
+  <key>MinimumOSVersion</key>
+  <string>15.0</string>
 </dict>
 </plist>

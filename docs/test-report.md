@@ -3513,3 +3513,112 @@ One note: running `pod install` by hand from `ios/` fails on this machine
 (CocoaPods 1.17.0 / Ruby 4.0.6 backtrace). It works fine when Flutter invokes
 it during a build, which is the path that matters — but do not be surprised by
 the manual command.
+
+
+---
+
+# iOS minimum raised 13.0 -> 15.0 (ITMS-90068)
+
+## Changed in the three places you named, plus the build number
+
+| File | Setting | Before | After |
+|---|---|---|---|
+| `ios/Runner.xcodeproj/project.pbxproj` | `IPHONEOS_DEPLOYMENT_TARGET` (Debug, Profile, Release — all three) | 13.0 | **15.0** |
+| `ios/Podfile` | `platform :ios` | '13.0' | **'15.0'** |
+| `ios/Flutter/AppFrameworkInfo.plist` | `MinimumOSVersion` | 13.0 | **15.0** |
+| `pubspec.yaml` | build number | +14 | **+15** |
+
+(The working tree had moved to `1.0.0+14` since I last touched it — you
+committed and bumped. Set to 15 as asked.)
+
+## Dependency compatibility — nothing needs more than 15.0
+
+Read out of each package's podspec at the exact version in `pubspec.lock`,
+plus the transitive RevenueCat pod:
+
+| Pod | Requires iOS ≥ |
+|---|---|
+| `camera_avfoundation` 0.9.23+2 | 13.0 |
+| `speech_to_text` 7.4.0 | 13.0 |
+| `purchases_flutter` 8.11.0 | 13.0 |
+| `RevenueCat` 5.32.0 | 13.0 |
+| `mobile_scanner` 7.4.0 | 12.0 |
+| `shared_preferences_foundation` | 12.0 |
+| `path_provider_foundation` | 12.0 |
+| `url_launcher_ios` 6.3.4 | 12.0 |
+| `app_links` 6.4.1 | 12.0 |
+| `permission_handler_apple` 9.4.7 | 8.0 |
+
+The highest is 13.0, so raising the floor to 15.0 clears everything and no
+dependency had to move. `pod install` regenerated without complaint.
+
+## The rebuilt bundle
+
+```
+$ fvm flutter clean && fvm flutter build ios --release --no-codesign
+✓ Built build/ios/iphoneos/Runner.app (32.0MB)
+
+$ plutil -p build/ios/iphoneos/Runner.app/Info.plist
+  "MinimumOSVersion" => "15.0"
+  "CFBundleVersion" => "15"
+  "CFBundleShortVersionString" => "1.0.0"
+  "CFBundleIdentifier" => "kg.salamat.app"
+
+$ vtool -show-build-version build/ios/iphoneos/Runner.app/Runner
+      cmd LC_BUILD_VERSION
+ platform IOS
+    minos 15.0
+      sdk 26.5
+```
+
+Both places Apple reads the app's own minimum — the bundle `Info.plist` and the
+binary's `LC_BUILD_VERSION` — say 15.0.
+
+## What did NOT move to 15.0, and why it is fine
+
+Embedded frameworks, straight out of the built app:
+
+| Framework | MinimumOSVersion |
+|---|---|
+| `App.framework` | **13.0** |
+| `Flutter.framework` | **13.0** |
+| `RevenueCat`, `PurchasesHybridCommon`, `purchases_flutter`, `camera_avfoundation`, `speech_to_text` | 13.0 |
+| `CwlCatchException`, `CwlCatchExceptionSupport` | 12.0 |
+| `app_links`, `mobile_scanner`, `path_provider_foundation`, `shared_preferences_foundation`, `url_launcher_ios`, `integration_test` | 15.0 |
+
+**`App.framework` and `Flutter.framework` cannot be raised on Flutter 3.41.9.**
+I set `AppFrameworkInfo.plist` to 15.0 and the built framework still came out
+13.0 — the tool does not read that key for this. It compiles App.framework with
+`-miphoneos-version-min=FlutterDarwinPlatform.ios.deploymentTarget()`, and that
+value is hardcoded:
+
+```dart
+// packages/flutter_tools/lib/src/darwin/darwin.dart:62
+return Version(13, 0, null);
+```
+
+`Flutter.framework` is a prebuilt engine artifact built against the same 13.0.
+Raising them means a newer Flutter — which this project cannot take, because
+`IconData` became `final` in 3.44 and both icon packages subclass it (see
+`CLAUDE.md`).
+
+**This should not block the upload.** A framework declaring a *lower* minimum
+than its host app is the normal, accepted direction — it means the framework
+also runs on older systems the app no longer supports. ITMS-90068 is about the
+app's own minimum, and that is 15.0 in both authoritative places. The reverse
+case, a framework demanding *more* than the app, is what gets rejected, and
+nothing here exceeds 15.0.
+
+I am flagging it anyway because I am reading Apple's rule as you described it
+rather than from the notice itself: **if the 2027 check turns out to inspect
+embedded frameworks too, the Flutter version becomes the blocker, and that is a
+much bigger job than three settings.** Worth confirming against the exact
+wording Apple sent you.
+
+## Verification
+
+`fvm flutter analyze` — 2 pre-existing infos. `fvm flutter test` — green.
+Release device build succeeds. Nothing committed.
+
+The bundle also dropped from 39.9 MB to 32.0 MB, which is the `flutter clean`
+clearing stale slices from earlier builds, not an effect of this change.
