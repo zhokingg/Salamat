@@ -1,12 +1,18 @@
 // Salamat — delete-account Edge Function.
 //
 // Why this exists:
-//   Google Play requires any app that creates accounts to let users delete
-//   their account and data. The client cannot delete an auth user (the anon
-//   key has no admin rights), so this function does it server-side with the
-//   service-role key. Every user table (profiles, meals, weight_logs,
-//   water_logs, scan_events, coach_events) references auth.users(id) ON DELETE
-//   CASCADE, so removing the auth user wipes all of their data in one shot.
+//   Google Play and the App Store both require any app that creates accounts
+//   to let users delete their account and data. The client cannot delete an
+//   auth user (the anon key has no admin rights), so this function does it
+//   server-side with the service-role key. Every user table references
+//   auth.users(id) ON DELETE CASCADE, so removing the auth user wipes all of
+//   their data in one shot.
+//
+//   The tables, verified against the live schema on 1 Sep 2026:
+//     profiles, meals, weight_logs, water_logs, scan_events, coach_events,
+//     recognition_usage
+//   `photo_usage` used to be on that list and no longer exists — the table was
+//   dropped; `recognition_usage` (migration 0005) is what records scans now.
 //
 // Security:
 //   The user id is NEVER taken from the request body. It is derived from the

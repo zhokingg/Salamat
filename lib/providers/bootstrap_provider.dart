@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/onboarding_flag.dart';
 import '../services/purchases_service.dart';
 import '../services/supabase_service.dart';
+import 'session_provider.dart';
 import 'user_provider.dart';
 
 /// What [bootstrapProvider] runs at startup.
@@ -55,15 +56,19 @@ bool isProfileOnboarded(Map<String, dynamic>? row) {
   return name.isNotEmpty && kcal > 0;
 }
 
-/// Loads the persisted profile once, after [bootstrapProvider] settles so a
-/// real `auth.uid()` exists. Returns the raw `profiles` row, or null when
+/// Loads the persisted profile for whoever is signed in, and re-loads it
+/// whenever that changes. Returns the raw `profiles` row, or null when
 /// there's no user, no row, or the read failed.
 ///
 /// Side effects for an onboarded row: hydrates [userProvider] (so a returning
 /// user's data appears even if the splash already navigated on the local
 /// flag) and sets the local onboarding flag (covers reinstall-with-profile).
 final profileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
-  await ref.watch(bootstrapProvider.future);
+  // Bound to the session: signing in, signing out and account deletion all
+  // change the uid, and every one of them must re-read the profile. This is
+  // the line whose absence made a signed-in user look like "Гость".
+  final uid = await awaitSession(ref);
+  if (uid == null) return null;
   final row = await SupabaseService.getProfile();
   if (isProfileOnboarded(row)) {
     ref.read(userProvider.notifier).hydrateFromProfile(row!);

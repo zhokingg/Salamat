@@ -5,6 +5,8 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import '../services/photo_recognition_service.dart';
 import '../services/purchases_service.dart';
 
+import 'session_provider.dart';
+
 /// Free tier: THREE photo scans for the LIFETIME of the account; Pro is
 /// unlimited. Manual logging is free and unlimited and never touches this.
 ///
@@ -85,6 +87,13 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
 
   @override
   SubscriptionState build() {
+    // Entitlements belong to an account, so rebuild when the account changes.
+    // `_disposed` is per-instance and a rebuild makes a new one, so the reset
+    // below is the whole reset: a new empty state, a fresh listener, a fresh
+    // fetch against whoever RevenueCat is now logged in as.
+    ref.watch(currentUidProvider);
+    _disposed = false;
+    _ready = false;
     // Live entitlement updates (purchase, restore, renewal, expiry) flow in
     // through the SDK listener; the initial fetch covers app start.
     if (PurchasesService.isReady) {

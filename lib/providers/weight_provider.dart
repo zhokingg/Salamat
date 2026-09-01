@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/supabase_service.dart';
-import 'bootstrap_provider.dart';
+import 'session_provider.dart';
 
 /// A single weight measurement, oldest data comes from `weight_logs`.
 class WeightLog {
@@ -14,7 +14,7 @@ class WeightLog {
 /// Weight history, oldest → newest. Awaits bootstrap so the query always
 /// runs against a live session. Invalidate after logging a new weight.
 final weightLogsProvider = FutureProvider<List<WeightLog>>((ref) async {
-  await ref.watch(bootstrapProvider.future);
+  await awaitSession(ref);
   final rows = await SupabaseService.getWeightHistory();
   final logs = <WeightLog>[];
   for (final row in rows) {

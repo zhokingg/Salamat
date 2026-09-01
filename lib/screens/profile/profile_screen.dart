@@ -304,10 +304,9 @@ class ProfileScreen extends ConsumerWidget {
     Navigator.of(context).pop(); // dismiss the progress spinner
 
     if (ok) {
+      // deleteAccount already signed out and minted a fresh anonymous
+      // session; the uid change rebuilds the per-user providers.
       OnboardingFlag.clear();
-      ref.invalidate(userProvider);
-      ref.invalidate(mealsProvider);
-      ref.invalidate(subscriptionProvider);
       context.go('/onboarding/welcome');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -383,12 +382,14 @@ class ProfileScreen extends ConsumerWidget {
       return;
     }
 
+    // Ends the session AND starts a fresh anonymous one, so the app is
+    // immediately usable again instead of running uid-less until the next
+    // launch. Everything per-user rebuilds off the new uid on its own — see
+    // currentUidProvider — so there is no list of providers to keep in sync
+    // here either.
     await AuthService.signOut();
     if (!context.mounted) return;
     OnboardingFlag.clear();
-    ref.invalidate(userProvider);
-    ref.invalidate(mealsProvider);
-    ref.invalidate(subscriptionProvider);
     context.go('/onboarding/welcome');
   }
 }

@@ -73,6 +73,12 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
         null => 'maintain',
       },
       dailyCalories: kcal,
+      // Onboarding is the only place that asks for these, so it is the only
+      // place that can save them. Without this the target weight lived in
+      // memory and vanished on reinstall.
+      targetWeightKg: u.targetWeight,
+      activityLevel: u.activityLevel?.name,
+      familiarity: u.familiarity?.name,
     ));
   }
 

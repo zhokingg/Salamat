@@ -1266,6 +1266,54 @@
   "authErrWeakPassword": "Use at least 8 characters.",
   "authErrRateLimited": "Too many attempts. Try again in a few minutes.",
   "authErrOffline": "Couldn't reach the service. Check your connection and try again.",
+  "mealSaveFailed": "Couldn't save {dish} — it wasn't added. Check your connection and try again.",
+  "@mealSaveFailed": {
+    "placeholders": {
+      "dish": {
+        "type": "String"
+      }
+    }
+  },
+  "authErrEmailNotConfirmed": "This address isn't confirmed yet. Open the link in the email we sent to it, then sign in.",
+  "authErrPasswordMismatch": "The two passwords don't match.",
+  "authRegisterLink": "Create an account",
+  "authRegisterTitle": "New account",
+  "authRegisterSubtitle": "An email and a password, so the diary and the subscription have somewhere to live that isn't this phone.",
+  "authRegisterCta": "Create",
+  "authPasswordConfirmLabel": "Repeat password",
+  "authPasswordConfirmHint": "Same password again",
+  "authRegisteredTitle": "Account created",
+  "authRegisteredBody": "You can sign in with {email} from any phone.",
+  "@authRegisteredBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authKeepDataTitle": "You already have entries here",
+  "authKeepDataBody": "A new account starts empty. Attach an email to this one instead and the diary, the weight history and the subscription all come with you.",
+  "authKeepDataCta": "Attach to this account",
+  "authForgotLink": "Forgot your password?",
+  "authForgotTitle": "Password reset",
+  "authForgotSubtitle": "We'll send a link to your address. Nothing changes until you open it.",
+  "authForgotCta": "Send the link",
+  "authForgotSentTitle": "Check your email",
+  "authForgotSentBody": "If there's an account on {email}, a reset link is on its way to it.",
+  "@authForgotSentBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authNewPasswordTitle": "New password",
+  "authNewPasswordSubtitle": "At least 8 characters. You'll use it to sign in from now on.",
+  "authNewPasswordCta": "Save password",
+  "authNewPasswordDone": "Password changed.",
+  "authChangePasswordRow": "Change password",
+  "authSignInRow": "Sign in to another account",
+  "authSignInRowAnon": "Sign in to an existing account",
   "paywallSecureTitle": "Attach an email before you subscribe",
   "paywallSecureBody": "A subscription lives on the account. Without an email there is no way back into this one.",
   "paywallSecureCta": "Attach",

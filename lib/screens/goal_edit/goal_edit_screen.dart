@@ -105,6 +105,9 @@ class _GoalEditScreenState extends ConsumerState<GoalEditScreen> {
         _ => 'maintain',
       },
       dailyCalories: kcal,
+      targetWeightKg: u.targetWeight,
+      activityLevel: u.activityLevel?.name,
+      familiarity: u.familiarity?.name,
     );
     if (mounted) context.pop();
   }

@@ -127,6 +127,9 @@ Future<void> showUpdateWeightDialog(
         _ => 'maintain',
       },
       dailyCalories: updated.calorieNorm ?? 2000,
+      targetWeightKg: updated.targetWeight,
+      activityLevel: updated.activityLevel?.name,
+      familiarity: updated.familiarity?.name,
     );
     await SupabaseService.logWeight(newValue.toDouble());
     ref.invalidate(weightLogsProvider);

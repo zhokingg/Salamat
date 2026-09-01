@@ -1754,6 +1754,98 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось связаться с сервисом. Проверь связь и попробуй ещё раз.';
 
   @override
+  String mealSaveFailed(String dish) {
+    return 'Не удалось сохранить «$dish» — блюдо не добавлено. Проверь связь и попробуй ещё раз.';
+  }
+
+  @override
+  String get authErrEmailNotConfirmed =>
+      'Почта ещё не подтверждена. Открой ссылку из письма, которое пришло на этот адрес, и войди снова.';
+
+  @override
+  String get authErrPasswordMismatch => 'Пароли не совпадают.';
+
+  @override
+  String get authRegisterLink => 'Создать аккаунт';
+
+  @override
+  String get authRegisterTitle => 'Новый аккаунт';
+
+  @override
+  String get authRegisterSubtitle =>
+      'Почта и пароль — чтобы дневник и подписка жили не в телефоне, а в аккаунте.';
+
+  @override
+  String get authRegisterCta => 'Создать';
+
+  @override
+  String get authPasswordConfirmLabel => 'Повтори пароль';
+
+  @override
+  String get authPasswordConfirmHint => 'Тот же пароль ещё раз';
+
+  @override
+  String get authRegisteredTitle => 'Аккаунт создан';
+
+  @override
+  String authRegisteredBody(String email) {
+    return 'Теперь можно войти по $email с любого телефона.';
+  }
+
+  @override
+  String get authKeepDataTitle => 'Здесь уже есть твои записи';
+
+  @override
+  String get authKeepDataBody =>
+      'Новый аккаунт начнётся с нуля. Привяжи почту к этому — и дневник, история веса и подписка останутся с тобой.';
+
+  @override
+  String get authKeepDataCta => 'Привязать к этому аккаунту';
+
+  @override
+  String get authForgotLink => 'Забыли пароль?';
+
+  @override
+  String get authForgotTitle => 'Восстановление пароля';
+
+  @override
+  String get authForgotSubtitle =>
+      'Пришлём ссылку на твой адрес. Пока не откроешь её, ничего не меняется.';
+
+  @override
+  String get authForgotCta => 'Отправить ссылку';
+
+  @override
+  String get authForgotSentTitle => 'Проверь почту';
+
+  @override
+  String authForgotSentBody(String email) {
+    return 'Если на $email есть аккаунт, ссылка для смены пароля уже отправлена.';
+  }
+
+  @override
+  String get authNewPasswordTitle => 'Новый пароль';
+
+  @override
+  String get authNewPasswordSubtitle =>
+      'Минимум 8 символов. С ним ты будешь входить дальше.';
+
+  @override
+  String get authNewPasswordCta => 'Сохранить пароль';
+
+  @override
+  String get authNewPasswordDone => 'Пароль изменён.';
+
+  @override
+  String get authChangePasswordRow => 'Сменить пароль';
+
+  @override
+  String get authSignInRow => 'Войти в другой аккаунт';
+
+  @override
+  String get authSignInRowAnon => 'Войти в существующий аккаунт';
+
+  @override
   String get paywallSecureTitle => 'Привяжи почту до оформления';
 
   @override

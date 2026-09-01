@@ -176,6 +176,20 @@ final GoRouter appRouter = GoRouter(
       path: '/sign-in',
       builder: (context, state) => const SignInScreen(),
     ),
+    // Also outside the shell, and for the same reason: registration replaces
+    // the account, and password recovery can arrive with no account at all.
+    GoRoute(
+      path: '/register',
+      builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      builder: (context, state) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
+      path: '/new-password',
+      builder: (context, state) => const NewPasswordScreen(),
+    ),
     GoRoute(
       path: '/goal-edit',
       builder: (context, state) => const GoalEditScreen(),

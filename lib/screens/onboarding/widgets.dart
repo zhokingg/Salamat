@@ -24,6 +24,8 @@ class OnboardingShell extends StatelessWidget {
     this.buttonEnabled = true,
     this.secondaryLabel,
     this.onSecondary,
+    this.tertiaryLabel,
+    this.onTertiary,
   });
 
   final int? step;
@@ -33,6 +35,12 @@ class OnboardingShell extends StatelessWidget {
   final bool buttonEnabled;
   final String? secondaryLabel;
   final VoidCallback? onSecondary;
+
+  /// A second quiet link under the first. Only the welcome screen uses it, to
+  /// offer both "I already have an account" and "create one" without either
+  /// competing with the primary button.
+  final String? tertiaryLabel;
+  final VoidCallback? onTertiary;
 
   @override
   Widget build(BuildContext context) {
@@ -102,20 +110,13 @@ class OnboardingShell extends StatelessWidget {
                     ),
                     if (secondaryLabel != null && onSecondary != null) ...[
                       const SizedBox(height: SalamatDarkDims.gap10),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: onSecondary,
-                        child: Padding(
-                          padding: const EdgeInsets.all(SalamatDarkDims.gap6),
-                          child: Text(
-                            secondaryLabel!,
-                            textAlign: TextAlign.center,
-                            style: SalamatDarkType.captionL
-                                .copyWith(color: c.text3, height: null),
-                          ),
-                        ),
+                      _QuietLink(
+                        label: secondaryLabel!,
+                        onTap: onSecondary!,
                       ),
                     ],
+                    if (tertiaryLabel != null && onTertiary != null)
+                      _QuietLink(label: tertiaryLabel!, onTap: onTertiary!),
                   ],
                 ),
               ),
@@ -625,6 +626,32 @@ class SalamatEyebrow extends StatelessWidget {
     return Text(
       text.toUpperCase(),
       style: SalamatDarkType.eyebrow.copyWith(color: color ?? context.c.text3),
+    );
+  }
+}
+
+
+/// The muted link that sits under the onboarding CTA.
+class _QuietLink extends StatelessWidget {
+  const _QuietLink({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(SalamatDarkDims.gap6),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: SalamatDarkType.captionL
+              .copyWith(color: context.c.text3, height: null),
+        ),
+      ),
     );
   }
 }

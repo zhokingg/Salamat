@@ -35,7 +35,7 @@ class SupabaseService {
     ).timeout(const Duration(seconds: 10));
 
     // Guarantee every user has a session. Anonymous sign-in gives a stable
-    // auth.uid() so RLS-scoped rows (meals, weight, photo usage) and the
+    // auth.uid() so RLS-scoped rows (meals, weight, scan counters) and the
     // recognize-food Edge Function all work without forcing account creation.
     // A persisted session is restored by Supabase.initialize, so we only sign
     // in when there is genuinely no user yet.
@@ -63,6 +63,36 @@ class SupabaseService {
   static Stream<AuthState> get authChanges =>
       isReady ? client.auth.onAuthStateChange : const Stream.empty();
 
+  /// Ends the current session and immediately starts a new anonymous one.
+  ///
+  /// Signing out on its own left the app with NO session for the rest of the
+  /// process: [init] is guarded by `_initialized` and will not run again, so
+  /// `auth.uid()` stayed null, every RLS-scoped write silently wrote nowhere
+  /// (`upsertUser` returns null when there is no uid) and the person saw no
+  /// error at all. Sign-out has to hand the app a working account the same way
+  /// a first launch does.
+  ///
+  /// Returns the new anonymous uid, or null if the fresh sign-in failed — in
+  /// which case the app is offline and there is nothing better to be done than
+  /// let the next launch retry.
+  static Future<String?> signOutAndStartFresh() async {
+    if (!isReady) return null;
+    try {
+      await client.auth.signOut();
+    } catch (e) {
+      if (kDebugMode) debugPrint('signOut error: $e');
+    }
+    try {
+      final res = await client.auth
+          .signInAnonymously()
+          .timeout(const Duration(seconds: 10));
+      return res.user?.id;
+    } catch (e) {
+      if (kDebugMode) debugPrint('post-signOut signInAnonymously failed: $e');
+      return null;
+    }
+  }
+
   // -------- profile --------
 
   static Future<Map<String, dynamic>?> upsertUser({
@@ -73,24 +103,64 @@ class SupabaseService {
     required double weightKg,
     required String goal,
     required int dailyCalories,
+    double? targetWeightKg,
+    String? activityLevel,
+    String? familiarity,
   }) async {
     final uid = currentUser?.id;
     if (uid == null) return null;
+    final core = <String, dynamic>{
+      'id': uid,
+      'name': name,
+      'gender': gender,
+      'age': age,
+      'height': heightCm,
+      'weight': weightKg,
+      'goal': goal,
+      'calorie_norm': dailyCalories,
+    };
+    // Added by migration 0010. Sent when the caller has them; if the migration
+    // has not been applied yet PostgREST answers PGRST204 ("Could not find the
+    // 'target_weight' column"), and the write is retried without them rather
+    // than losing the whole profile over three optional fields.
+    final extended = <String, dynamic>{
+      ...core,
+      if (targetWeightKg != null) 'target_weight': targetWeightKg,
+      if (activityLevel != null) 'activity_level': activityLevel,
+      if (familiarity != null) 'familiarity': familiarity,
+    };
     try {
-      return await client.from('profiles').upsert({
-        'id': uid,
-        'name': name,
-        'gender': gender,
-        'age': age,
-        'height': heightCm,
-        'weight': weightKg,
-        'goal': goal,
-        'calorie_norm': dailyCalories,
-      }).select().single();
+      return await client
+          .from('profiles')
+          .upsert(extended)
+          .select()
+          .single();
     } catch (e) {
+      if (extended.length > core.length && _isMissingColumn(e)) {
+        if (kDebugMode) {
+          debugPrint('upsertUser: migration 0010 not applied, '
+              'writing without the goal columns');
+        }
+        try {
+          return await client.from('profiles').upsert(core).select().single();
+        } catch (e2) {
+          if (kDebugMode) debugPrint('upsertUser error: $e2');
+          return null;
+        }
+      }
       if (kDebugMode) debugPrint('upsertUser error: $e');
       return null;
     }
+  }
+
+  /// PostgREST's "this column is not in my schema cache" — i.e. the migration
+  /// that adds it has not been run.
+  static bool _isMissingColumn(Object e) {
+    if (e is PostgrestException) {
+      return e.code == 'PGRST204' ||
+          e.message.contains('Could not find the');
+    }
+    return false;
   }
 
   /// Reads the current user's profile row, or null if there's no user, no row,
@@ -113,9 +183,10 @@ class SupabaseService {
   }
 
   /// Permanently deletes the current user's account and all their data via the
-  /// `delete-account` Edge Function (cascade removes profile, meals, weight,
-  /// photo usage). On success the old session is cleared and a fresh anonymous
-  /// session is created so the app stays usable as a brand-new user.
+  /// `delete-account` Edge Function. Deleting the auth user cascades to
+  /// profiles, meals, weight_logs, water_logs, scan_events, coach_events and
+  /// recognition_usage. On success the old session is cleared and a fresh
+  /// anonymous session is created so the app stays usable as a brand-new user.
   ///
   /// Returns true if the account was deleted.
   static Future<bool> deleteAccount() async {
@@ -129,8 +200,7 @@ class SupabaseService {
         return false;
       }
       // Clear the now-deleted user's session, then start clean.
-      await client.auth.signOut();
-      await client.auth.signInAnonymously();
+      await signOutAndStartFresh();
       return true;
     } catch (e) {
       if (kDebugMode) debugPrint('deleteAccount error: $e');
@@ -140,6 +210,13 @@ class SupabaseService {
 
   // -------- meals (food logs) --------
 
+  /// Writes one meal row.
+  ///
+  /// THROWS on failure, on purpose. It used to catch everything and log to the
+  /// debug console, which meant a rejected write — a bad uuid, RLS, no network
+  /// — left the entry sitting in the diary looking saved and gone by the next
+  /// launch. [MealsNotifier.add] is what turns the throw into a rollback and a
+  /// message; nothing else calls this.
   static Future<void> logFood({
     /// Client-generated row id. Passed through so the local entry and the DB
     /// row share one identity: without it Postgres minted its own uuid and
@@ -156,22 +233,18 @@ class SupabaseService {
     required String mealType,
   }) async {
     final uid = currentUser?.id;
-    if (uid == null) return;
-    try {
-      await client.from('meals').insert({
-        'id': id,
-        'user_id': uid,
-        'name': foodName,
-        'meal_type': mealType,
-        'grams': portionG,
-        'kcal': calories,
-        'protein': proteinG,
-        'fat': fatG,
-        'carbs': carbsG,
-      });
-    } catch (e) {
-      if (kDebugMode) debugPrint('logFood error: $e');
-    }
+    if (uid == null) throw StateError('logFood: no session');
+    await client.from('meals').insert({
+      'id': id,
+      'user_id': uid,
+      'name': foodName,
+      'meal_type': mealType,
+      'grams': portionG,
+      'kcal': calories,
+      'protein': proteinG,
+      'fat': fatG,
+      'carbs': carbsG,
+    });
   }
 
   /// Throws on network/backend failure so callers (mealsProvider) can surface

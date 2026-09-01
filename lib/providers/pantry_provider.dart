@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/user_prefs.dart';
+import 'session_provider.dart';
+
 /// The ingredients the user says they have at home.
 ///
 /// Kept on the device only. It is a scratch list the user edits constantly,
@@ -10,7 +13,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Supabase table — which this feature is explicitly not allowed to add.
 /// `shared_preferences` is already a dependency, so no new package either.
 class PantryNotifier extends Notifier<List<String>> {
-  static const String _kStorageKey = 'pantry_items';
+  /// Per account — see [userScopedKey].
+  static const String _kLegacyKey = 'pantry_items';
+  static String get _kStorageKey => userScopedKey(_kLegacyKey);
 
   /// Guards against unbounded growth from a user pasting a shopping list, and
   /// matches the ceiling the Edge Function enforces server-side.
@@ -19,6 +24,9 @@ class PantryNotifier extends Notifier<List<String>> {
 
   @override
   List<String> build() {
+    // Bound to the session: the list is what THIS person says is in their
+    // fridge, and it must not appear in the next account.
+    ref.watch(currentUidProvider);
     _load();
     return const [];
   }
@@ -26,8 +34,12 @@ class PantryNotifier extends Notifier<List<String>> {
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      await adoptLegacyKey(prefs, _kLegacyKey, _kStorageKey);
       final raw = prefs.getString(_kStorageKey);
-      if (raw == null) return;
+      if (raw == null) {
+        state = const [];
+        return;
+      }
       final decoded = jsonDecode(raw);
       if (decoded is! List) return;
       state = [

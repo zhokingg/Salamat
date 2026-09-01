@@ -1739,6 +1739,98 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t reach the service. Check your connection and try again.';
 
   @override
+  String mealSaveFailed(String dish) {
+    return 'Couldn\'t save $dish — it wasn\'t added. Check your connection and try again.';
+  }
+
+  @override
+  String get authErrEmailNotConfirmed =>
+      'This address isn\'t confirmed yet. Open the link in the email we sent to it, then sign in.';
+
+  @override
+  String get authErrPasswordMismatch => 'The two passwords don\'t match.';
+
+  @override
+  String get authRegisterLink => 'Create an account';
+
+  @override
+  String get authRegisterTitle => 'New account';
+
+  @override
+  String get authRegisterSubtitle =>
+      'An email and a password, so the diary and the subscription have somewhere to live that isn\'t this phone.';
+
+  @override
+  String get authRegisterCta => 'Create';
+
+  @override
+  String get authPasswordConfirmLabel => 'Repeat password';
+
+  @override
+  String get authPasswordConfirmHint => 'Same password again';
+
+  @override
+  String get authRegisteredTitle => 'Account created';
+
+  @override
+  String authRegisteredBody(String email) {
+    return 'You can sign in with $email from any phone.';
+  }
+
+  @override
+  String get authKeepDataTitle => 'You already have entries here';
+
+  @override
+  String get authKeepDataBody =>
+      'A new account starts empty. Attach an email to this one instead and the diary, the weight history and the subscription all come with you.';
+
+  @override
+  String get authKeepDataCta => 'Attach to this account';
+
+  @override
+  String get authForgotLink => 'Forgot your password?';
+
+  @override
+  String get authForgotTitle => 'Password reset';
+
+  @override
+  String get authForgotSubtitle =>
+      'We\'ll send a link to your address. Nothing changes until you open it.';
+
+  @override
+  String get authForgotCta => 'Send the link';
+
+  @override
+  String get authForgotSentTitle => 'Check your email';
+
+  @override
+  String authForgotSentBody(String email) {
+    return 'If there\'s an account on $email, a reset link is on its way to it.';
+  }
+
+  @override
+  String get authNewPasswordTitle => 'New password';
+
+  @override
+  String get authNewPasswordSubtitle =>
+      'At least 8 characters. You\'ll use it to sign in from now on.';
+
+  @override
+  String get authNewPasswordCta => 'Save password';
+
+  @override
+  String get authNewPasswordDone => 'Password changed.';
+
+  @override
+  String get authChangePasswordRow => 'Change password';
+
+  @override
+  String get authSignInRow => 'Sign in to another account';
+
+  @override
+  String get authSignInRowAnon => 'Sign in to an existing account';
+
+  @override
   String get paywallSecureTitle => 'Attach an email before you subscribe';
 
   @override

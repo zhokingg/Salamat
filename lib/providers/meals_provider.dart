@@ -1,9 +1,10 @@
 import 'package:salamat/l10n/app_localizations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/macro_lookup_service.dart';
 import '../services/supabase_service.dart';
-import 'bootstrap_provider.dart';
+import 'session_provider.dart';
 
 /// Meal slot. Display labels come from AppLocalizations via the extension
 /// below — visuals (icons) live in the UI layer.
@@ -89,10 +90,29 @@ class MealEntry {
   bool get hasMacros => protein > 0 || fat > 0 || carbs > 0;
 }
 
+/// A meal that was typed in but did not reach the server.
+///
+/// Carried on the state rather than thrown, because every call site fires
+/// [MealsNotifier.add] and forgets it: the sheet closes, the camera pops, and
+/// there is nobody left holding the future to catch anything.
+class MealWriteFailure {
+  const MealWriteFailure({required this.dish, required this.at});
+
+  final String dish;
+
+  /// Distinguishes two failures of the same dish, so the second one is shown
+  /// too instead of looking like a state that never changed.
+  final DateTime at;
+}
+
 class MealsState {
-  const MealsState({this.entries = const {}});
+  const MealsState({this.entries = const {}, this.writeFailure});
 
   final Map<MealType, List<MealEntry>> entries;
+
+  /// Set when the last write was rolled back. Read once by the listener that
+  /// shows the message; nothing else depends on it.
+  final MealWriteFailure? writeFailure;
 
   List<MealEntry> forType(MealType type) => entries[type] ?? const [];
 
@@ -117,6 +137,17 @@ class MealsState {
     next[type] = list;
     return MealsState(entries: next);
   }
+
+  /// Removes one entry by id, wherever it is.
+  MealsState copyWithRemoved(MealType type, String id) {
+    final next = Map<MealType, List<MealEntry>>.from(entries);
+    next[type] =
+        (next[type] ?? const []).where((e) => e.id != id).toList();
+    return MealsState(entries: next, writeFailure: writeFailure);
+  }
+
+  MealsState withFailure(MealWriteFailure? failure) =>
+      MealsState(entries: entries, writeFailure: failure);
 }
 
 /// Today's meals, persisted in Supabase.
@@ -127,7 +158,7 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
   @override
   Future<MealsState> build() async {
     // Gate on bootstrap: never touch the network before the session exists.
-    await ref.watch(bootstrapProvider.future);
+    await awaitSession(ref);
     final rows = await SupabaseService.getTodayFoodLogs();
     return _fromRows(rows);
   }
@@ -135,19 +166,34 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
   /// Adds a meal. The UI updates optimistically, then the row is persisted.
   /// Signature is unchanged so existing call sites (camera, portion sheet)
   /// keep working — they fire-and-forget this future.
-  Future<void> add(MealType type, MealEntry entry) async {
+  Future<bool> add(MealType type, MealEntry entry) async {
     final current = state.valueOrNull ?? const MealsState();
-    state = AsyncData(current.copyWithAdded(type, entry));
-    await SupabaseService.logFood(
-      id: entry.id,
-      foodName: entry.name,
-      calories: entry.kcal,
-      proteinG: entry.protein,
-      carbsG: entry.carbs,
-      fatG: entry.fat,
-      portionG: entry.grams,
-      mealType: type.name,
-    );
+    state = AsyncData(current.copyWithAdded(type, entry).withFailure(null));
+    try {
+      await SupabaseService.logFood(
+        id: entry.id,
+        foodName: entry.name,
+        calories: entry.kcal,
+        proteinG: entry.protein,
+        carbsG: entry.carbs,
+        fatG: entry.fat,
+        portionG: entry.grams,
+        mealType: type.name,
+      );
+      return true;
+    } catch (e) {
+      // The write failed, so the optimistic entry is a lie: it would sit in
+      // today's diary, count towards the ring, and be gone after the next
+      // reload with no explanation. Take it back out and say so.
+      if (kDebugMode) debugPrint('logFood failed, rolling back: $e');
+      final now = state.valueOrNull ?? const MealsState();
+      state = AsyncData(
+        now.copyWithRemoved(type, entry.id).withFailure(
+              MealWriteFailure(dish: entry.name, at: DateTime.now()),
+            ),
+      );
+      return false;
+    }
   }
 
   /// Adds a meal and, when no macros were typed in, fills them in afterwards

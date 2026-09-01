@@ -7,12 +7,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../config/legal.dart';
 import '../../providers/locale_provider.dart';
+import '../../providers/session_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/salamat_dark.dart';
 import '../../widgets/update_weight_dialog.dart';
 import '../onboarding/widgets.dart' show SalamatEyebrow;
-import '../../services/auth_service.dart';
 import '../auth/auth_forms.dart';
 
 /// Settings, built to the prototype's `scSettings`: back button + 22/600
@@ -40,6 +40,11 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The whole identity, not just the uid: attaching an email keeps the same
+    // uid on purpose, so a screen keyed on the id alone never learned that the
+    // address had been submitted and kept saying "Почта не привязана".
+    final account = ref.watch(currentUserProvider);
+    final anonymous = account.isAnonymous;
     final c = context.c;
     final loc = AppLocalizations.of(context)!;
     final locale = ref.watch(localeProvider);
@@ -171,18 +176,36 @@ class SettingsScreen extends ConsumerWidget {
             _RowCard(
               rows: [
                 (
-                  icon: AuthService.isAnonymous
+                  icon: anonymous
                       ? PhosphorIcons.warningCircle()
                       : PhosphorIcons.envelopeSimple(),
                   label: loc.authAccountRow,
-                  value: AuthService.email ??
-                      AuthService.pendingEmail ??
+                  value: account.email ??
+                      account.pendingEmail ??
                       loc.authAccountAnonymous,
                   danger: false,
-                  onTap: AuthService.isAnonymous
-                      ? () => showAttachEmailSheet(context)
-                      : null,
+                  onTap:
+                      anonymous ? () => showAttachEmailSheet(context) : null,
                 ),
+                // The only way into another account from inside the app.
+                // Before this, `/sign-in` was reachable only from the welcome
+                // screen — which anybody who has finished onboarding never
+                // sees again, so switching accounts meant reinstalling.
+                (
+                  icon: PhosphorIcons.signIn(),
+                  label: anonymous ? loc.authSignInRowAnon : loc.authSignInRow,
+                  value: '',
+                  danger: false,
+                  onTap: () => context.push('/sign-in'),
+                ),
+                if (!anonymous)
+                  (
+                    icon: PhosphorIcons.lockSimple(),
+                    label: loc.authChangePasswordRow,
+                    value: '',
+                    danger: false,
+                    onTap: () => context.push('/new-password'),
+                  ),
               ],
             ),
             const SizedBox(height: SalamatDarkDims.gap20),

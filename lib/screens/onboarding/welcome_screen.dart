@@ -57,6 +57,10 @@ class WelcomeScreen extends StatelessWidget {
       // path and this must not read as a registration wall.
       secondaryLabel: loc.authHaveAccount,
       onSecondary: () => context.push('/sign-in'),
+      // Creating an account is a choice offered here, not a wall: the primary
+      // button above still walks straight into the app with no registration.
+      tertiaryLabel: loc.authRegisterLink,
+      onTertiary: () => context.push('/register'),
     );
   }
 }

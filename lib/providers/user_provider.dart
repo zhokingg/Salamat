@@ -1,6 +1,8 @@
 import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'session_provider.dart';
+
 enum Gender { male, female }
 
 extension GenderLoc on Gender {
@@ -214,8 +216,17 @@ class UserState {
 enum BmiBand { unknown, under, normal, over, obese }
 
 class UserNotifier extends Notifier<UserState> {
+  /// Empty on every session change.
+  ///
+  /// This holds one account's answers, so it must not survive into another
+  /// one. [profileProvider] rebuilds off the same key and fills it back in
+  /// from the server row a moment later; between the two the screen shows the
+  /// empty state rather than the previous person's numbers.
   @override
-  UserState build() => const UserState();
+  UserState build() {
+    ref.watch(currentUidProvider);
+    return const UserState();
+  }
 
   void setName({required String name, required String lastName}) {
     state = state.copyWith(name: name, lastName: lastName);
@@ -270,8 +281,20 @@ class UserNotifier extends Notifier<UserState> {
       height: _doubleOrNull(row['height']),
       weight: _doubleOrNull(row['weight']),
       calorieNorm: _intOrNull(row['calorie_norm']),
+      // Migration 0010. Absent from rows written before it, and absent from
+      // every row until it is applied — `copyWith` ignores nulls, so those
+      // rows behave exactly as they did.
+      targetWeight: _doubleOrNull(row['target_weight']),
+      activityLevel: _activityFromDb(row['activity_level']),
+      familiarity: _familiarityFromDb(row['familiarity']),
     );
   }
+
+  static ActivityLevel? _activityFromDb(Object? v) =>
+      ActivityLevel.values.where((e) => e.name == v?.toString()).firstOrNull;
+
+  static Familiarity? _familiarityFromDb(Object? v) =>
+      Familiarity.values.where((e) => e.name == v?.toString()).firstOrNull;
 
   static Gender? _genderFromDb(Object? v) => switch (v?.toString()) {
         'male' => Gender.male,

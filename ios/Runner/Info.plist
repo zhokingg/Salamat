@@ -27,6 +27,27 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<!-- Deep link back into the app from a Supabase auth email.
+	     Confirmation and password-recovery links land on a URL the project
+	     hands out; without a scheme registered here iOS had nowhere to send
+	     them, so the link opened a browser and died there. supabase_flutter
+	     picks the URI up on its own (app_links is one of its dependencies)
+	     and exchanges the PKCE `code` in it; the app only has to own the
+	     scheme. The matching Redirect URL must also be allow-listed in the
+	     Supabase dashboard, or GoTrue refuses to send people to it. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>kg.salamat.app.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>kg.salamat.app</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>

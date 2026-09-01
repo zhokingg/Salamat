@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/supabase_service.dart';
-import 'bootstrap_provider.dart';
+import '../services/user_prefs.dart';
+import 'session_provider.dart';
 
 /// One tap of the water button.
 const int kWaterSipMl = 250;
@@ -64,11 +65,13 @@ class WaterState {
 }
 
 class WaterNotifier extends AsyncNotifier<WaterState> {
-  static const String _kPrefsKey = 'water_local_today';
+  /// Per account — see [userScopedKey]. The old shared key meant the fallback
+  /// copy followed the device, not the person.
+  static String get _kPrefsKey => userScopedKey('water_local_today');
 
   @override
   Future<WaterState> build() async {
-    await ref.watch(bootstrapProvider.future);
+    await awaitSession(ref);
     final rows = await SupabaseService.getTodayWater();
     if (rows != null) {
       return WaterState(

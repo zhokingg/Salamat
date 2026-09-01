@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/supabase_service.dart';
-import 'bootstrap_provider.dart';
+import 'session_provider.dart';
 import 'meals_provider.dart';
 import 'user_provider.dart';
 
@@ -166,7 +166,7 @@ class HistoryRangeNotifier extends Notifier<HistoryRange> {
 
 /// Food history for the selected range, bucketed by local calendar day.
 final historyProvider = FutureProvider<HistoryStats>((ref) async {
-  await ref.watch(bootstrapProvider.future);
+  await awaitSession(ref);
   final range = ref.watch(historyRangeProvider);
 
   // Re-read whenever today's diary changes so a fresh log shows up here too.

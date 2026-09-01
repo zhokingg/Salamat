@@ -68,6 +68,41 @@ class PurchasesService {
     }
   }
 
+  /// Points the SDK at [uid], or at a fresh anonymous id when [uid] is null.
+  ///
+  /// WHY THIS HAS TO EXIST. `configure` runs once, at startup, with whatever
+  /// uid existed then. Signing in, signing out and attaching an email all
+  /// change who the account belongs to; without this call RevenueCat kept
+  /// reporting the previous person's entitlements, and any purchase made
+  /// afterwards would have been filed under the previous `app_user_id` — which
+  /// is exactly the id `revenuecat-webhook` uses to find the profile row to
+  /// mark Pro. The subscription would attach to the wrong person.
+  ///
+  /// `logIn` is an alias, not a replacement: RevenueCat merges the anonymous
+  /// id's purchases into the named one, so a purchase made before signing in
+  /// is not stranded.
+  ///
+  /// Returns silently when the SDK never configured (no key for this
+  /// platform) — the app runs without purchases there by design.
+  static Future<void> switchUser(String? uid) async {
+    if (!_configured) return;
+    try {
+      if (uid == null) {
+        await Purchases.logOut();
+        if (kDebugMode) debugPrint('[PurchasesService] logOut -> anonymous');
+        return;
+      }
+      final current = await Purchases.appUserID;
+      if (current == uid) return;
+      await Purchases.logIn(uid);
+      if (kDebugMode) {
+        debugPrint('[PurchasesService] logIn $current -> $uid');
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[PurchasesService] switchUser failed: $e');
+    }
+  }
+
   /// True when the given customer info carries an active Pro entitlement.
   static bool hasPro(CustomerInfo info) =>
       info.entitlements.active.containsKey(RevenueCatConfig.proEntitlement);

@@ -3074,6 +3074,168 @@ abstract class AppLocalizations {
   /// **'Couldn\'t reach the service. Check your connection and try again.'**
   String get authErrOffline;
 
+  /// No description provided for @mealSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save {dish} — it wasn\'t added. Check your connection and try again.'**
+  String mealSaveFailed(String dish);
+
+  /// No description provided for @authErrEmailNotConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'This address isn\'t confirmed yet. Open the link in the email we sent to it, then sign in.'**
+  String get authErrEmailNotConfirmed;
+
+  /// No description provided for @authErrPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The two passwords don\'t match.'**
+  String get authErrPasswordMismatch;
+
+  /// No description provided for @authRegisterLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get authRegisterLink;
+
+  /// No description provided for @authRegisterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New account'**
+  String get authRegisterTitle;
+
+  /// No description provided for @authRegisterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'An email and a password, so the diary and the subscription have somewhere to live that isn\'t this phone.'**
+  String get authRegisterSubtitle;
+
+  /// No description provided for @authRegisterCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get authRegisterCta;
+
+  /// No description provided for @authPasswordConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat password'**
+  String get authPasswordConfirmLabel;
+
+  /// No description provided for @authPasswordConfirmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Same password again'**
+  String get authPasswordConfirmHint;
+
+  /// No description provided for @authRegisteredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created'**
+  String get authRegisteredTitle;
+
+  /// No description provided for @authRegisteredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can sign in with {email} from any phone.'**
+  String authRegisteredBody(String email);
+
+  /// No description provided for @authKeepDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have entries here'**
+  String get authKeepDataTitle;
+
+  /// No description provided for @authKeepDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A new account starts empty. Attach an email to this one instead and the diary, the weight history and the subscription all come with you.'**
+  String get authKeepDataBody;
+
+  /// No description provided for @authKeepDataCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach to this account'**
+  String get authKeepDataCta;
+
+  /// No description provided for @authForgotLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password?'**
+  String get authForgotLink;
+
+  /// No description provided for @authForgotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset'**
+  String get authForgotTitle;
+
+  /// No description provided for @authForgotSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll send a link to your address. Nothing changes until you open it.'**
+  String get authForgotSubtitle;
+
+  /// No description provided for @authForgotCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the link'**
+  String get authForgotCta;
+
+  /// No description provided for @authForgotSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get authForgotSentTitle;
+
+  /// No description provided for @authForgotSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If there\'s an account on {email}, a reset link is on its way to it.'**
+  String authForgotSentBody(String email);
+
+  /// No description provided for @authNewPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get authNewPasswordTitle;
+
+  /// No description provided for @authNewPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters. You\'ll use it to sign in from now on.'**
+  String get authNewPasswordSubtitle;
+
+  /// No description provided for @authNewPasswordCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get authNewPasswordCta;
+
+  /// No description provided for @authNewPasswordDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed.'**
+  String get authNewPasswordDone;
+
+  /// No description provided for @authChangePasswordRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get authChangePasswordRow;
+
+  /// No description provided for @authSignInRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to another account'**
+  String get authSignInRow;
+
+  /// No description provided for @authSignInRowAnon.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to an existing account'**
+  String get authSignInRowAnon;
+
   /// No description provided for @paywallSecureTitle.
   ///
   /// In en, this message translates to:
