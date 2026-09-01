@@ -1205,5 +1205,70 @@
   "waterNotSynced": "Saved on this device only",
   "@waterNotSynced": {
     "description": "Shown while water_logs does not exist server-side. NEEDS RU TRANSLATION."
-  }
+  },
+  "authHaveAccount": "Already have an account?",
+  "authSignInTitle": "Sign in",
+  "authSignInSubtitle": "Your food log, weight history and subscription are on the account, not on the phone.",
+  "authEmailLabel": "Email",
+  "authEmailHint": "you@example.com",
+  "authPasswordLabel": "Password",
+  "authPasswordHint": "At least 8 characters",
+  "authSignInCta": "Sign in",
+  "authSignInWarnTitle": "This will replace what is on this phone",
+  "authSignInWarnBody": "Anything logged here without an email belongs to the current account and stays with it. Attach an email first if you want to keep it.",
+  "authSignInWarnLink": "Attach an email instead",
+  "authLinkTitle": "Attach an email",
+  "authLinkSubtitle": "Keeps everything you have logged and lets you sign back in after reinstalling. Nothing you have already entered is lost.",
+  "authLinkCta": "Attach",
+  "authLinkedTitle": "Email attached",
+  "authLinkedBody": "You can sign back in with {email} from any phone.",
+  "@authLinkedBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authConfirmSentTitle": "Check your email",
+  "authConfirmSentBody": "A confirmation link is on its way to {email}. Open it and the account is yours — until then nothing changes and nothing is lost.",
+  "@authConfirmSentBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authAccountRow": "Account",
+  "authAccountAnonymous": "No email",
+  "authSignedInAs": "Signed in as {email}",
+  "@authSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authSignOutTitle": "Sign out?",
+  "authSignOutAnonBody": "This account has no email, so there is no way back into it. Your food log, weight history and subscription will be gone for good.",
+  "authSignOutAnonAttach": "Attach an email first",
+  "authSignOutBody": "You can sign back in with {email} at any time.",
+  "@authSignOutBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authSignOutCta": "Sign out",
+  "authErrBadCredentials": "Wrong email or password.",
+  "authErrEmailTaken": "That email already has an account. Sign in instead.",
+  "authErrInvalidEmail": "That doesn't look like an email address.",
+  "authErrWeakPassword": "Use at least 8 characters.",
+  "authErrRateLimited": "Too many attempts. Try again in a few minutes.",
+  "authErrOffline": "Couldn't reach the service. Check your connection and try again.",
+  "paywallSecureTitle": "Attach an email before you subscribe",
+  "paywallSecureBody": "A subscription lives on the account. Without an email there is no way back into this one.",
+  "paywallSecureCta": "Attach",
+  "paywallSecureSkip": "Later",
+  "welcomeHeroCaption": "Photograph · Check · Done"
 }

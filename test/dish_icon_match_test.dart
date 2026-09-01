@@ -38,6 +38,10 @@ const List<String> _fromTheModel = [
   'Дымдама',
   'Долма',
   'Хумус с питой',
+  // Drawn in this pass.
+  'Фалафель',
+  'Хачапури по-аджарски',
+  'Мясо по-французски',
 ];
 
 /// Deliberately awkward: dishes with no icon, vague answers, and things that
@@ -45,16 +49,14 @@ const List<String> _fromTheModel = [
 /// next round of keywords.
 const List<String> _expectedToFallBack = [
   'Домашний обед',
-  'Мясо по-французски',
-  'Суши с лососем',
-  'Фалафель',
   'Плошка с гарниром',
   'Ассорти',
-  'Тортилья с курицей и овощами',
   'Что-то из холодильника',
-  'Лепёшка с каймаком',
   'Тарелка еды',
-  'Хачапури по-аджарски',
+  'Рагу из чего-то',
+  'Суши с лососем',
+  'Тортилья с курицей и овощами',
+  'Лепёшка с каймаком',
   'Бургер-боул',
 ];
 
@@ -93,6 +95,10 @@ void main() {
     expect(DishIconService.match('Толма').file, 'dolma.svg');
     expect(DishIconService.match('Humus').file, 'hummus.svg');
     expect(DishIconService.match('Дымдама').file, 'dymdama.svg');
+    expect(DishIconService.match('Фалафель').file, 'falafel.svg');
+    expect(DishIconService.match('Хачапури').file, 'khachapuri.svg');
+    expect(DishIconService.match('Мясо по-французски').file,
+        'meat_french.svg');
 
     // Nothing may point at a file that is not in the set.
     for (final f in DishIconService.allFiles) {

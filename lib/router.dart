@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'providers/meals_provider.dart';
+import 'screens/auth/auth_forms.dart';
 import 'screens/camera/camera_screen.dart';
 import 'screens/coach/coach_screen.dart';
 import 'screens/cook/cook_screen.dart';
@@ -168,6 +169,12 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+    // Outside the shell: signing in replaces the account, so it must not sit
+    // inside a tab whose state belongs to the old one.
+    GoRoute(
+      path: '/sign-in',
+      builder: (context, state) => const SignInScreen(),
     ),
     GoRoute(
       path: '/goal-edit',

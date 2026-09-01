@@ -13,6 +13,8 @@ import '../../config/legal.dart';
 import '../../providers/user_provider.dart';
 import '../../services/purchases_service.dart';
 import '../../theme/salamat_dark.dart';
+import '../../services/auth_service.dart';
+import '../auth/auth_forms.dart';
 
 enum _Tier { month1, year }
 
@@ -256,12 +258,43 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
   }
 
+  /// Offered once, right before money changes hands.
+  ///
+  /// A subscription is attached to the account, and an account with no email
+  /// cannot be re-entered — so this is the single most expensive moment to be
+  /// anonymous. Skippable: it must not become a registration wall in front of
+  /// a purchase.
+  Future<void> _offerToSecureAccount() async {
+    if (!AuthService.isAnonymous) return;
+    final loc = AppLocalizations.of(context)!;
+    final take = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(loc.paywallSecureTitle),
+        content: Text(loc.paywallSecureBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(loc.paywallSecureSkip),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(loc.paywallSecureCta),
+          ),
+        ],
+      ),
+    );
+    if (take == true && mounted) await showAttachEmailSheet(context);
+  }
+
   Future<void> _purchase() async {
     final loc = AppLocalizations.of(context)!;
     final tier = _tiers[_selected];
     if (tier == null || _purchasing) return;
     setState(() => _purchasing = true);
     try {
+      await _offerToSecureAccount();
+      if (!mounted) return;
       // purchases_flutter 8.x returns CustomerInfo directly.
       final info = await Purchases.purchasePackage(tier.package);
       if (!mounted) return;

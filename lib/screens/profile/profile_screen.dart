@@ -14,6 +14,8 @@ import '../../services/supabase_service.dart';
 import '../../widgets/update_weight_dialog.dart';
 import '../../theme/salamat_icons.dart';
 import '../../theme/salamat_dark.dart';
+import '../../services/auth_service.dart';
+import '../auth/auth_forms.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -335,9 +337,54 @@ class ProfileScreen extends ConsumerWidget {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
-  void _logout(BuildContext context, WidgetRef ref) {
-    // Clear the local flag too — otherwise the next launch would route a
-    // logged-out user straight to an empty dashboard.
+  /// Signing out, with the consequence stated before it happens.
+  ///
+  /// This used to clear a local flag and route away WITHOUT ending the
+  /// session, so the app came back as the same account with onboarding reset
+  /// — which then overwrote the profile. It now signs out for real, which
+  /// makes the warning below load-bearing: on an account with no email there
+  /// is genuinely no way back in.
+  Future<void> _logout(BuildContext context, WidgetRef ref) async {
+    final loc = AppLocalizations.of(context)!;
+    final anonymous = AuthService.isAnonymous;
+    final email = AuthService.email;
+
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(loc.authSignOutTitle),
+        content: Text(
+          anonymous ? loc.authSignOutAnonBody : loc.authSignOutBody(email ?? ''),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop('cancel'),
+            child: Text(loc.buttonCancel),
+          ),
+          if (anonymous)
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop('attach'),
+              child: Text(loc.authSignOutAnonAttach),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop('out'),
+            child: Text(
+              loc.authSignOutCta,
+              style: TextStyle(color: context.c.err),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (!context.mounted || choice == null || choice == 'cancel') return;
+
+    if (choice == 'attach') {
+      await showAttachEmailSheet(context);
+      return;
+    }
+
+    await AuthService.signOut();
+    if (!context.mounted) return;
     OnboardingFlag.clear();
     ref.invalidate(userProvider);
     ref.invalidate(mealsProvider);

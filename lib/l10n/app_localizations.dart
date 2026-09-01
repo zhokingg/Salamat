@@ -2881,6 +2881,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved on this device only'**
   String get waterNotSynced;
+
+  /// No description provided for @authHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get authHaveAccount;
+
+  /// No description provided for @authSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authSignInTitle;
+
+  /// No description provided for @authSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your food log, weight history and subscription are on the account, not on the phone.'**
+  String get authSignInSubtitle;
+
+  /// No description provided for @authEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmailLabel;
+
+  /// No description provided for @authEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'you@example.com'**
+  String get authEmailHint;
+
+  /// No description provided for @authPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPasswordLabel;
+
+  /// No description provided for @authPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get authPasswordHint;
+
+  /// No description provided for @authSignInCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authSignInCta;
+
+  /// No description provided for @authSignInWarnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This will replace what is on this phone'**
+  String get authSignInWarnTitle;
+
+  /// No description provided for @authSignInWarnBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything logged here without an email belongs to the current account and stays with it. Attach an email first if you want to keep it.'**
+  String get authSignInWarnBody;
+
+  /// No description provided for @authSignInWarnLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach an email instead'**
+  String get authSignInWarnLink;
+
+  /// No description provided for @authLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach an email'**
+  String get authLinkTitle;
+
+  /// No description provided for @authLinkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps everything you have logged and lets you sign back in after reinstalling. Nothing you have already entered is lost.'**
+  String get authLinkSubtitle;
+
+  /// No description provided for @authLinkCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get authLinkCta;
+
+  /// No description provided for @authLinkedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email attached'**
+  String get authLinkedTitle;
+
+  /// No description provided for @authLinkedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can sign back in with {email} from any phone.'**
+  String authLinkedBody(String email);
+
+  /// No description provided for @authConfirmSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get authConfirmSentTitle;
+
+  /// No description provided for @authConfirmSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A confirmation link is on its way to {email}. Open it and the account is yours — until then nothing changes and nothing is lost.'**
+  String authConfirmSentBody(String email);
+
+  /// No description provided for @authAccountRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get authAccountRow;
+
+  /// No description provided for @authAccountAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'No email'**
+  String get authAccountAnonymous;
+
+  /// No description provided for @authSignedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {email}'**
+  String authSignedInAs(String email);
+
+  /// No description provided for @authSignOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out?'**
+  String get authSignOutTitle;
+
+  /// No description provided for @authSignOutAnonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has no email, so there is no way back into it. Your food log, weight history and subscription will be gone for good.'**
+  String get authSignOutAnonBody;
+
+  /// No description provided for @authSignOutAnonAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach an email first'**
+  String get authSignOutAnonAttach;
+
+  /// No description provided for @authSignOutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can sign back in with {email} at any time.'**
+  String authSignOutBody(String email);
+
+  /// No description provided for @authSignOutCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get authSignOutCta;
+
+  /// No description provided for @authErrBadCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong email or password.'**
+  String get authErrBadCredentials;
+
+  /// No description provided for @authErrEmailTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'That email already has an account. Sign in instead.'**
+  String get authErrEmailTaken;
+
+  /// No description provided for @authErrInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like an email address.'**
+  String get authErrInvalidEmail;
+
+  /// No description provided for @authErrWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters.'**
+  String get authErrWeakPassword;
+
+  /// No description provided for @authErrRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again in a few minutes.'**
+  String get authErrRateLimited;
+
+  /// No description provided for @authErrOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the service. Check your connection and try again.'**
+  String get authErrOffline;
+
+  /// No description provided for @paywallSecureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach an email before you subscribe'**
+  String get paywallSecureTitle;
+
+  /// No description provided for @paywallSecureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A subscription lives on the account. Without an email there is no way back into this one.'**
+  String get paywallSecureBody;
+
+  /// No description provided for @paywallSecureCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get paywallSecureCta;
+
+  /// No description provided for @paywallSecureSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get paywallSecureSkip;
+
+  /// No description provided for @welcomeHeroCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph · Check · Done'**
+  String get welcomeHeroCaption;
 }
 
 class _AppLocalizationsDelegate

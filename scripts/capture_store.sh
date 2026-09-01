@@ -8,7 +8,8 @@
 # integration test that walks the app, and writes verified 1320x2868 frames
 # into store2/. Any frame with the wrong size fails the run.
 #
-# Overridable: SALAMAT_UDID, SALAMAT_SHOT_PORT, SALAMAT_SHOT_DIR, FLUTTER_BIN
+# Overridable: SALAMAT_UDID, SALAMAT_SHOT_PORT, SALAMAT_SHOT_DIR, FLUTTER_BIN,
+#              SALAMAT_TEST
 
 set -euo pipefail
 
@@ -21,7 +22,7 @@ export SALAMAT_SHOT_DIR="${SALAMAT_SHOT_DIR:-store2}"
 # The project needs Flutter 3.41.9: IconData became `final` in 3.44 (breaks
 # phosphor_flutter / lucide_icons) and camera_avfoundation < 0.9.22 segfaults
 # on the iOS 26 simulator, which needs >= 3.35.
-DEFAULT_FLUTTER="$HOME/flutter-sdks/3.41.9/flutter/bin/flutter"
+DEFAULT_FLUTTER="$HOME/fvm/versions/3.41.9/bin/flutter"
 FLUTTER_BIN="${FLUTTER_BIN:-$DEFAULT_FLUTTER}"
 if [ ! -x "$FLUTTER_BIN" ]; then
   FLUTTER_BIN="$(command -v flutter || true)"
@@ -67,7 +68,12 @@ fi
 
 # ---- the run ----
 set +e
-"$FLUTTER_BIN" test integration_test/store_screens_test.dart -d "$SALAMAT_UDID"
+# Which capture to run. store_frames_test.dart seeds a full day and shoots
+# the five listing frames; store_screens_test.dart is the original
+# onboarding walk-through.
+SALAMAT_TEST="${SALAMAT_TEST:-integration_test/store_frames_test.dart}"
+echo "capture: $SALAMAT_TEST"
+"$FLUTTER_BIN" test "$SALAMAT_TEST" -d "$SALAMAT_UDID"
 TEST_RC=$?
 set -e
 

@@ -1641,4 +1641,131 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get waterNotSynced => 'Сохранено только на этом устройстве';
+
+  @override
+  String get authHaveAccount => 'Уже есть аккаунт?';
+
+  @override
+  String get authSignInTitle => 'Вход';
+
+  @override
+  String get authSignInSubtitle =>
+      'Дневник, история веса и подписка живут в аккаунте, а не в телефоне.';
+
+  @override
+  String get authEmailLabel => 'Почта';
+
+  @override
+  String get authEmailHint => 'you@example.com';
+
+  @override
+  String get authPasswordLabel => 'Пароль';
+
+  @override
+  String get authPasswordHint => 'Минимум 8 символов';
+
+  @override
+  String get authSignInCta => 'Войти';
+
+  @override
+  String get authSignInWarnTitle => 'Это заменит то, что сейчас в телефоне';
+
+  @override
+  String get authSignInWarnBody =>
+      'Всё, что записано без почты, останется на текущем аккаунте. Если хочешь это сохранить — сначала привяжи почту.';
+
+  @override
+  String get authSignInWarnLink => 'Лучше привязать почту';
+
+  @override
+  String get authLinkTitle => 'Привязать почту';
+
+  @override
+  String get authLinkSubtitle =>
+      'Сохранит всё, что уже записано, и даст войти снова после переустановки. Ничего из введённого не потеряется.';
+
+  @override
+  String get authLinkCta => 'Привязать';
+
+  @override
+  String get authLinkedTitle => 'Почта привязана';
+
+  @override
+  String authLinkedBody(String email) {
+    return 'Теперь можно войти по $email с любого телефона.';
+  }
+
+  @override
+  String get authConfirmSentTitle => 'Проверь почту';
+
+  @override
+  String authConfirmSentBody(String email) {
+    return 'Письмо со ссылкой ушло на $email. Открой её — и аккаунт закреплён за тобой. До этого ничего не меняется и ничего не теряется.';
+  }
+
+  @override
+  String get authAccountRow => 'Аккаунт';
+
+  @override
+  String get authAccountAnonymous => 'Почта не привязана';
+
+  @override
+  String authSignedInAs(String email) {
+    return 'Вход по $email';
+  }
+
+  @override
+  String get authSignOutTitle => 'Выйти из аккаунта?';
+
+  @override
+  String get authSignOutAnonBody =>
+      'К этому аккаунту не привязана почта, вернуться в него будет нельзя. Дневник, история веса и подписка пропадут окончательно.';
+
+  @override
+  String get authSignOutAnonAttach => 'Сначала привязать почту';
+
+  @override
+  String authSignOutBody(String email) {
+    return 'Ты сможешь снова войти по $email в любой момент.';
+  }
+
+  @override
+  String get authSignOutCta => 'Выйти';
+
+  @override
+  String get authErrBadCredentials => 'Неверная почта или пароль.';
+
+  @override
+  String get authErrEmailTaken =>
+      'На эту почту уже есть аккаунт. Войди в него.';
+
+  @override
+  String get authErrInvalidEmail => 'Это не похоже на адрес почты.';
+
+  @override
+  String get authErrWeakPassword => 'Нужно минимум 8 символов.';
+
+  @override
+  String get authErrRateLimited =>
+      'Слишком много попыток. Попробуй через пару минут.';
+
+  @override
+  String get authErrOffline =>
+      'Не удалось связаться с сервисом. Проверь связь и попробуй ещё раз.';
+
+  @override
+  String get paywallSecureTitle => 'Привяжи почту до оформления';
+
+  @override
+  String get paywallSecureBody =>
+      'Подписка привязана к аккаунту. Без почты вернуться в него будет нельзя.';
+
+  @override
+  String get paywallSecureCta => 'Привязать';
+
+  @override
+  String get paywallSecureSkip => 'Позже';
+
+  @override
+  String get welcomeHeroCaption => 'Снимок · Проверка · Готово';
 }

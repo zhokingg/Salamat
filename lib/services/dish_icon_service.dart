@@ -166,6 +166,15 @@ const Map<String, List<String>> _keywords = {
   // also swallows «нутелла». A chickpea dish falling back is better than
   // chocolate spread arriving as hummus.
   'hummus.svg': ['хумус', 'хуммус', 'humus', 'hummus'],
+  // Drawn for the set after these three kept landing on the empty plate.
+  'falafel.svg': ['фалафел', 'фаляфел', 'falafel', 'felafel'],
+  'khachapuri.svg': [
+    'хачапур', 'хачипур', 'хачапури', 'khachapuri', 'hachapuri', 'аджарул',
+  ],
+  'meat_french.svg': [
+    'мясо по-французски', 'мясо по французски', 'по-французски',
+    'meat french', 'french style meat',
+  ],
 
   // ---- Овощи ----
   'boiled_potato.svg': [

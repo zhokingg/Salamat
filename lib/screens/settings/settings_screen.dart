@@ -12,6 +12,8 @@ import '../../providers/user_provider.dart';
 import '../../theme/salamat_dark.dart';
 import '../../widgets/update_weight_dialog.dart';
 import '../onboarding/widgets.dart' show SalamatEyebrow;
+import '../../services/auth_service.dart';
+import '../auth/auth_forms.dart';
 
 /// Settings, built to the prototype's `scSettings`: back button + 22/600
 /// title, a segmented control, then cards of rows with a trailing value.
@@ -155,6 +157,31 @@ class SettingsScreen extends ConsumerWidget {
                   value: '',
                   danger: false,
                   onTap: null,
+                ),
+              ],
+            ),
+            const SizedBox(height: SalamatDarkDims.gap20),
+
+            // ── account ──
+            // A permanent row, not a prompt that appears once and is gone.
+            // Whether the account can be recovered is a standing fact about
+            // it, so it lives where standing facts live.
+            SalamatEyebrow(loc.authAccountRow),
+            const SizedBox(height: SalamatDarkDims.gap10),
+            _RowCard(
+              rows: [
+                (
+                  icon: AuthService.isAnonymous
+                      ? PhosphorIcons.warningCircle()
+                      : PhosphorIcons.envelopeSimple(),
+                  label: loc.authAccountRow,
+                  value: AuthService.email ??
+                      AuthService.pendingEmail ??
+                      loc.authAccountAnonymous,
+                  danger: false,
+                  onTap: AuthService.isAnonymous
+                      ? () => showAttachEmailSheet(context)
+                      : null,
                 ),
               ],
             ),

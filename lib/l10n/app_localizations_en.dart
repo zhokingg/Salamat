@@ -1626,4 +1626,131 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get waterNotSynced => 'Saved on this device only';
+
+  @override
+  String get authHaveAccount => 'Already have an account?';
+
+  @override
+  String get authSignInTitle => 'Sign in';
+
+  @override
+  String get authSignInSubtitle =>
+      'Your food log, weight history and subscription are on the account, not on the phone.';
+
+  @override
+  String get authEmailLabel => 'Email';
+
+  @override
+  String get authEmailHint => 'you@example.com';
+
+  @override
+  String get authPasswordLabel => 'Password';
+
+  @override
+  String get authPasswordHint => 'At least 8 characters';
+
+  @override
+  String get authSignInCta => 'Sign in';
+
+  @override
+  String get authSignInWarnTitle => 'This will replace what is on this phone';
+
+  @override
+  String get authSignInWarnBody =>
+      'Anything logged here without an email belongs to the current account and stays with it. Attach an email first if you want to keep it.';
+
+  @override
+  String get authSignInWarnLink => 'Attach an email instead';
+
+  @override
+  String get authLinkTitle => 'Attach an email';
+
+  @override
+  String get authLinkSubtitle =>
+      'Keeps everything you have logged and lets you sign back in after reinstalling. Nothing you have already entered is lost.';
+
+  @override
+  String get authLinkCta => 'Attach';
+
+  @override
+  String get authLinkedTitle => 'Email attached';
+
+  @override
+  String authLinkedBody(String email) {
+    return 'You can sign back in with $email from any phone.';
+  }
+
+  @override
+  String get authConfirmSentTitle => 'Check your email';
+
+  @override
+  String authConfirmSentBody(String email) {
+    return 'A confirmation link is on its way to $email. Open it and the account is yours — until then nothing changes and nothing is lost.';
+  }
+
+  @override
+  String get authAccountRow => 'Account';
+
+  @override
+  String get authAccountAnonymous => 'No email';
+
+  @override
+  String authSignedInAs(String email) {
+    return 'Signed in as $email';
+  }
+
+  @override
+  String get authSignOutTitle => 'Sign out?';
+
+  @override
+  String get authSignOutAnonBody =>
+      'This account has no email, so there is no way back into it. Your food log, weight history and subscription will be gone for good.';
+
+  @override
+  String get authSignOutAnonAttach => 'Attach an email first';
+
+  @override
+  String authSignOutBody(String email) {
+    return 'You can sign back in with $email at any time.';
+  }
+
+  @override
+  String get authSignOutCta => 'Sign out';
+
+  @override
+  String get authErrBadCredentials => 'Wrong email or password.';
+
+  @override
+  String get authErrEmailTaken =>
+      'That email already has an account. Sign in instead.';
+
+  @override
+  String get authErrInvalidEmail => 'That doesn\'t look like an email address.';
+
+  @override
+  String get authErrWeakPassword => 'Use at least 8 characters.';
+
+  @override
+  String get authErrRateLimited =>
+      'Too many attempts. Try again in a few minutes.';
+
+  @override
+  String get authErrOffline =>
+      'Couldn\'t reach the service. Check your connection and try again.';
+
+  @override
+  String get paywallSecureTitle => 'Attach an email before you subscribe';
+
+  @override
+  String get paywallSecureBody =>
+      'A subscription lives on the account. Without an email there is no way back into this one.';
+
+  @override
+  String get paywallSecureCta => 'Attach';
+
+  @override
+  String get paywallSecureSkip => 'Later';
+
+  @override
+  String get welcomeHeroCaption => 'Photograph · Check · Done';
 }
