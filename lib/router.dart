@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'providers/meals_provider.dart';
+import 'services/auth_link.dart';
 import 'screens/auth/auth_forms.dart';
+import 'screens/auth/link_problem_screen.dart';
 import 'screens/camera/camera_screen.dart';
 import 'screens/coach/coach_screen.dart';
 import 'screens/cook/cook_screen.dart';
@@ -36,6 +37,22 @@ import 'widgets/dashboard_shell.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/splash',
+  // Every link from a Supabase auth email arrives here, whatever its shape.
+  //
+  // Two of them reach the router at all: iOS hands the URL to Flutter, which
+  // feeds it to GoRouter as a location, and `kg.salamat.app://login-callback/`
+  // matches no route. Before this, that produced the raw
+  // `Route not found: …#access_token=…` — an exception with the person's
+  // tokens printed in it — because the email-change link is the one shape
+  // `supabase_flutter` does not consume itself. See [AuthLink].
+  //
+  // `isCallback` is a cheap map lookup, so ordinary navigation pays nothing.
+  redirect: (context, state) async {
+    if (!AuthLink.isCallback(state.uri)) return null;
+    final result = await AuthLink.handle(state.uri);
+    authLinkNotice.value = result;
+    return result.destination;
+  },
   routes: [
     GoRoute(
       path: '/splash',
@@ -191,6 +208,11 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const NewPasswordScreen(),
     ),
     GoRoute(
+      path: '/auth-link-failed',
+      builder: (context, state) =>
+          const LinkProblemScreen(problem: LinkProblem.authLink),
+    ),
+    GoRoute(
       path: '/goal-edit',
       builder: (context, state) => const GoalEditScreen(),
     ),
@@ -234,7 +256,9 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const PaywallScreen(),
     ),
   ],
-  errorBuilder: (context, state) => Scaffold(
-    body: Center(child: Text('Route not found: ${state.uri}')),
-  ),
+  // Never a stack trace and never the URL: an unknown address is a dead end
+  // for the app, not an error the person made, and the URL of an auth link
+  // carries their tokens.
+  errorBuilder: (context, state) =>
+      const LinkProblemScreen(problem: LinkProblem.unknownRoute),
 );

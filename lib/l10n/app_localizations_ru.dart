@@ -1754,6 +1754,28 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось связаться с сервисом. Проверь связь и попробуй ещё раз.';
 
   @override
+  String get linkProblemTitle => 'Ссылка не открылась';
+
+  @override
+  String get linkProblemAuthBody =>
+      'Возможно, истёк срок или ею уже воспользовались. Запроси письмо заново и открой самое свежее.';
+
+  @override
+  String get linkProblemUnknownBody =>
+      'Приложение не знает этот адрес. Ничего не потерялось — всё на месте.';
+
+  @override
+  String get linkProblemCta => 'В приложение';
+
+  @override
+  String authEmailConfirmed(String email) {
+    return 'Почта подтверждена: $email';
+  }
+
+  @override
+  String get authEmailConfirmedPlain => 'Почта подтверждена.';
+
+  @override
   String mealSaveFailed(String dish) {
     return 'Не удалось сохранить «$dish» — блюдо не добавлено. Проверь связь и попробуй ещё раз.';
   }

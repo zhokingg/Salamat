@@ -3074,6 +3074,42 @@ abstract class AppLocalizations {
   /// **'Couldn\'t reach the service. Check your connection and try again.'**
   String get authErrOffline;
 
+  /// No description provided for @linkProblemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That link didn\'t open'**
+  String get linkProblemTitle;
+
+  /// No description provided for @linkProblemAuthBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have expired, or it may already have been used. Ask for a new email and open the newest one.'**
+  String get linkProblemAuthBody;
+
+  /// No description provided for @linkProblemUnknownBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The app doesn\'t know this address. Nothing is lost — everything is where you left it.'**
+  String get linkProblemUnknownBody;
+
+  /// No description provided for @linkProblemCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the app'**
+  String get linkProblemCta;
+
+  /// No description provided for @authEmailConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Email confirmed: {email}'**
+  String authEmailConfirmed(String email);
+
+  /// No description provided for @authEmailConfirmedPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Email confirmed.'**
+  String get authEmailConfirmedPlain;
+
   /// No description provided for @mealSaveFailed.
   ///
   /// In en, this message translates to:

@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
 
 import 'providers/locale_provider.dart';
 import 'providers/meals_provider.dart';
+import 'services/auth_link.dart';
 import 'providers/session_provider.dart';
 import 'router.dart';
 import 'theme/salamat_dark.dart';
@@ -62,26 +63,73 @@ class SalamatApp extends ConsumerWidget {
       // Sits under MaterialApp's ScaffoldMessenger, so its message shows over
       // whatever screen is on top — including the camera and the portion
       // sheet, which are where meals are actually added.
-      builder: (context, child) => _MealWriteWatcher(child: child),
+      builder: (context, child) => _Notices(child: child),
     );
   }
 }
 
 
-/// Says so when a meal did not save.
+/// One-off messages that have no screen of their own: a meal that did not
+/// save, and a link from an email that did something worth naming.
 ///
 /// Every path that logs a meal fires `mealsProvider.add(...)` and moves on —
 /// the sheet closes, the camera pops — so there is nobody holding the future
 /// when the write fails. The notifier rolls the entry back and leaves a
 /// [MealWriteFailure] on the state; this is what turns that into something the
 /// person sees, instead of a dish that quietly disappears by the next launch.
-class _MealWriteWatcher extends ConsumerWidget {
-  const _MealWriteWatcher({required this.child});
+class _Notices extends ConsumerStatefulWidget {
+  const _Notices({required this.child});
 
   final Widget? child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Notices> createState() => _NoticesState();
+}
+
+class _NoticesState extends ConsumerState<_Notices> {
+  @override
+  void initState() {
+    super.initState();
+    authLinkNotice.addListener(_onAuthLink);
+  }
+
+  @override
+  void dispose() {
+    authLinkNotice.removeListener(_onAuthLink);
+    super.dispose();
+  }
+
+  /// Says out loud what a link from an email did.
+  ///
+  /// The email-change link is the one that needs it: it lands on settings, and
+  /// without a word there the screen just appears, with the address quietly
+  /// different. The failure case has its own screen and needs nothing here.
+  void _onAuthLink() {
+    final result = authLinkNotice.value;
+    if (result == null || !mounted) return;
+    authLinkNotice.value = null;
+    if (result.kind != AuthLinkKind.emailChange) return;
+    final loc = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (loc == null || messenger == null) return;
+    final email = result.email;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 5),
+          content: Text(
+            email == null
+                ? loc.authEmailConfirmedPlain
+                : loc.authEmailConfirmed(email),
+          ),
+        ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen(mealsProvider, (previous, next) {
       final failure = next.valueOrNull?.writeFailure;
       if (failure == null) return;
@@ -100,6 +148,6 @@ class _MealWriteWatcher extends ConsumerWidget {
           ),
         );
     });
-    return child ?? const SizedBox.shrink();
+    return widget.child ?? const SizedBox.shrink();
   }
 }

@@ -1739,6 +1739,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t reach the service. Check your connection and try again.';
 
   @override
+  String get linkProblemTitle => 'That link didn\'t open';
+
+  @override
+  String get linkProblemAuthBody =>
+      'It may have expired, or it may already have been used. Ask for a new email and open the newest one.';
+
+  @override
+  String get linkProblemUnknownBody =>
+      'The app doesn\'t know this address. Nothing is lost — everything is where you left it.';
+
+  @override
+  String get linkProblemCta => 'Go to the app';
+
+  @override
+  String authEmailConfirmed(String email) {
+    return 'Email confirmed: $email';
+  }
+
+  @override
+  String get authEmailConfirmedPlain => 'Email confirmed.';
+
+  @override
   String mealSaveFailed(String dish) {
     return 'Couldn\'t save $dish — it wasn\'t added. Check your connection and try again.';
   }

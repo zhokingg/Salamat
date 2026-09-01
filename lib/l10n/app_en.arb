@@ -1266,6 +1266,19 @@
   "authErrWeakPassword": "Use at least 8 characters.",
   "authErrRateLimited": "Too many attempts. Try again in a few minutes.",
   "authErrOffline": "Couldn't reach the service. Check your connection and try again.",
+  "linkProblemTitle": "That link didn't open",
+  "linkProblemAuthBody": "It may have expired, or it may already have been used. Ask for a new email and open the newest one.",
+  "linkProblemUnknownBody": "The app doesn't know this address. Nothing is lost — everything is where you left it.",
+  "linkProblemCta": "Go to the app",
+  "authEmailConfirmed": "Email confirmed: {email}",
+  "@authEmailConfirmed": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authEmailConfirmedPlain": "Email confirmed.",
   "mealSaveFailed": "Couldn't save {dish} — it wasn't added. Check your connection and try again.",
   "@mealSaveFailed": {
     "placeholders": {

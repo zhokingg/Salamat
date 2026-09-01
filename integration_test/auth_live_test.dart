@@ -156,21 +156,31 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('live mail — $_phase', (WidgetTester tester) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      'app_locale': _lang,
-      'onboarding_completed': true,
-    });
+    // The deep-link phase must use REAL SharedPreferences: PKCE stores a code
+    // verifier when the reset is requested, and only the same install can
+    // redeem the code that comes back. Mock prefs live in memory and die with
+    // the test process, which is exactly the process that has to hand over to
+    // the OS here.
+    final realPrefs = _phase == 'dlrequest';
+    if (!realPrefs) {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'app_locale': _lang,
+        'onboarding_completed': true,
+      });
+    }
     app.main();
     await settle(tester, ms: 9000);
 
-    // Fresh anonymous account for every run.
-    try {
-      await SupabaseService.client.auth.signOut();
-      await SupabaseService.client.auth.signInAnonymously();
-    } catch (e) {
-      print('session reset failed: $e');
+    if (!realPrefs) {
+      // Fresh anonymous account for every run.
+      try {
+        await SupabaseService.client.auth.signOut();
+        await SupabaseService.client.auth.signInAnonymously();
+      } catch (e) {
+        print('session reset failed: $e');
+      }
+      await settle(tester, ms: 2500);
     }
-    await settle(tester, ms: 2500);
 
     final container = ProviderScope.containerOf(
       tester.element(find.byType(MaterialApp)),
@@ -466,6 +476,26 @@ void main() {
         await shot('row_3_after');
         expect(after, _addr,
             reason: 'the account row did not catch up with the attached address');
+        break;
+
+      // =================================================================
+      case 'dlrequest':
+        // Half one of the round trip, and the half that must happen inside the
+        // app: asking for the mail, so gotrue stores the PKCE verifier on THIS
+        // install. The host then opens the link the OS way and the app is
+        // launched again by iOS, verifier still in place.
+        appRouter.go('/forgot-password');
+        await settle(tester, ms: 3000);
+        await tester.enterText(find.byType(TextField).first, _addr);
+        await settle(tester, ms: 400);
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await settle(tester, ms: 8000);
+        await shot('dl_1_reset_requested');
+        print('reset requested for $_addr');
+
+        final dlLink = await _linkFromInbox(_box, 'type=recovery');
+        print('RECOVERY_LINK=$dlLink');
+        expect(dlLink, isNotNull, reason: 'no recovery mail arrived');
         break;
 
       default:
