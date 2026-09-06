@@ -50,6 +50,13 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<!-- Exempt from the export-compliance questionnaire: the app makes no use
+	     of cryptography of its own. Everything it sends goes over HTTPS via
+	     the system's own stack (Supabase, RevenueCat, the Edge Functions),
+	     which is the standard exemption. Declaring it here stops App Store
+	     Connect asking on every upload. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
@@ -85,18 +92,16 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<!-- Portrait only. Every screen was laid out for a phone held upright and
+	     none has ever been looked at sideways: the calorie ring, the BMI scale
+	     and the onboarding steps all assume the tall axis. Declared here rather
+	     than through SystemChrome.setPreferredOrientations because the system
+	     reads this before the first frame — there is no window in which the app
+	     could rotate before Dart has run.
+	     Upside-down is left out on purpose: Face ID iPhones do not offer it. -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 </dict>
 </plist>

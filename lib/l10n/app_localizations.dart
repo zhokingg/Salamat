@@ -797,7 +797,7 @@ abstract class AppLocalizations {
   /// No description provided for @summaryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Personal plan\nbased on your answers'**
+  /// **'Your personal\nplan'**
   String get summaryTitle;
 
   /// No description provided for @summaryStatBmi.

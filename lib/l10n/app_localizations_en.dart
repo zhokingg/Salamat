@@ -393,7 +393,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activityVerySub => '6–7 workouts per week';
 
   @override
-  String get summaryTitle => 'Personal plan\nbased on your answers';
+  String get summaryTitle => 'Your personal\nplan';
 
   @override
   String get summaryStatBmi => 'BMI';
