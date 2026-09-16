@@ -262,6 +262,92 @@ class AppLocalizationsRu extends AppLocalizations {
       'Это грубый ориентир, а не диагноз: ИМТ ничего не знает про мышцы и телосложение.';
 
   @override
+  String get methodTitle => 'Как это посчитано';
+
+  @override
+  String get methodStandardMifflin => 'Миффлин–Сан Жеор';
+
+  @override
+  String get methodStandardWho => 'зоны ИМТ по ВОЗ';
+
+  @override
+  String get methodKcalTitle => 'Норма калорий';
+
+  @override
+  String get methodKcalFormula =>
+      'Базовый обмен — по формуле Миффлина–Сан Жеора (1990): 10 × вес (кг) + 6,25 × рост (см) − 5 × возраст, затем +5 для мужчин или −161 для женщин.';
+
+  @override
+  String get methodKcalAccuracy =>
+      'Систематический обзор 2005 года сравнил четыре ходовые формулы: эта чаще других попадает в ±10 % от измеренного расхода энергии, но для отдельного человека ошибка может быть заметной. Поэтому норма — оценка, а не измерение.';
+
+  @override
+  String get methodActivity =>
+      'Множители активности 1,2 / 1,375 / 1,55 / 1,725 — общепринятые в диетологии консервативные значения. Само понятие уровня физической активности (PAL), на который умножают базовый обмен, описано в отчёте FAO/WHO/UNU; наши коэффициенты не взяты из этого отчёта.';
+
+  @override
+  String get methodGoalShift =>
+      'При цели похудеть или набрать вес норма сдвигается на 500 ккал в день. Это общепринятая практика, восходящая к правилу «3500 ккал ≈ 0,45 кг»; современные модели показывают, что реальный темп ниже и замедляется со временем.';
+
+  @override
+  String get methodFloors =>
+      'Норма не опускается ниже 1200 ккал для женщин и 1500 для мужчин — это обычные нижние границы низкокалорийных диет в обзорах, а не медицинское предписание.';
+
+  @override
+  String get methodBmiTitle => 'Индекс массы тела';
+
+  @override
+  String get methodBmiBands =>
+      'ИМТ = вес (кг) / рост² (м). Границы зон — классификация ВОЗ: ниже 18,5; 18,5–24,9; 25–29,9; 30 и выше (Технический доклад ВОЗ № 854, 1995).';
+
+  @override
+  String get methodBmiCaveat =>
+      'ВОЗ называет ИМТ суррогатным маркером: он не различает мышцы и жир, и для оценки нужны дополнительные измерения.';
+
+  @override
+  String get methodBmiAsia =>
+      'Для ряда азиатских популяций ВОЗ допускает более низкие пороги (23 и 27,5) — здесь используются общие границы.';
+
+  @override
+  String get methodSourcesLabel => 'Источники';
+
+  @override
+  String get methodSrcMifflin => 'Mifflin et al. — Am J Clin Nutr, 1990';
+
+  @override
+  String get methodSrcFrankenfield =>
+      'Frankenfield et al. — J Am Diet Assoc, 2005, систематический обзор';
+
+  @override
+  String get methodSrcFao =>
+      'FAO/WHO/UNU — Human energy requirements, 2004, гл. 5';
+
+  @override
+  String get methodSrcHall =>
+      'Hall — Int J Obes, 2008: сколько дефицита нужно на килограмм';
+
+  @override
+  String get methodSrcKoliaki =>
+      'Koliaki et al. — Healthcare, 2018, обзор низкокалорийных диет';
+
+  @override
+  String get methodSrcWhoTable => 'ВОЗ — таблица классификации ИМТ (NLIS)';
+
+  @override
+  String get methodSrcWhoTrs => 'ВОЗ — Technical Report Series 854, 1995';
+
+  @override
+  String get methodSrcWhoFact => 'ВОЗ — фактшит «Ожирение и избыточный вес»';
+
+  @override
+  String get methodSrcWhoAsia =>
+      'WHO Expert Consultation — Lancet, 2004, пороги для азиатских популяций';
+
+  @override
+  String get methodNotAdvice =>
+      'Это справочные расчёты, а не медицинская рекомендация. Питание при заболеваниях, беременности или приёме лекарств обсуждай с врачом.';
+
+  @override
   String get targetTitle => 'Какой твой\nцелевой вес?';
 
   @override

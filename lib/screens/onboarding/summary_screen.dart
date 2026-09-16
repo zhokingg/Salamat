@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../widgets/methodology_card.dart';
 import '../../theme/salamat_dark.dart';
 
 class SummaryScreen extends ConsumerWidget {
@@ -96,6 +97,9 @@ class SummaryScreen extends ConsumerWidget {
           if (bmi > 0) ...[
             const SizedBox(height: 16),
             _BmiScaleCard(bmi: bmi, band: u.bmiBand),
+            const SizedBox(height: 12),
+            // Guideline 1.4.1: where the bands come from, next to the scale.
+            const MethodologyCard(showCalories: false, showBmi: true),
           ],
           const Spacer(),
         ],

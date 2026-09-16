@@ -566,6 +566,150 @@ abstract class AppLocalizations {
   /// **'A rough reference, not a diagnosis — BMI knows nothing about muscle or build.'**
   String get bmiScaleNote;
 
+  /// No description provided for @methodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How this is calculated'**
+  String get methodTitle;
+
+  /// No description provided for @methodStandardMifflin.
+  ///
+  /// In en, this message translates to:
+  /// **'Mifflin–St Jeor'**
+  String get methodStandardMifflin;
+
+  /// No description provided for @methodStandardWho.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO BMI bands'**
+  String get methodStandardWho;
+
+  /// No description provided for @methodKcalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie target'**
+  String get methodKcalTitle;
+
+  /// No description provided for @methodKcalFormula.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting energy expenditure uses the Mifflin–St Jeor equation (1990): 10 × weight (kg) + 6.25 × height (cm) − 5 × age, then +5 for men or −161 for women.'**
+  String get methodKcalFormula;
+
+  /// No description provided for @methodKcalAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'A 2005 systematic review compared the four equations in common use: this one lands within ±10 % of measured expenditure more often than the others, but for any one person the error can be noticeable. The target is an estimate, not a measurement.'**
+  String get methodKcalAccuracy;
+
+  /// No description provided for @methodActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'The activity multipliers 1.2 / 1.375 / 1.55 / 1.725 are conservative values in general use in dietetics. The idea of a physical activity level (PAL) multiplying resting expenditure is set out in the FAO/WHO/UNU report; these particular coefficients are not taken from it.'**
+  String get methodActivity;
+
+  /// No description provided for @methodGoalShift.
+  ///
+  /// In en, this message translates to:
+  /// **'For a weight-loss or weight-gain goal the target is shifted by 500 kcal a day. This is common practice descended from the “3,500 kcal ≈ 1 lb” rule; current models show the real pace is slower and tapers over time.'**
+  String get methodGoalShift;
+
+  /// No description provided for @methodFloors.
+  ///
+  /// In en, this message translates to:
+  /// **'The target never goes below 1,200 kcal for women or 1,500 for men — the customary lower bounds of low-calorie diets in the literature, not a medical prescription.'**
+  String get methodFloors;
+
+  /// No description provided for @methodBmiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Body mass index'**
+  String get methodBmiTitle;
+
+  /// No description provided for @methodBmiBands.
+  ///
+  /// In en, this message translates to:
+  /// **'BMI = weight (kg) / height² (m). The bands follow the WHO classification: under 18.5; 18.5–24.9; 25–29.9; 30 and above (WHO Technical Report Series 854, 1995).'**
+  String get methodBmiBands;
+
+  /// No description provided for @methodBmiCaveat.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO calls BMI a surrogate marker: it cannot tell muscle from fat, and other measurements are needed alongside it.'**
+  String get methodBmiCaveat;
+
+  /// No description provided for @methodBmiAsia.
+  ///
+  /// In en, this message translates to:
+  /// **'For several Asian populations WHO allows lower cut-offs (23 and 27.5); the general bands are used here.'**
+  String get methodBmiAsia;
+
+  /// No description provided for @methodSourcesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get methodSourcesLabel;
+
+  /// No description provided for @methodSrcMifflin.
+  ///
+  /// In en, this message translates to:
+  /// **'Mifflin et al. — Am J Clin Nutr, 1990'**
+  String get methodSrcMifflin;
+
+  /// No description provided for @methodSrcFrankenfield.
+  ///
+  /// In en, this message translates to:
+  /// **'Frankenfield et al. — J Am Diet Assoc, 2005, systematic review'**
+  String get methodSrcFrankenfield;
+
+  /// No description provided for @methodSrcFao.
+  ///
+  /// In en, this message translates to:
+  /// **'FAO/WHO/UNU — Human energy requirements, 2004, ch. 5'**
+  String get methodSrcFao;
+
+  /// No description provided for @methodSrcHall.
+  ///
+  /// In en, this message translates to:
+  /// **'Hall — Int J Obes, 2008: the energy deficit per unit of weight lost'**
+  String get methodSrcHall;
+
+  /// No description provided for @methodSrcKoliaki.
+  ///
+  /// In en, this message translates to:
+  /// **'Koliaki et al. — Healthcare, 2018, review of low-calorie diets'**
+  String get methodSrcKoliaki;
+
+  /// No description provided for @methodSrcWhoTable.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO — BMI classification table (NLIS)'**
+  String get methodSrcWhoTable;
+
+  /// No description provided for @methodSrcWhoTrs.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO — Technical Report Series 854, 1995'**
+  String get methodSrcWhoTrs;
+
+  /// No description provided for @methodSrcWhoFact.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO — fact sheet “Obesity and overweight”'**
+  String get methodSrcWhoFact;
+
+  /// No description provided for @methodSrcWhoAsia.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO Expert Consultation — Lancet, 2004, cut-offs for Asian populations'**
+  String get methodSrcWhoAsia;
+
+  /// No description provided for @methodNotAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'These are reference calculations, not medical advice. Talk to a doctor about nutrition during illness, pregnancy or while on medication.'**
+  String get methodNotAdvice;
+
   /// No description provided for @targetTitle.
   ///
   /// In en, this message translates to:

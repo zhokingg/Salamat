@@ -2,13 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Camera plugin declares RECORD_AUDIO; we never record video with audio. -->
-    <uses-permission
-        android:name="android.permission.RECORD_AUDIO"
-        tools:node="remove"/>
+    <!-- Voice input (speech_to_text) records from the microphone. This used to
+         be stripped with tools:node="remove" on the grounds that the camera
+         plugin asks for it and we never film with sound — true in July, wrong
+         once speech was added. The plugin declares no permissions of its own,
+         so it has to be declared here or listening fails at the permission
+         check. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
-        android:label="salamat"
+        android:label="Salamat"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -32,6 +35,19 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Links from Supabase auth emails: confirmation, email change,
+                 password recovery. The counterpart of CFBundleURLTypes on iOS —
+                 without it Android has nobody to hand kg.salamat.app:// to and
+                 the link dies in the browser. supabase_flutter picks the URI up
+                 itself (app_links is one of its dependencies); the app only has
+                 to own the scheme. The same address must be allow-listed under
+                 Authentication -> URL Configuration in the Supabase dashboard. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="kg.salamat.app" android:host="login-callback"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
@@ -48,6 +64,12 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Required from targetSdk 30 onwards, per the speech_to_text README:
+             without it package visibility hides every speech recogniser on the
+             device and the plugin finds none. -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
         </intent>
     </queries>
 </manifest>

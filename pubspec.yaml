@@ -2,7 +2,7 @@ name: salamat
 description: "Salamat — nutrition tracker for Kazakhstan, Kyrgyzstan and Uzbekistan."
 publish_to: 'none'
 
-version: 1.0.0+21
+version: 1.0.0+22
 
 environment:
   sdk: ^3.7.2
@@ -35,7 +35,10 @@ dependencies:
   intl: any
   uuid: ^4.4.0
   permission_handler: ^11.3.0
-  purchases_flutter: ^8.10.0
+  # >= 10.2.3 is the first line that carries purchases-ios 5.78, the release
+  # that compiles under Xcode 27 / Swift 6.4 (PaywallColor init ambiguity).
+  # 8.x pins RevenueCat 5.32 and no longer builds on that toolchain.
+  purchases_flutter: ^10.12.0
 
 dev_dependencies:
   flutter_test:

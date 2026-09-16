@@ -12,6 +12,7 @@ import '../../providers/user_provider.dart';
 import '../../services/onboarding_flag.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/update_weight_dialog.dart';
+import '../../widgets/methodology_card.dart';
 import '../../theme/salamat_icons.dart';
 import '../../theme/salamat_dark.dart';
 import '../../services/auth_service.dart';
@@ -151,6 +152,13 @@ class ProfileScreen extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _DataCard(user: user),
+        ),
+        const SizedBox(height: 12),
+        // Guideline 1.4.1: the norm shown in the card above is explained and
+        // sourced right beneath it, on every visit, not only during onboarding.
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: MethodologyCard(showCalories: true, showBmi: true),
         ),
 
         const SizedBox(height: 16),

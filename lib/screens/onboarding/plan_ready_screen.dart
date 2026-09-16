@@ -9,6 +9,7 @@ import '../../services/supabase_service.dart';
 import '../../services/onboarding_flag.dart';
 import '../../theme/salamat_icons.dart';
 import 'widgets.dart';
+import '../../widgets/methodology_card.dart';
 import '../../theme/salamat_dark.dart';
 
 class PlanReadyScreen extends ConsumerStatefulWidget {
@@ -280,6 +281,10 @@ class _PlanReadyScreenState extends ConsumerState<PlanReadyScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          // Guideline 1.4.1: the formula and its sources sit directly under the
+          // number they produce, on the first screen that shows it.
+          const MethodologyCard(showCalories: true, showBmi: false),
           const Spacer(),
         ],
       ),

@@ -262,6 +262,92 @@ class AppLocalizationsEn extends AppLocalizations {
       'A rough reference, not a diagnosis — BMI knows nothing about muscle or build.';
 
   @override
+  String get methodTitle => 'How this is calculated';
+
+  @override
+  String get methodStandardMifflin => 'Mifflin–St Jeor';
+
+  @override
+  String get methodStandardWho => 'WHO BMI bands';
+
+  @override
+  String get methodKcalTitle => 'Calorie target';
+
+  @override
+  String get methodKcalFormula =>
+      'Resting energy expenditure uses the Mifflin–St Jeor equation (1990): 10 × weight (kg) + 6.25 × height (cm) − 5 × age, then +5 for men or −161 for women.';
+
+  @override
+  String get methodKcalAccuracy =>
+      'A 2005 systematic review compared the four equations in common use: this one lands within ±10 % of measured expenditure more often than the others, but for any one person the error can be noticeable. The target is an estimate, not a measurement.';
+
+  @override
+  String get methodActivity =>
+      'The activity multipliers 1.2 / 1.375 / 1.55 / 1.725 are conservative values in general use in dietetics. The idea of a physical activity level (PAL) multiplying resting expenditure is set out in the FAO/WHO/UNU report; these particular coefficients are not taken from it.';
+
+  @override
+  String get methodGoalShift =>
+      'For a weight-loss or weight-gain goal the target is shifted by 500 kcal a day. This is common practice descended from the “3,500 kcal ≈ 1 lb” rule; current models show the real pace is slower and tapers over time.';
+
+  @override
+  String get methodFloors =>
+      'The target never goes below 1,200 kcal for women or 1,500 for men — the customary lower bounds of low-calorie diets in the literature, not a medical prescription.';
+
+  @override
+  String get methodBmiTitle => 'Body mass index';
+
+  @override
+  String get methodBmiBands =>
+      'BMI = weight (kg) / height² (m). The bands follow the WHO classification: under 18.5; 18.5–24.9; 25–29.9; 30 and above (WHO Technical Report Series 854, 1995).';
+
+  @override
+  String get methodBmiCaveat =>
+      'WHO calls BMI a surrogate marker: it cannot tell muscle from fat, and other measurements are needed alongside it.';
+
+  @override
+  String get methodBmiAsia =>
+      'For several Asian populations WHO allows lower cut-offs (23 and 27.5); the general bands are used here.';
+
+  @override
+  String get methodSourcesLabel => 'Sources';
+
+  @override
+  String get methodSrcMifflin => 'Mifflin et al. — Am J Clin Nutr, 1990';
+
+  @override
+  String get methodSrcFrankenfield =>
+      'Frankenfield et al. — J Am Diet Assoc, 2005, systematic review';
+
+  @override
+  String get methodSrcFao =>
+      'FAO/WHO/UNU — Human energy requirements, 2004, ch. 5';
+
+  @override
+  String get methodSrcHall =>
+      'Hall — Int J Obes, 2008: the energy deficit per unit of weight lost';
+
+  @override
+  String get methodSrcKoliaki =>
+      'Koliaki et al. — Healthcare, 2018, review of low-calorie diets';
+
+  @override
+  String get methodSrcWhoTable => 'WHO — BMI classification table (NLIS)';
+
+  @override
+  String get methodSrcWhoTrs => 'WHO — Technical Report Series 854, 1995';
+
+  @override
+  String get methodSrcWhoFact => 'WHO — fact sheet “Obesity and overweight”';
+
+  @override
+  String get methodSrcWhoAsia =>
+      'WHO Expert Consultation — Lancet, 2004, cut-offs for Asian populations';
+
+  @override
+  String get methodNotAdvice =>
+      'These are reference calculations, not medical advice. Talk to a doctor about nutrition during illness, pregnancy or while on medication.';
+
+  @override
   String get targetTitle => 'What is your\ntarget weight?';
 
   @override

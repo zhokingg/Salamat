@@ -295,10 +295,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     try {
       await _offerToSecureAccount();
       if (!mounted) return;
-      // purchases_flutter 8.x returns CustomerInfo directly.
-      final info = await Purchases.purchasePackage(tier.package);
+      // purchases_flutter >= 9 returns a PurchaseResult; the customer info
+      // it carries is already refreshed with the new entitlement.
+      final result =
+          await Purchases.purchase(PurchaseParams.package(tier.package));
       if (!mounted) return;
-      if (PurchasesService.hasPro(info)) {
+      if (PurchasesService.hasPro(result.customerInfo)) {
         _snack(loc.paywallWelcomePro);
         _close();
       }
