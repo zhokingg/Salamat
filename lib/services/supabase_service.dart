@@ -231,6 +231,12 @@ class SupabaseService {
     required double fatG,
     required double portionG,
     required String mealType,
+
+    /// When the meal was eaten. Null means now — the column default — which is
+    /// what logging into today wants. Set only when the diary is showing a
+    /// past day, so the row lands in the day the person is looking at instead
+    /// of in today's.
+    DateTime? eatenAt,
   }) async {
     final uid = currentUser?.id;
     if (uid == null) throw StateError('logFood: no session');
@@ -244,27 +250,42 @@ class SupabaseService {
       'protein': proteinG,
       'fat': fatG,
       'carbs': carbsG,
+      if (eatenAt != null) 'eaten_at': eatenAt.toUtc().toIso8601String(),
     });
   }
 
+  /// One local calendar day's food logs.
+  ///
+  /// Bounded on BOTH sides — `[midnight, next midnight)` — which is the whole
+  /// difference from the old today-only read: that one had no upper bound, so
+  /// it happened to be correct for today and would have returned every later
+  /// day's rows for any other date.
+  ///
   /// Throws on network/backend failure so callers (mealsProvider) can surface
   /// a real error state instead of silently rendering an empty diary.
-  static Future<List<Map<String, dynamic>>> getTodayFoodLogs() async {
+  static Future<List<Map<String, dynamic>>> getFoodLogsForDay(
+    DateTime day,
+  ) async {
     if (!isSignedIn) return [];
     try {
-      final now = DateTime.now();
-      final startLocal = DateTime(now.year, now.month, now.day);
+      final startLocal = DateTime(day.year, day.month, day.day);
+      final endLocal = startLocal.add(const Duration(days: 1));
       final rows = await client
           .from('meals')
           .select()
           .gte('eaten_at', startLocal.toUtc().toIso8601String())
+          .lt('eaten_at', endLocal.toUtc().toIso8601String())
           .order('eaten_at', ascending: false);
       return List<Map<String, dynamic>>.from(rows);
     } catch (e) {
-      if (kDebugMode) debugPrint('getTodayFoodLogs error: $e');
+      if (kDebugMode) debugPrint('getFoodLogsForDay error: $e');
       rethrow;
     }
   }
+
+  /// Today's food logs. Thin wrapper kept for callers that mean "now".
+  static Future<List<Map<String, dynamic>>> getTodayFoodLogs() =>
+      getFoodLogsForDay(DateTime.now());
 
   /// Food logs from [since] (inclusive, local time) up to now.
   ///
@@ -332,38 +353,45 @@ class SupabaseService {
 
   // -------- water --------
 
-  /// Today's water rows, oldest first.
+  /// One local calendar day's water rows, oldest first.
   ///
   /// Returns null — distinct from an empty list — when the table is not there
   /// yet or the read fails, so the caller can tell "no water logged" apart
   /// from "cannot persist water at all" and fall back accordingly.
   /// `water_logs` ships in migration 0004.
-  static Future<List<Map<String, dynamic>>?> getTodayWater() async {
+  static Future<List<Map<String, dynamic>>?> getWaterForDay(
+    DateTime day,
+  ) async {
     if (!isSignedIn) return null;
     try {
-      final now = DateTime.now();
-      final startLocal = DateTime(now.year, now.month, now.day);
+      final startLocal = DateTime(day.year, day.month, day.day);
+      final endLocal = startLocal.add(const Duration(days: 1));
       final rows = await client
           .from('water_logs')
           .select()
           .gte('logged_at', startLocal.toUtc().toIso8601String())
+          .lt('logged_at', endLocal.toUtc().toIso8601String())
           .order('logged_at', ascending: true);
       return List<Map<String, dynamic>>.from(rows);
     } catch (e) {
-      if (kDebugMode) debugPrint('getTodayWater unavailable: $e');
+      if (kDebugMode) debugPrint('getWaterForDay unavailable: $e');
       return null;
     }
   }
 
   /// Logs one portion. False when the row could not be written — most likely
   /// because migration 0004 has not been applied.
-  static Future<bool> logWater(int amountMl) async {
+  ///
+  /// [loggedAt] null means now (the column default); pass it only when the
+  /// diary is showing a past day.
+  static Future<bool> logWater(int amountMl, {DateTime? loggedAt}) async {
     final uid = currentUser?.id;
     if (uid == null) return false;
     try {
       await client.from('water_logs').insert({
         'user_id': uid,
         'amount_ml': amountMl,
+        if (loggedAt != null) 'logged_at': loggedAt.toUtc().toIso8601String(),
       });
       return true;
     } catch (e) {
@@ -372,15 +400,23 @@ class SupabaseService {
     }
   }
 
-  /// Deletes today's most recent water row.
-  static Future<bool> deleteLatestWater() async {
+  /// Deletes the most recent water row of one day — today when [day] is null.
+  ///
+  /// Scoped to the day on purpose: undoing on a past day must not reach into
+  /// a later day's rows, which an unbounded "newest row" query would do.
+  static Future<bool> deleteLatestWater({DateTime? day}) async {
     final uid = currentUser?.id;
     if (uid == null) return false;
     try {
+      final d = day ?? DateTime.now();
+      final startLocal = DateTime(d.year, d.month, d.day);
+      final endLocal = startLocal.add(const Duration(days: 1));
       final rows = await client
           .from('water_logs')
           .select('id')
           .eq('user_id', uid)
+          .gte('logged_at', startLocal.toUtc().toIso8601String())
+          .lt('logged_at', endLocal.toUtc().toIso8601String())
           .order('logged_at', ascending: false)
           .limit(1);
       final list = List<Map<String, dynamic>>.from(rows);
@@ -395,13 +431,16 @@ class SupabaseService {
 
   // -------- weight --------
 
-  static Future<void> logWeight(double weightKg) async {
+  /// [loggedAt] null means now (the column default); pass it only when the
+  /// weigh-in is being recorded against a past day.
+  static Future<void> logWeight(double weightKg, {DateTime? loggedAt}) async {
     final uid = currentUser?.id;
     if (uid == null) return;
     try {
       await client.from('weight_logs').insert({
         'user_id': uid,
         'weight_kg': weightKg,
+        if (loggedAt != null) 'logged_at': loggedAt.toUtc().toIso8601String(),
       });
     } catch (e) {
       if (kDebugMode) debugPrint('logWeight error: $e');

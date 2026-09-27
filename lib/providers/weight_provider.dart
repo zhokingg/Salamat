@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/supabase_service.dart';
+import 'selected_date_provider.dart';
 import 'session_provider.dart';
 
 /// A single weight measurement, oldest data comes from `weight_logs`.
@@ -27,4 +28,20 @@ final weightLogsProvider = FutureProvider<List<WeightLog>>((ref) async {
   // getWeightHistory returns newest-first; charts read left→right in time.
   logs.sort((a, b) => a.loggedAt.compareTo(b.loggedAt));
   return logs;
+});
+
+/// The same history, cut off at the end of the selected day.
+///
+/// `weight_logs` already carries `logged_at` per row, so "weight on that day"
+/// needs no extra query — only the right slice. Empty until the first weigh-in
+/// on or before that day.
+final weightLogsUpToSelectedProvider = Provider<List<WeightLog>>((ref) {
+  final logs = ref.watch(weightLogsProvider).valueOrNull ?? const <WeightLog>[];
+  final day = ref.watch(selectedDateProvider);
+  if (isToday(day)) return logs;
+  final end = startOfDay(day).add(const Duration(days: 1));
+  return [
+    for (final l in logs)
+      if (l.loggedAt.isBefore(end)) l,
+  ];
 });

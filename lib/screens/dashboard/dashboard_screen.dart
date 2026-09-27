@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/meals_provider.dart';
+import '../../providers/selected_date_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/water_provider.dart';
@@ -56,16 +57,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     final loc = AppLocalizations.of(context)!;
     final user = ref.watch(userProvider);
     final mealsAsync = ref.watch(mealsProvider);
+    // The one piece of state the whole screen hangs from. Every per-day
+    // provider below (diary, water, weight) watches it too, so this rebuild
+    // and their reloads are the same event.
+    final selected = ref.watch(selectedDateProvider);
 
     // Three explicit states — an empty flash-render is not allowed:
     //  loading → skeleton; error → local data + offline banner with Retry;
     //  data → normal content.
     return mealsAsync.when(
       loading: () => _Skeleton(),
-      error: (_, __) =>
-          _buildContent(context, loc, user, const MealsState(), offline: true),
+      error: (_, __) => _buildContent(
+        context,
+        loc,
+        user,
+        const MealsState(),
+        selected,
+        offline: true,
+      ),
       data: (meals) =>
-          _buildContent(context, loc, user, meals, offline: false),
+          _buildContent(context, loc, user, meals, selected, offline: false),
     );
   }
 
@@ -73,7 +84,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     BuildContext context,
     AppLocalizations loc,
     UserState user,
-    MealsState meals, {
+    MealsState meals,
+    DateTime selected, {
     required bool offline,
   }) {
     final norm = user.calorieNorm ?? 2000;
@@ -87,7 +99,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
     final localeTag = Localizations.localeOf(context).toString();
     final now = DateTime.now();
-    final dateLine = _capitalize(DateFormat('EEEE, d MMMM', localeTag).format(now));
+    final viewingToday = isToday(selected);
+    final dateLine =
+        _capitalize(DateFormat('EEEE, d MMMM', localeTag).format(selected));
 
     // Most recently added entry across all meal slots (visual only).
     final allEntries =
@@ -107,6 +121,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
     // A day only counts toward the streak with at least one logged meal.
     final streak = allEntries.isEmpty ? 0 : 1;
+
+    void selectDay(DateTime d) =>
+        ref.read(selectedDateProvider.notifier).select(d);
 
     return ListView(
       padding: EdgeInsets.only(
@@ -138,13 +155,48 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                dateLine,
-                style: SalamatDarkType.style(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: sc.text2,
-                ),
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      dateLine,
+                      style: SalamatDarkType.style(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: sc.text2,
+                      ),
+                    ),
+                  ),
+                  // Only shown while looking at the past — it is the way back,
+                  // and on today it would be a no-op control.
+                  if (!viewingToday) ...[
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () =>
+                          ref.read(selectedDateProvider.notifier).goToToday(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: sc.surface2,
+                          borderRadius:
+                              BorderRadius.circular(SalamatDarkDims.rPill),
+                        ),
+                        child: Text(
+                          loc.progressDayToday,
+                          style: SalamatDarkType.style(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: sc.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
@@ -154,7 +206,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           padding: const EdgeInsets.symmetric(
             horizontal: SalamatDarkDims.screenPadH,
           ),
-          child: _WeekStrip(today: now, localeTag: localeTag),
+          child: _WeekStrip(
+            today: now,
+            selected: selected,
+            localeTag: localeTag,
+            onSelect: selectDay,
+          ),
         ),
         const SizedBox(height: 16),
         Padding(
@@ -212,8 +269,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             horizontal: SalamatDarkDims.screenPadH,
           ),
           child: _WeightCard(
-            weight: user.weight,
-            logs: ref.watch(weightLogsProvider).valueOrNull ?? const [],
+            // The profile's `weight` is the value as of now, so it is only
+            // the right headline on today. On a past day the card falls back
+            // to the last weigh-in on or before that day.
+            weight: viewingToday ? user.weight : null,
+            logs: ref.watch(weightLogsUpToSelectedProvider),
             onAdd: () => showUpdateWeightDialog(context, ref),
           ),
         ),
@@ -395,31 +455,69 @@ class _OfflineBanner extends StatelessWidget {
   }
 }
 
-/// Current-week calendar strip: Mon–Sun day chips, today filled with accent.
-/// Visual only — days are not tappable (no per-day history view yet).
+/// Calendar strip for the week containing the selected day: Mon–Sun chips,
+/// the selected day filled with accent, today ringed when it is not the
+/// selection.
+///
+/// Tapping a chip picks that day; a horizontal swipe pages a week at a time.
+/// Days after today are dimmed and inert — there is nothing to show for them
+/// and nothing may be logged into them.
 class _WeekStrip extends StatelessWidget {
-  const _WeekStrip({required this.today, required this.localeTag});
+  const _WeekStrip({
+    required this.today,
+    required this.selected,
+    required this.localeTag,
+    required this.onSelect,
+  });
 
   final DateTime today;
+  final DateTime selected;
   final String localeTag;
+  final ValueChanged<DateTime> onSelect;
 
   @override
   Widget build(BuildContext context) {
-    final monday = today.subtract(Duration(days: today.weekday - 1));
+    // The week shown follows the SELECTION, not the clock, so paging back
+    // three weeks keeps showing that week instead of snapping to this one.
+    final monday = startOfDay(selected)
+        .subtract(Duration(days: selected.weekday - 1));
+    final todayStart = startOfDay(today);
     final letterFmt = DateFormat.E(localeTag);
-    return Row(
-      children: [
-        for (var i = 0; i < 7; i++) ...[
-          Expanded(
-            child: _DayChip(
-              date: monday.add(Duration(days: i)),
-              isToday: i == today.weekday - 1,
-              letterFmt: letterFmt,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      // Swipe right = back a week, left = forward. `select` clamps, so a
+      // forward swipe from this week lands on today rather than the future.
+      onHorizontalDragEnd: (d) {
+        final v = d.primaryVelocity ?? 0;
+        if (v > 120) {
+          onSelect(selected.subtract(const Duration(days: 7)));
+        } else if (v < -120) {
+          onSelect(selected.add(const Duration(days: 7)));
+        }
+      },
+      child: Row(
+        children: [
+          for (var i = 0; i < 7; i++) ...[
+            Expanded(
+              child: Builder(
+                builder: (_) {
+                  final date = monday.add(Duration(days: i));
+                  final future = date.isAfter(todayStart);
+                  return _DayChip(
+                    date: date,
+                    isSelected: date == startOfDay(selected),
+                    isToday: date == todayStart,
+                    isFuture: future,
+                    letterFmt: letterFmt,
+                    onTap: future ? null : () => onSelect(date),
+                  );
+                },
+              ),
             ),
-          ),
-          if (i != 6) const SizedBox(width: 6),
+            if (i != 6) const SizedBox(width: 6),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -427,50 +525,70 @@ class _WeekStrip extends StatelessWidget {
 class _DayChip extends StatelessWidget {
   const _DayChip({
     required this.date,
+    required this.isSelected,
     required this.isToday,
+    required this.isFuture,
     required this.letterFmt,
+    required this.onTap,
   });
 
   final DateTime date;
+  final bool isSelected;
   final bool isToday;
+  final bool isFuture;
   final DateFormat letterFmt;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final letter = letterFmt.format(date).replaceAll('.', '').toUpperCase();
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: isToday ? sc.primary : sc.surface,
-        borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
-      ),
-      child: Column(
-        children: [
-          Text(
-            letter,
-            style: SalamatDarkType.style(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.4,
-              color: isToday
-                  ? sc.onPrimary.withValues(alpha: 0.85)
-                  : sc.text2,
-              height: 1.0,
+    final fg = isSelected
+        ? sc.onPrimary
+        : isFuture
+            ? sc.text3
+            : sc.text;
+    final subFg = isSelected
+        ? sc.onPrimary.withValues(alpha: 0.85)
+        : isFuture
+            ? sc.text3
+            : sc.text2;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? sc.primary : sc.surface,
+          borderRadius: BorderRadius.circular(SalamatDarkDims.rPill),
+          // Today stays findable while another day is selected.
+          border: isToday && !isSelected
+              ? Border.all(color: sc.primary, width: 1.5)
+              : null,
+        ),
+        child: Column(
+          children: [
+            Text(
+              letter,
+              style: SalamatDarkType.style(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+                color: subFg,
+                height: 1.0,
+              ),
             ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            '${date.day}',
-            style: SalamatDarkType.style(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: isToday
-                  ? sc.onPrimary
-                  : sc.text,
-              height: 1.0,
+            const SizedBox(height: 5),
+            Text(
+              '${date.day}',
+              style: SalamatDarkType.style(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: fg,
+                height: 1.0,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/macro_lookup_service.dart';
 import '../services/supabase_service.dart';
+import 'selected_date_provider.dart';
 import 'session_provider.dart';
 
 /// Meal slot. Display labels come from AppLocalizations via the extension
@@ -150,17 +151,33 @@ class MealsState {
       MealsState(entries: entries, writeFailure: failure);
 }
 
-/// Today's meals, persisted in Supabase.
+/// The meals of whichever day the home screen is showing, persisted in
+/// Supabase. Defaults to today — see [selectedDateProvider].
 ///
 /// `build` waits for [bootstrapProvider] (Supabase init + anonymous sign-in)
 /// before loading, so reads/writes always run against a real `auth.uid()`.
 class MealsNotifier extends AsyncNotifier<MealsState> {
   @override
   Future<MealsState> build() async {
+    // Watched BEFORE the first await, so the dependency is registered
+    // synchronously and picking another day rebuilds this provider.
+    final day = ref.watch(selectedDateProvider);
     // Gate on bootstrap: never touch the network before the session exists.
     await awaitSession(ref);
-    final rows = await SupabaseService.getTodayFoodLogs();
+    final rows = await SupabaseService.getFoodLogsForDay(day);
     return _fromRows(rows);
+  }
+
+  /// Timestamp to write for a new entry on the selected day.
+  ///
+  /// Null on today, so the row keeps the column default and records the real
+  /// moment. On a past day there is no real moment to record, so the entry is
+  /// stamped at local noon — safely inside the day whichever way the UTC
+  /// offset (or a DST shift) falls.
+  DateTime? _stampForSelectedDay() {
+    final day = ref.read(selectedDateProvider);
+    if (isToday(day)) return null;
+    return DateTime(day.year, day.month, day.day, 12);
   }
 
   /// Adds a meal. The UI updates optimistically, then the row is persisted.
@@ -179,11 +196,12 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
         fatG: entry.fat,
         portionG: entry.grams,
         mealType: type.name,
+        eatenAt: _stampForSelectedDay(),
       );
       return true;
     } catch (e) {
       // The write failed, so the optimistic entry is a lie: it would sit in
-      // today's diary, count towards the ring, and be gone after the next
+      // the day's diary, count towards the ring, and be gone after the next
       // reload with no explanation. Take it back out and say so.
       if (kDebugMode) debugPrint('logFood failed, rolling back: $e');
       final now = state.valueOrNull ?? const MealsState();
@@ -271,11 +289,13 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
     );
   }
 
-  /// Re-reads today's meals from Supabase (e.g. after returning to a screen).
+  /// Re-reads the selected day's meals from Supabase (e.g. after returning to
+  /// a screen).
   Future<void> reload() async {
+    final day = ref.read(selectedDateProvider);
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final rows = await SupabaseService.getTodayFoodLogs();
+      final rows = await SupabaseService.getFoodLogsForDay(day);
       return _fromRows(rows);
     });
   }

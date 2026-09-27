@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 
+import '../providers/selected_date_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/weight_provider.dart';
 import '../services/supabase_service.dart';
@@ -107,31 +108,45 @@ Future<void> showUpdateWeightDialog(
     ),
   );
   if (newValue != null) {
+    final day = ref.read(selectedDateProvider);
+    final viewingToday = isToday(day);
     final u = ref.read(userProvider);
-    ref.read(userProvider.notifier).setBody(
-          height: u.height ?? 170,
-          weight: newValue.toDouble(),
-        );
+    // The profile carries CURRENT weight, so only a weigh-in dated today may
+    // move it; back-filling an older day must not rewrite today's figure.
+    if (viewingToday) {
+      ref.read(userProvider.notifier).setBody(
+            height: u.height ?? 170,
+            weight: newValue.toDouble(),
+          );
+    }
     // Persist immediately — a local-only mutation silently reverts on the
     // next restart (profile re-hydrates from the server row).
     final updated = ref.read(userProvider);
-    SupabaseService.upsertUser(
-      name: updated.name.isEmpty ? 'Friend' : updated.name,
-      gender: updated.gender == Gender.female ? 'female' : 'male',
-      age: updated.age ?? 25,
-      heightCm: updated.height ?? 170,
-      weightKg: newValue.toDouble(),
-      goal: switch (updated.goal) {
-        Goal.lose => 'lose',
-        Goal.gain => 'gain',
-        _ => 'maintain',
-      },
-      dailyCalories: updated.calorieNorm ?? 2000,
-      targetWeightKg: updated.targetWeight,
-      activityLevel: updated.activityLevel?.name,
-      familiarity: updated.familiarity?.name,
+    if (viewingToday) {
+      SupabaseService.upsertUser(
+        name: updated.name.isEmpty ? 'Friend' : updated.name,
+        gender: updated.gender == Gender.female ? 'female' : 'male',
+        age: updated.age ?? 25,
+        heightCm: updated.height ?? 170,
+        weightKg: newValue.toDouble(),
+        goal: switch (updated.goal) {
+          Goal.lose => 'lose',
+          Goal.gain => 'gain',
+          _ => 'maintain',
+        },
+        dailyCalories: updated.calorieNorm ?? 2000,
+        targetWeightKg: updated.targetWeight,
+        activityLevel: updated.activityLevel?.name,
+        familiarity: updated.familiarity?.name,
+      );
+    }
+    await SupabaseService.logWeight(
+      newValue.toDouble(),
+      // Local noon on a past day — inside the day whichever way the UTC
+      // offset falls.
+      loggedAt:
+          viewingToday ? null : DateTime(day.year, day.month, day.day, 12),
     );
-    await SupabaseService.logWeight(newValue.toDouble());
     ref.invalidate(weightLogsProvider);
   }
 }
