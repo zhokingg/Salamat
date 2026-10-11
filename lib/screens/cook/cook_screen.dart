@@ -12,6 +12,25 @@ import '../../services/meal_suggestion_service.dart';
 import '../../theme/salamat_dark.dart';
 import '../onboarding/widgets.dart' show SalamatCard, SalamatEyebrow;
 
+/// The diary row for a suggestion. Top-level so the write can be tested
+/// without driving the suggestion UI.
+///
+/// The midpoint is the single value the band justifies. The portion is the
+/// recipe's weighed ingredients added up — see [MealSuggestion.weighedGrams] —
+/// and 0 when nothing in the recipe is weighed: the client already reads
+/// `grams <= 0` as "portion unknown" (no scaling in the detail screen), and
+/// migration 0011 lets the row carry it. No figure is invented here.
+MealEntry suggestionEntry(MealSuggestion s) => MealEntry(
+      id: const Uuid().v4(),
+      name: s.name,
+      source: 'suggested',
+      grams: s.weighedGrams,
+      kcal: s.kcal.mid,
+      protein: (s.protein?.mid ?? 0).toDouble(),
+      fat: (s.fat?.mid ?? 0).toDouble(),
+      carbs: (s.carbs?.mid ?? 0).toDouble(),
+    );
+
 /// "What to cook" — three dishes from what the user has, sized to what is
 /// left of the day.
 ///
@@ -86,23 +105,19 @@ class _CookScreenState extends ConsumerState<CookScreen> {
     }
   }
 
-  void _addToDiary(MealSuggestion s) {
+  Future<void> _addToDiary(MealSuggestion s) async {
     final loc = AppLocalizations.of(context)!;
-    // The midpoint is the single value the band justifies.
-    ref.read(mealsProvider.notifier).add(
-          _slotForNow(),
-          MealEntry(
-            id: const Uuid().v4(),
-            name: s.name,
-            source: 'suggested',
-            grams: 0,
-            kcal: s.kcal.mid,
-            protein: (s.protein?.mid ?? 0).toDouble(),
-            fat: (s.fat?.mid ?? 0).toDouble(),
-            carbs: (s.carbs?.mid ?? 0).toDouble(),
-          ),
-        );
     final messenger = ScaffoldMessenger.of(context);
+    // Awaited: the old code popped and announced success before the row was
+    // written, so a rejected insert (grams 0 against the old
+    // `check (grams > 0)`) showed "added" and then nothing. `add` itself stamps
+    // the entry into the
+    // day the home screen is showing and rolls back on failure; the failure
+    // notice is the app-wide one in main.dart, so nothing is shown twice.
+    final ok = await ref
+        .read(mealsProvider.notifier)
+        .add(_slotForNow(), suggestionEntry(s));
+    if (!mounted || !ok) return;
     if (context.canPop()) context.pop();
     messenger.showSnackBar(
       SnackBar(

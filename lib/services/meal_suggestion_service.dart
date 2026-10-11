@@ -80,6 +80,41 @@ class MealSuggestion {
   final List<SuggestionIngredient> ingredients;
   final List<String> steps;
 
+  /// Mass of the serving as the recipe weighs it: the sum of every ingredient
+  /// amount given in grams or millilitres ("120 г", "100 ml", "0,5 кг").
+  /// Counted items ("2 шт") and unmeasured ones ("по вкусу") add nothing.
+  ///
+  /// Why this exists: `meals.grams` used to carry `check (grams > 0)`, and a
+  /// suggestion has no photo or scale behind it — the cook screen wrote 0 and
+  /// every "Add to diary" was rejected by Postgres. The number here is the
+  /// model's own ingredient list added up, not a figure invented at the call
+  /// site. 0 when nothing in the list is weighed — "portion unknown", which
+  /// the diary accepts since migration 0011.
+  double get weighedGrams {
+    var total = 0.0;
+    for (final i in ingredients) {
+      final m = _amountRe.firstMatch(i.amount);
+      if (m == null) continue;
+      final value = double.tryParse(m.group(1)!.replaceAll(',', '.'));
+      if (value == null) continue;
+      final unit = m.group(2)!.toLowerCase();
+      total += unit == 'кг' || unit == 'kg' || unit == 'л' || unit == 'l'
+          ? value * 1000
+          : value;
+    }
+    return total;
+  }
+
+  /// `<number> <unit>` where the unit is a mass or a volume; pieces are not
+  /// matched on purpose. Cyrillic and Latin spellings, both decimal marks.
+  /// The unit must not continue into more letters ("1 литр", "2 glasses"),
+  /// checked with a lookahead rather than `\b`: Dart's `\b` is ASCII-only and
+  /// never fires after a Cyrillic letter, so "150 г" would not match.
+  static final RegExp _amountRe = RegExp(
+    r'(\d+(?:[.,]\d+)?)\s*(кг|kg|гр|г|g|мл|ml|л|l)(?![A-Za-zА-Яа-яЁё])',
+    caseSensitive: false,
+  );
+
   /// Verdict against the calorie remainder. Macros are shown but do not
   /// decide the badge — calories are the budget the user is tracking.
   BudgetFit fitFor(int remainingKcal) {
