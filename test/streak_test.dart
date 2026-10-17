@@ -97,4 +97,38 @@ void main() {
       expect(streakOf([d(16, 23, 50), d(17, 0, 10)]), 2);
     });
   });
+
+  group('countLoggedDays (days in the app)', () {
+    int daysOf(Iterable<DateTime> at) =>
+        countLoggedDays(at, toLocal: (x) => x);
+
+    test('distinct days, gaps do not matter: 1, 2, 9, 17 → 4', () {
+      expect(daysOf([d(1), d(2), d(9), d(17)]), 4);
+      // The same instants are a streak of 1 — the two numbers differ.
+      expect(streakOf([d(1), d(2), d(9), d(17)]), 1);
+    });
+
+    test('several meals on one day count once', () {
+      expect(daysOf([d(5, 8), d(5, 13), d(5, 20)]), 1);
+    });
+
+    test('today need not be logged', () {
+      expect(daysOf([d(3), d(4)]), 2);
+    });
+
+    test('no meals → 0', () {
+      expect(daysOf(const []), 0);
+    });
+
+    test('bucketed by local day, not UTC', () {
+      DateTime bishkek(DateTime utc) => utc.add(const Duration(hours: 6));
+      final meals = [
+        DateTime.utc(2026, 10, 15, 19, 0), // 16 Oct 01:00 Bishkek
+        DateTime.utc(2026, 10, 16, 6, 0), // 16 Oct 12:00 Bishkek
+      ];
+      expect(countLoggedDays(meals, toLocal: bishkek), 1);
+      expect(countLoggedDays(meals, toLocal: (x) => x), 2,
+          reason: 'by UTC these are two different days');
+    });
+  });
 }

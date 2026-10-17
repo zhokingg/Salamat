@@ -133,7 +133,10 @@ class ProfileScreen extends ConsumerWidget {
           child: Row(
             children: [
               Expanded(
-                child: _StatCard(value: '1', label: loc.profileStatDaysInApp),
+                child: _StatCard(
+                  value: '${ref.watch(loggedDaysProvider).valueOrNull ?? 0}',
+                  label: loc.profileStatDaysInApp,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

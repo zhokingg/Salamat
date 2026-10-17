@@ -21,9 +21,7 @@ int computeStreak(
   required DateTime now,
   DateTime Function(DateTime) toLocal = _toLocal,
 }) {
-  final logged = <DateTime>{
-    for (final at in eatenAt) startOfDay(toLocal(at)),
-  };
+  final logged = <DateTime>{for (final at in eatenAt) startOfDay(toLocal(at))};
   if (logged.isEmpty) return 0;
 
   var day = startOfDay(toLocal(now));
@@ -82,3 +80,26 @@ const int kStreakInitialWindowDays = 90;
 
 /// Ten years. A streak longer than this is reported as this.
 const int kStreakMaxWindowDays = 3650;
+
+/// Distinct local calendar days with at least one meal — "days in the app"
+/// on the profile. Not a streak: gaps do not reset anything, and today need
+/// not be logged. Same bucketing as [computeStreak].
+int countLoggedDays(
+  Iterable<DateTime> eatenAt, {
+  DateTime Function(DateTime) toLocal = _toLocal,
+}) => <DateTime>{for (final at in eatenAt) startOfDay(toLocal(at))}.length;
+
+/// Lower bound for "all time". `meals` did not exist before this, and the
+/// date strip cannot log into a year that far back, so `gte` from here is
+/// every row; an explicit floor keeps the paginated query shaped like the
+/// streak's rather than special-casing "no bound".
+final DateTime kMealsEpoch = DateTime(2025);
+
+/// Days in the app, all time. Recomputed on the same signal as the streak:
+/// first read after start, and every meal write.
+final loggedDaysProvider = FutureProvider<int>((ref) async {
+  await awaitSession(ref);
+  ref.watch(mealsRevisionProvider);
+  final stamps = await SupabaseService.getMealTimestampsSince(kMealsEpoch);
+  return countLoggedDays(stamps);
+});
