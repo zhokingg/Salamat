@@ -66,7 +66,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     // Three explicit states — an empty flash-render is not allowed:
     //  loading → skeleton; error → local data + offline banner with Retry;
     //  data → normal content.
+    // `skipLoadingOnReload`: when the provider rebuilds because the selected
+    // day changed, keep showing the day we have until the new one arrives.
+    // The skeleton is for the first load only — on a day switch it was a
+    // full-screen flash between two screens that both had content.
     return mealsAsync.when(
+      skipLoadingOnReload: true,
       loading: () => _Skeleton(),
       error: (_, __) => _buildContent(
         context,

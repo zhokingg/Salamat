@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/supabase_config.dart';
@@ -11,6 +12,12 @@ class SupabaseService {
   SupabaseService._();
 
   static bool _initialized = false;
+
+  /// Test hook: an `http.Client` every Supabase request goes through. Set
+  /// before [init] (i.e. before `app.main()`) to count requests or add
+  /// latency; null in the app itself. Production code never reads this.
+  @visibleForTesting
+  static http.Client? httpClientOverride;
 
   static Future<void> init() async {
     if (_initialized) return;
@@ -31,6 +38,7 @@ class SupabaseService {
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
       ),
+      httpClient: httpClientOverride,
       debug: kDebugMode,
     ).timeout(const Duration(seconds: 10));
 

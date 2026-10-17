@@ -34,6 +34,9 @@ dependencies:
   url_launcher: ^6.3.0
   intl: any
   uuid: ^4.4.0
+  # Already transitive via supabase_flutter; direct so SupabaseService can
+  # type its test-only http client override.
+  http: ^1.6.0
   permission_handler: ^11.3.0
   # >= 10.2.3 is the first line that carries purchases-ios 5.78, the release
   # that compiles under Xcode 27 / Swift 6.4 (PaywallColor init ambiguity).

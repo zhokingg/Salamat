@@ -70,14 +70,26 @@ class WaterNotifier extends AsyncNotifier<WaterState> {
   /// copy followed the device, not the person.
   static String get _kPrefsKey => userScopedKey('water_local_today');
 
+  /// Days already loaded this session — same shape and reasons as the diary's
+  /// cache in `MealsNotifier`: a revisited day costs no request, writes keep
+  /// their day current, and a change of account empties it.
+  final Map<DateTime, WaterState> _cache = {};
+  String? _cacheUid;
+
   @override
   Future<WaterState> build() async {
     // Watched before the first await so switching the day rebuilds this.
     final day = ref.watch(selectedDateProvider);
-    await awaitSession(ref);
+    final uid = await awaitSession(ref);
+    if (uid != _cacheUid) {
+      _cache.clear();
+      _cacheUid = uid;
+    }
+    final cached = _cache[day];
+    if (cached != null) return cached;
     final rows = await SupabaseService.getWaterForDay(day);
     if (rows != null) {
-      return WaterState(
+      return _cache[day] = WaterState(
         entries: [
           for (final r in rows)
             if ((r['amount_ml'] as num?) != null)
@@ -88,12 +100,18 @@ class WaterNotifier extends AsyncNotifier<WaterState> {
       );
     }
     // Table absent (migration pending) or read failed — fall back to the
-    // device copy for that day.
+    // device copy for that day. Not cached: the next visit should retry.
     return WaterState(
       entries: await _loadLocal(day),
       synced: false,
       loading: false,
     );
+  }
+
+  /// Publishes [next] as the state and as [day]'s cached copy.
+  void _set(DateTime day, WaterState next) {
+    state = AsyncData(next);
+    _cache[day] = next;
   }
 
   /// The local fallback keeps one bucket PER DAY, so a past day shows its own
@@ -163,7 +181,7 @@ class WaterNotifier extends AsyncNotifier<WaterState> {
     final day = ref.read(selectedDateProvider);
     final current = state.valueOrNull ?? const WaterState();
     final next = [...current.entries, ml];
-    state = AsyncData(current.copyWith(entries: next, loading: false));
+    _set(day, current.copyWith(entries: next, loading: false));
 
     final ok = await SupabaseService.logWater(
       ml,
@@ -171,7 +189,7 @@ class WaterNotifier extends AsyncNotifier<WaterState> {
     );
     if (!ok) await _saveLocal(day, next);
     final after = state.valueOrNull ?? const WaterState();
-    state = AsyncData(after.copyWith(synced: ok));
+    _set(day, after.copyWith(synced: ok));
   }
 
   /// Takes back the most recent sip.
@@ -184,12 +202,12 @@ class WaterNotifier extends AsyncNotifier<WaterState> {
     final current = state.valueOrNull ?? const WaterState();
     if (current.entries.isEmpty) return;
     final next = current.entries.sublist(0, current.entries.length - 1);
-    state = AsyncData(current.copyWith(entries: next));
+    _set(day, current.copyWith(entries: next));
 
     final ok = await SupabaseService.deleteLatestWater(day: day);
     if (!ok) await _saveLocal(day, next);
     final after = state.valueOrNull ?? const WaterState();
-    state = AsyncData(after.copyWith(synced: ok));
+    _set(day, after.copyWith(synced: ok));
   }
 }
 

@@ -159,8 +159,12 @@ final historyProvider = FutureProvider<HistoryStats>((ref) async {
   await awaitSession(ref);
   final range = ref.watch(historyRangeProvider);
 
-  // Re-read whenever today's diary changes so a fresh log shows up here too.
-  ref.watch(mealsProvider);
+  // Re-read when a meal is added, edited or deleted — on any day — so a fresh
+  // log shows up here too. The revision counter, not [mealsProvider]: that
+  // one also rebuilds every time the home screen moves to another day, and
+  // emits twice per move (loading, then data), which cost this provider two
+  // full re-fetches of the range for a change in what was being LOOKED at.
+  ref.watch(mealsRevisionProvider);
 
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);

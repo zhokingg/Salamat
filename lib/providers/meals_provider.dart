@@ -166,15 +166,38 @@ class MealsState {
 /// `build` waits for [bootstrapProvider] (Supabase init + anonymous sign-in)
 /// before loading, so reads/writes always run against a real `auth.uid()`.
 class MealsNotifier extends AsyncNotifier<MealsState> {
+  /// Days already loaded this session, by local midnight. Moving back to a
+  /// day the person has already looked at is served from here with no
+  /// request; every write keeps its day's entry current, so the cache is
+  /// never behind what the server has. Keyed by account via [_cacheUid]:
+  /// a sign-in or sign-out empties it, so one account never sees another's
+  /// days. Lives on the notifier, which Riverpod keeps across rebuilds.
+  final Map<DateTime, MealsState> _cache = {};
+  String? _cacheUid;
+
   @override
   Future<MealsState> build() async {
     // Watched BEFORE the first await, so the dependency is registered
     // synchronously and picking another day rebuilds this provider.
     final day = ref.watch(selectedDateProvider);
     // Gate on bootstrap: never touch the network before the session exists.
-    await awaitSession(ref);
+    final uid = await awaitSession(ref);
+    if (uid != _cacheUid) {
+      _cache.clear();
+      _cacheUid = uid;
+    }
+    final cached = _cache[day];
+    if (cached != null) return cached;
     final rows = await SupabaseService.getFoodLogsForDay(day);
-    return _fromRows(rows);
+    return _cache[day] = _fromRows(rows);
+  }
+
+  /// Publishes [next] as the state and as [day]'s cached copy. [day] is the
+  /// day the operation started on, captured by the caller — the person may
+  /// have moved to another day while a write was in flight.
+  void _set(DateTime day, MealsState next) {
+    state = AsyncData(next);
+    _cache[day] = next;
   }
 
   /// Timestamp to write for a new entry on the selected day.
@@ -193,8 +216,9 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
   /// Signature is unchanged so existing call sites (camera, portion sheet)
   /// keep working — they fire-and-forget this future.
   Future<bool> add(MealType type, MealEntry entry) async {
+    final day = ref.read(selectedDateProvider);
     final current = state.valueOrNull ?? const MealsState();
-    state = AsyncData(current.copyWithAdded(type, entry).withFailure(null));
+    _set(day, current.copyWithAdded(type, entry).withFailure(null));
     try {
       await SupabaseService.logFood(
         id: entry.id,
@@ -215,7 +239,8 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
       // reload with no explanation. Take it back out and say so.
       if (kDebugMode) debugPrint('logFood failed, rolling back: $e');
       final now = state.valueOrNull ?? const MealsState();
-      state = AsyncData(
+      _set(
+        day,
         now.copyWithRemoved(type, entry.id).withFailure(
               MealWriteFailure(dish: entry.name, at: DateTime.now()),
             ),
@@ -226,12 +251,13 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
 
   /// Drops one entry, optimistically then on the server.
   Future<void> remove(MealType type, String id) async {
+    final day = ref.read(selectedDateProvider);
     final current = state.valueOrNull ?? const MealsState();
     final next = Map<MealType, List<MealEntry>>.from(current.entries);
     next[type] = (next[type] ?? const [])
         .where((e) => e.id != id)
         .toList(growable: false);
-    state = AsyncData(MealsState(entries: next));
+    _set(day, MealsState(entries: next));
     if (await SupabaseService.deleteFoodLog(id)) {
       ref.read(mealsRevisionProvider.notifier).bump();
     }
@@ -239,13 +265,14 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
 
   /// Rescales one entry in place. Keeps the row id and `eaten_at`.
   Future<void> updateEntry(MealType type, MealEntry entry) async {
+    final day = ref.read(selectedDateProvider);
     final current = state.valueOrNull ?? const MealsState();
     final next = Map<MealType, List<MealEntry>>.from(current.entries);
     next[type] = [
       for (final e in next[type] ?? const <MealEntry>[])
         if (e.id == entry.id) entry else e,
     ];
-    state = AsyncData(MealsState(entries: next));
+    _set(day, MealsState(entries: next));
     final ok = await SupabaseService.updateFoodLog(
       id: entry.id,
       portionG: entry.grams,
@@ -264,7 +291,7 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final rows = await SupabaseService.getFoodLogsForDay(day);
-      return _fromRows(rows);
+      return _cache[day] = _fromRows(rows);
     });
   }
 
