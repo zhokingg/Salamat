@@ -206,6 +206,24 @@ abstract class AppLocalizations {
   /// **'Portion, g'**
   String get manualPortion;
 
+  /// No description provided for @manualEstimateMacros.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate macros'**
+  String get manualEstimateMacros;
+
+  /// No description provided for @manualEstimating.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimating…'**
+  String get manualEstimating;
+
+  /// No description provided for @manualEstimateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t estimate macros — type them in or leave them blank.'**
+  String get manualEstimateFailed;
+
   /// No description provided for @manualAddToMeal.
   ///
   /// In en, this message translates to:

@@ -63,6 +63,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualPortion => 'Portion, g';
 
   @override
+  String get manualEstimateMacros => 'Estimate macros';
+
+  @override
+  String get manualEstimating => 'Estimating…';
+
+  @override
+  String get manualEstimateFailed =>
+      'Couldn\'t estimate macros — type them in or leave them blank.';
+
+  @override
   String manualAddToMeal(String meal) {
     return 'Add to $meal';
   }

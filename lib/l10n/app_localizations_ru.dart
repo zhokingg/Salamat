@@ -63,6 +63,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get manualPortion => 'Порция, г';
 
   @override
+  String get manualEstimateMacros => 'Оценить БЖУ';
+
+  @override
+  String get manualEstimating => 'Подбираем…';
+
+  @override
+  String get manualEstimateFailed =>
+      'Не удалось оценить БЖУ — впишите вручную или оставьте пустыми.';
+
+  @override
   String manualAddToMeal(String meal) {
     return 'Добавить в $meal';
   }

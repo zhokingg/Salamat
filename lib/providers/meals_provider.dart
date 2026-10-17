@@ -2,7 +2,6 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../services/macro_lookup_service.dart';
 import '../services/supabase_service.dart';
 import 'selected_date_provider.dart';
 import 'session_provider.dart';
@@ -123,9 +122,19 @@ class MealsState {
   int get totalKcalAll =>
       MealType.values.fold(0, (sum, t) => sum + totalKcal(t));
 
-  double _macroSum(double Function(MealEntry) pick) => MealType.values
-      .expand((t) => forType(t))
-      .fold(0.0, (sum, e) => sum + pick(e));
+  Iterable<MealEntry> get _all => MealType.values.expand((t) => forType(t));
+
+  /// Entries whose macros are actually known. The day's macro totals are
+  /// sums over these only: an entry logged with calories alone is not "0 g
+  /// protein", it is unknown, and must not pull a total toward zero.
+  Iterable<MealEntry> get _withMacros => _all.where((e) => e.hasMacros);
+
+  /// False when no entry of the day has a macro breakdown — the totals are
+  /// then not "0 g" but unknown, and the macro bars render a dash.
+  bool get hasAnyMacros => _withMacros.isNotEmpty;
+
+  double _macroSum(double Function(MealEntry) pick) =>
+      _withMacros.fold(0.0, (sum, e) => sum + pick(e));
 
   double get totalProtein => _macroSum((e) => e.protein);
   double get totalFat => _macroSum((e) => e.fat);
@@ -213,51 +222,6 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
       );
       return false;
     }
-  }
-
-  /// Adds a meal and, when no macros were typed in, fills them in afterwards
-  /// from [MacroLookupService].
-  ///
-  /// The save is never blocked on the lookup: [add] completes (and the sheet
-  /// closes) first, the entry appears immediately, and the macros land later
-  /// via [updateEntry], which keeps the row id and `eaten_at`. If the lookup
-  /// fails the entry simply stays without macros and the UI shows a dash —
-  /// nothing is invented and no zeros are written as if measured.
-  ///
-  /// Manual logging remains free; this path never touches the photo quota.
-  Future<void> addWithMacroBackfill(
-    MealType type,
-    MealEntry entry,
-    String lang,
-  ) async {
-    await add(type, entry);
-    if (entry.hasMacros) return;
-
-    final macros = await MacroLookupService.lookup(
-      dish: entry.name,
-      kcal: entry.kcal,
-      lang: lang,
-    );
-    if (macros == null) return;
-
-    // The row may have been deleted or edited while the lookup was in flight.
-    final current = state.valueOrNull;
-    if (current == null) return;
-    final live = current
-        .forType(type)
-        .where((e) => e.id == entry.id)
-        .cast<MealEntry?>()
-        .firstWhere((e) => true, orElse: () => null);
-    if (live == null || live.hasMacros) return;
-
-    await updateEntry(
-      type,
-      live.withMacros(
-        protein: macros.protein,
-        fat: macros.fat,
-        carbs: macros.carbs,
-      ),
-    );
   }
 
   /// Drops one entry, optimistically then on the server.

@@ -24,6 +24,9 @@
   "manualFat": "Fat, g",
   "manualCarbs": "Carbs, g",
   "manualPortion": "Portion, g",
+  "manualEstimateMacros": "Estimate macros",
+  "manualEstimating": "Estimating…",
+  "manualEstimateFailed": "Couldn't estimate macros — type them in or leave them blank.",
   "manualAddToMeal": "Add to {meal}",
   "@manualAddToMeal": {
     "placeholders": {

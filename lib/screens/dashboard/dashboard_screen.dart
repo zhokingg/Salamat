@@ -109,16 +109,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         MealType.values.expand((t) => meals.forType(t)).toList();
     final lastEntry = allEntries.isEmpty ? null : allEntries.last;
 
-    // Macro totals for the bars: stored values only, never an estimate, so
-    // this agrees with `MealsState.totalProtein` (which the cook budget uses)
-    // and with the protein score in Progress. An entry whose macros are not
-    // known yet contributes nothing rather than a guess.
-    var protein = 0.0, fat = 0.0, carbs = 0.0;
-    for (final e in allEntries) {
-      protein += e.protein;
-      fat += e.fat;
-      carbs += e.carbs;
-    }
+    // Macro totals for the bars come from `MealsState` — the same sums the
+    // cook budget and the coach use — over entries with known macros only.
+    // A day where nothing has a breakdown is unknown, not 0 g.
+    final protein = meals.totalProtein;
+    final fat = meals.totalFat;
+    final carbs = meals.totalCarbs;
+    final macrosKnown = meals.hasAnyMacros;
 
     // Consecutive logged days, from `meals` across days — not from this
     // screen's one-day state, which is why it used to read 0 or 1 and nothing
@@ -230,6 +227,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             protein: protein,
             fat: fat,
             carbs: carbs,
+            macrosKnown: macrosKnown,
           ),
         ),
         const SizedBox(height: 12),
@@ -617,6 +615,7 @@ class _CaloriesCard extends StatelessWidget {
     required this.protein,
     required this.fat,
     required this.carbs,
+    required this.macrosKnown,
   });
 
   final Animation<double> ringAnim;
@@ -627,6 +626,7 @@ class _CaloriesCard extends StatelessWidget {
   final double protein;
   final double fat;
   final double carbs;
+  final bool macrosKnown;
 
   @override
   Widget build(BuildContext context) {
@@ -686,6 +686,7 @@ class _CaloriesCard extends StatelessWidget {
               fat: fat,
               carbs: carbs,
               norm: norm,
+              known: macrosKnown,
             ),
           ),
         ],
@@ -754,12 +755,17 @@ class _MacroBars extends StatelessWidget {
     required this.fat,
     required this.carbs,
     required this.norm,
+    required this.known,
   });
 
   final double protein;
   final double fat;
   final double carbs;
   final int norm;
+
+  /// False when no entry of the day has a macro breakdown: the rows then show
+  /// a dash in place of the value — "unknown", not "0 g eaten".
+  final bool known;
 
   @override
   Widget build(BuildContext context) {
@@ -773,6 +779,7 @@ class _MacroBars extends StatelessWidget {
           target: norm * 0.30 / 4,
           unit: loc.gramsUnit,
           color: c.primary,
+          known: known,
         ),
         const SizedBox(height: 13),
         _MacroBar(
@@ -781,6 +788,7 @@ class _MacroBars extends StatelessWidget {
           target: norm * 0.40 / 4,
           unit: loc.gramsUnit,
           color: c.secondary,
+          known: known,
         ),
         const SizedBox(height: 13),
         _MacroBar(
@@ -789,6 +797,7 @@ class _MacroBars extends StatelessWidget {
           target: norm * 0.30 / 9,
           unit: loc.gramsUnit,
           color: c.accent,
+          known: known,
         ),
       ],
     );
@@ -802,6 +811,7 @@ class _MacroBar extends StatelessWidget {
     required this.target,
     required this.unit,
     required this.color,
+    this.known = true,
   });
 
   final String label;
@@ -809,11 +819,15 @@ class _MacroBar extends StatelessWidget {
   final double target;
   final String unit;
   final Color color;
+  final bool known;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final fill = target <= 0 ? 0.0 : (value / target).clamp(0.0, 1.0);
+    final loc = AppLocalizations.of(context)!;
+    final fill =
+        !known || target <= 0 ? 0.0 : (value / target).clamp(0.0, 1.0);
+    final shown = known ? '${value.round()}' : loc.valueDash;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -830,7 +844,7 @@ class _MacroBar extends StatelessWidget {
               ),
             ),
             Text(
-              '${value.round()} / ${target.round()} $unit',
+              '$shown / ${target.round()} $unit',
               style: SalamatDarkType.captionXs.copyWith(
                 color: c.text3,
                 fontFeatures: const [FontFeature.tabularFigures()],

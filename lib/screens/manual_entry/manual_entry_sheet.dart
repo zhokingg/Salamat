@@ -7,6 +7,7 @@ import 'package:salamat/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../providers/meals_provider.dart';
+import '../../services/macro_lookup_service.dart';
 import '../../theme/salamat_icons.dart';
 import '../../theme/salamat_dark.dart';
 
@@ -56,6 +57,8 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
   late MealType _mealType;
   bool _detailsOpen = false;
   bool _kcalTouched = false;
+  bool _estimating = false;
+  bool _estimateFailed = false;
 
   @override
   void initState() {
@@ -86,8 +89,39 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
   bool get _canSave => _nameCtrl.text.trim().isNotEmpty && _kcalValid;
 
   double _macro(TextEditingController c) {
-    // digitsOnly keeps input >= 0 by construction.
+    // digitsOnly keeps input >= 0 by construction. Empty is 0, which the
+    // schema and `MealEntry.hasMacros` read as "unknown" — see the fix note
+    // in `_save`.
     return double.tryParse(c.text.trim()) ?? 0;
+  }
+
+  /// Fills the three macro fields from [MacroLookupService] — only when the
+  /// person asks for it. The result lands in the editable fields, not in the
+  /// row: they can correct or clear it before saving, and nothing is written
+  /// that was not on the form when "Add" was tapped.
+  Future<void> _estimate() async {
+    if (!_canSave || _estimating) return;
+    setState(() {
+      _estimating = true;
+      _estimateFailed = false;
+    });
+    final macros = await MacroLookupService.lookup(
+      dish: _nameCtrl.text.trim(),
+      kcal: _kcal!,
+      lang: Localizations.localeOf(context).languageCode,
+    );
+    if (!mounted) return;
+    setState(() {
+      _estimating = false;
+      if (macros == null) {
+        _estimateFailed = true;
+        return;
+      }
+      // The fields are digits-only, so round to whole grams.
+      _proteinCtrl.text = '${macros.protein.round()}';
+      _fatCtrl.text = '${macros.fat.round()}';
+      _carbsCtrl.text = '${macros.carbs.round()}';
+    });
   }
 
   void _save() {
@@ -105,17 +139,14 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
       carbs: _macro(_carbsCtrl),
       source: 'manual',
     );
-    // Fire-and-forget: the entry is saved and the sheet closes immediately.
-    // When the macro fields were left empty the breakdown is looked up in the
-    // background and written to the same row once it arrives; until then the
-    // entry simply shows a dash instead of macros.
-    unawaited(
-      ref.read(mealsProvider.notifier).addWithMacroBackfill(
-            _mealType,
-            entry,
-            Localizations.localeOf(context).languageCode,
-          ),
-    );
+    // Fire-and-forget: the entry is saved and the sheet closes immediately;
+    // a failed write is rolled back and announced by the app-wide listener.
+    // What is on the form is what is written. Empty macro fields stay empty
+    // (0/0/0 — the schema's "unknown", rendered as a dash everywhere); the
+    // lookup runs only from the "Estimate macros" button above, never on
+    // save. It used to run here in the background and overwrite the row with
+    // figures the person had not entered.
+    unawaited(ref.read(mealsProvider.notifier).add(_mealType, entry));
     Navigator.of(context).pop();
     messenger.showSnackBar(
       SnackBar(
@@ -309,6 +340,60 @@ class _ManualEntrySheetState extends ConsumerState<ManualEntrySheet> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 10),
+                          // Explicit, opt-in: the only place a macro estimate
+                          // comes from. Needs a name and valid calories.
+                          Row(
+                            children: [
+                              TextButton.icon(
+                                onPressed: _canSave && !_estimating
+                                    ? _estimate
+                                    : null,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: sc.primary,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 6,
+                                  ),
+                                ),
+                                icon: _estimating
+                                    ? SizedBox(
+                                        width: 14,
+                                        height: 14,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: sc.primary,
+                                        ),
+                                      )
+                                    : SalamatIcon(
+                                        PhosphorIcons.sparkle(),
+                                        size: 16,
+                                        color: sc.primary,
+                                      ),
+                                label: Text(
+                                  _estimating
+                                      ? loc.manualEstimating
+                                      : loc.manualEstimateMacros,
+                                  style: SalamatDarkType.style(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_estimateFailed)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8, top: 2),
+                              child: Text(
+                                loc.manualEstimateFailed,
+                                style: SalamatDarkType.style(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: sc.text2,
+                                ),
+                              ),
+                            ),
                         ],
                       ],
                     ),
