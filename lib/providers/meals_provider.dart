@@ -198,6 +198,7 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
         mealType: type.name,
         eatenAt: _stampForSelectedDay(),
       );
+      ref.read(mealsRevisionProvider.notifier).bump();
       return true;
     } catch (e) {
       // The write failed, so the optimistic entry is a lie: it would sit in
@@ -267,7 +268,9 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
         .where((e) => e.id != id)
         .toList(growable: false);
     state = AsyncData(MealsState(entries: next));
-    await SupabaseService.deleteFoodLog(id);
+    if (await SupabaseService.deleteFoodLog(id)) {
+      ref.read(mealsRevisionProvider.notifier).bump();
+    }
   }
 
   /// Rescales one entry in place. Keeps the row id and `eaten_at`.
@@ -279,7 +282,7 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
         if (e.id == entry.id) entry else e,
     ];
     state = AsyncData(MealsState(entries: next));
-    await SupabaseService.updateFoodLog(
+    final ok = await SupabaseService.updateFoodLog(
       id: entry.id,
       portionG: entry.grams,
       calories: entry.kcal,
@@ -287,6 +290,7 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
       carbsG: entry.carbs,
       fatG: entry.fat,
     );
+    if (ok) ref.read(mealsRevisionProvider.notifier).bump();
   }
 
   /// Re-reads the selected day's meals from Supabase (e.g. after returning to
@@ -343,3 +347,21 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
 
 final mealsProvider =
     AsyncNotifierProvider<MealsNotifier, MealsState>(MealsNotifier.new);
+
+/// Bumped after every write to `meals` that reached the server — add, remove,
+/// update — on whichever day it landed.
+///
+/// For anything derived from more than one day (streak, history). Those used
+/// to watch [mealsProvider] itself, which also rebuilds when the home screen
+/// moves to another day — a re-read that changes nothing and re-fetches
+/// everything. Watching this instead means "the data changed", not "the view
+/// changed".
+final mealsRevisionProvider =
+    NotifierProvider<MealsRevisionNotifier, int>(MealsRevisionNotifier.new);
+
+class MealsRevisionNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void bump() => state = state + 1;
+}

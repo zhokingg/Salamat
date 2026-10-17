@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salamat/l10n/app_localizations.dart';
 
 import '../../providers/history_provider.dart';
+import '../../providers/streak_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/weight_provider.dart';
 import '../../theme/salamat_dark.dart';
@@ -106,7 +107,16 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
       const SizedBox(height: SalamatDarkDims.gap16),
       Padding(padding: pad, child: _WeightCard(user: user, logs: logs)),
       const SizedBox(height: SalamatDarkDims.gap16),
-      Padding(padding: pad, child: _ScoreCards(stats: stats)),
+      Padding(
+        padding: pad,
+        child: _ScoreCards(
+          stats: stats,
+          // From its own provider, not from `stats`: the history range is
+          // whatever the user picked (a single day, a week), and a streak
+          // cut to that range was never longer than the range.
+          streak: ref.watch(streakProvider).valueOrNull ?? 0,
+        ),
+      ),
       const SizedBox(height: SalamatDarkDims.gap20),
       Padding(padding: pad, child: _ConsistencyMap(stats: stats)),
       if (user.targetWeight != null && user.weight != null) ...[
@@ -542,9 +552,10 @@ class _WeightLinePainter extends CustomPainter {
 
 /// Two score cards: protein adherence and the logging streak.
 class _ScoreCards extends StatelessWidget {
-  const _ScoreCards({required this.stats});
+  const _ScoreCards({required this.stats, required this.streak});
 
   final HistoryStats stats;
+  final int streak;
 
   @override
   Widget build(BuildContext context) {
@@ -574,7 +585,7 @@ class _ScoreCards extends StatelessWidget {
             child: _ScoreCard(
               label: loc.progressConsistencyLabel,
               color: c.secondary,
-              value: '${stats.streak}',
+              value: '$streak',
               sub: loc.progressConsistencySub,
             ),
           ),

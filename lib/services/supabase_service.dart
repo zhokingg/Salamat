@@ -310,6 +310,42 @@ class SupabaseService {
     }
   }
 
+  /// When each meal from [since] (inclusive, local time) was eaten, as local
+  /// instants. Nothing else is selected: the streak needs only the days.
+  ///
+  /// Pages through PostgREST's row cap (1000 by default) by `eaten_at`, so a
+  /// long window on a heavy diary still comes back whole instead of silently
+  /// missing its oldest days. Empty on failure, like [getFoodLogsSince].
+  static Future<List<DateTime>> getMealTimestampsSince(DateTime since) async {
+    if (!isSignedIn) return [];
+    const page = 1000;
+    final out = <DateTime>[];
+    try {
+      var before = DateTime.now().add(const Duration(days: 1)).toUtc();
+      while (true) {
+        final rows = await client
+            .from('meals')
+            .select('eaten_at')
+            .gte('eaten_at', since.toUtc().toIso8601String())
+            .lt('eaten_at', before.toIso8601String())
+            .order('eaten_at', ascending: false)
+            .limit(page);
+        DateTime? oldest;
+        for (final row in rows) {
+          final at = DateTime.tryParse(row['eaten_at']?.toString() ?? '');
+          if (at == null) continue;
+          out.add(at.toLocal());
+          oldest = at.toUtc();
+        }
+        if (rows.length < page || oldest == null) return out;
+        before = oldest;
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('getMealTimestampsSince error: $e');
+      return [];
+    }
+  }
+
   /// Rewrites the nutrition of one existing row.
   ///
   /// An update rather than delete-and-insert so `eaten_at` and the row id

@@ -93,16 +93,6 @@ class HistoryStats {
     return n == 0 ? 0 : (totalKcal / n).round();
   }
 
-  /// Consecutive logged days counting back from today.
-  int get streak {
-    var n = 0;
-    for (final d in days.reversed) {
-      if (!d.logged) break;
-      n++;
-    }
-    return n;
-  }
-
   /// Protein target used for scoring: the same 30 % display split the rest of
   /// the app uses for macro bars.
   double get proteinTarget => calorieNorm * 0.30 / 4;

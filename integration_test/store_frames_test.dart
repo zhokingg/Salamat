@@ -41,6 +41,7 @@ import 'package:salamat/providers/bootstrap_provider.dart';
 import 'package:salamat/providers/history_provider.dart';
 import 'package:salamat/providers/locale_provider.dart';
 import 'package:salamat/providers/meals_provider.dart';
+import 'package:salamat/providers/streak_provider.dart';
 import 'package:salamat/providers/user_provider.dart';
 import 'package:salamat/providers/water_provider.dart';
 import 'package:salamat/providers/weight_provider.dart';
@@ -501,7 +502,7 @@ void main() {
             'avg ${stats.dailyAverageKcal} kcal, '
             'protein score ${stats.proteinScore}% '
             '(${stats.proteinDaysOnTarget} of ${stats.loggedDayCount}), '
-            'streak ${stats.streak}');
+            'streak ${container.read(streakProvider).valueOrNull}');
         expect(stats.loggedDayCount, _history.length + 1,
             reason: 'the week should hold today plus five seeded days');
       }

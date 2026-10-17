@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../config/legal.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/meals_provider.dart';
+import '../../providers/streak_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/onboarding_flag.dart';
@@ -143,7 +144,10 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _StatCard(value: '1', label: loc.profileStatStreak),
+                child: _StatCard(
+                  value: '${ref.watch(streakProvider).valueOrNull ?? 0}',
+                  label: loc.profileStatStreak,
+                ),
               ),
             ],
           ),

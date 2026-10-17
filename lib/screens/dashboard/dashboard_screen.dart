@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../providers/meals_provider.dart';
 import '../../providers/selected_date_provider.dart';
+import '../../providers/streak_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/water_provider.dart';
@@ -119,8 +120,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       carbs += e.carbs;
     }
 
-    // A day only counts toward the streak with at least one logged meal.
-    final streak = allEntries.isEmpty ? 0 : 1;
+    // Consecutive logged days, from `meals` across days — not from this
+    // screen's one-day state, which is why it used to read 0 or 1 and nothing
+    // else. `valueOrNull` keeps the last value while it recomputes.
+    final streak = ref.watch(streakProvider).valueOrNull ?? 0;
 
     void selectDay(DateTime d) =>
         ref.read(selectedDateProvider.notifier).select(d);
