@@ -114,6 +114,32 @@ class WaterNotifier extends AsyncNotifier<WaterState> {
     _cache[day] = next;
   }
 
+  /// Re-reads the selected day from the server, bypassing the cache. Content
+  /// stays on screen meanwhile (see `MealsNotifier.reload`). When the table
+  /// is unavailable the device copy is shown, as in [build].
+  Future<void> reload() async {
+    final day = ref.read(selectedDateProvider);
+    final rows = await SupabaseService.getWaterForDay(day);
+    if (rows != null) {
+      _set(
+        day,
+        WaterState(
+          entries: [
+            for (final r in rows)
+              if ((r['amount_ml'] as num?) != null)
+                (r['amount_ml'] as num).round(),
+          ],
+          synced: true,
+          loading: false,
+        ),
+      );
+      return;
+    }
+    state = AsyncData(
+      WaterState(entries: await _loadLocal(day), synced: false, loading: false),
+    );
+  }
+
   /// The local fallback keeps one bucket PER DAY, so a past day shows its own
   /// total and yesterday's entries never leak into today's.
   ///

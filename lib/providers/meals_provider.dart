@@ -284,15 +284,21 @@ class MealsNotifier extends AsyncNotifier<MealsState> {
     if (ok) ref.read(mealsRevisionProvider.notifier).bump();
   }
 
-  /// Re-reads the selected day's meals from Supabase (e.g. after returning to
-  /// a screen).
+  /// Re-reads the selected day's meals from Supabase — pull-to-refresh, or
+  /// after returning to a screen. Bypasses the cache and replaces its entry.
+  ///
+  /// The current content stays on screen while the request runs: the caller
+  /// shows its own progress (the RefreshIndicator), and dropping to a
+  /// loading state here would be the empty-state flash the day switch no
+  /// longer has. On failure the old content is kept too; the error is logged.
   Future<void> reload() async {
     final day = ref.read(selectedDateProvider);
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    try {
       final rows = await SupabaseService.getFoodLogsForDay(day);
-      return _cache[day] = _fromRows(rows);
-    });
+      _set(day, _fromRows(rows));
+    } catch (e) {
+      if (kDebugMode) debugPrint('meals reload failed: $e');
+    }
   }
 
   static MealsState _fromRows(List<Map<String, dynamic>> rows) {

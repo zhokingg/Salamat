@@ -130,7 +130,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     void selectDay(DateTime d) =>
         ref.read(selectedDateProvider.notifier).select(d);
 
-    return ListView(
+    // Pull to refresh: the only way past the per-day cache. Re-reads the day
+    // the screen is showing and bumps the revision so streak, days-in-app
+    // and history (which no longer follow day changes) re-derive too.
+    Future<void> refresh() async {
+      await Future.wait([
+        ref.read(mealsProvider.notifier).reload(),
+        ref.read(waterProvider.notifier).reload(),
+      ]);
+      ref.read(mealsRevisionProvider.notifier).bump();
+    }
+
+    final list = ListView(
+      // Pullable even when the day is short enough not to scroll.
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.only(
         top: 56,
         bottom: SalamatDarkDims.navHeight + 40,
@@ -323,6 +336,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           ),
         ],
       ],
+    );
+
+    return RefreshIndicator(
+      onRefresh: refresh,
+      color: sc.primary,
+      backgroundColor: sc.surface2,
+      // The list's top padding is where the indicator lands.
+      edgeOffset: 56,
+      child: list,
     );
   }
 
